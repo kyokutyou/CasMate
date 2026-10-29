@@ -17,8 +17,8 @@ and frame identity across GL rendering, encoding, sending, and acknowledgement.
 Existing entry points remain available for upstream binary callers. These additions
 do not replace the SRT handshake, encryption, packetization, or retransmission protocol.
 
-The authoritative behavior and validation requirements are in
-[the outdoor specification](../../../docs/features/outdoor-streaming.md).
+Native transport build and validation commands are documented in
+[the native transport README](../../../native/outdoor/README.md).
 
 Since the native transport adoption (ADR 0018), CasMate uses only the MPEG-TS packetizer from the srt module. The Kotlin SRT client is not started by the product; connection, encryption and retransmission are owned by native libsrt.
 

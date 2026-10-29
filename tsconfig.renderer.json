@@ -18,5 +18,5 @@
     "jsx": "react-jsx",
     "types": ["vite/client"]
   },
-  "include": ["src/renderer/**/*.ts", "src/renderer/**/*.tsx", "src/shared/**/*.ts", "vite.config.mts", "vite.obs-style-editor.config.mts", "vitest.prototypes.config.mts"]
+  "include": ["src/renderer/**/*.ts", "src/renderer/**/*.tsx", "src/shared/**/*.ts", "vite.config.mts", "vite.obs-style-editor.config.mts"]
 }

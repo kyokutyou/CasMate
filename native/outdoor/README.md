@@ -1,7 +1,5 @@
 # 外配信のネイティブ送受信
 
-正式な挙動は [外配信仕様](../../docs/features/outdoor-streaming.md#ネイティブ送受信契約)、採用理由は [ADR 0018](../../docs/adr/0018-native-srt-and-local-receiver.md) を参照。
-
 AndroidのJNI CallerとWindowsの端末別Listenerは同じ `transport.cpp` と固定版libsrtを使う。AndroidはRootEncoderの撮影・エンコーダー・MPEG-TS packetizerだけを利用し、KotlinのSRT接続実装を起動しない。PCは受信したTSを再エンコードせずループバックUDPへ転送する。`ts-progress.cpp` は連続した完全なPESとPTSを数え、OBSの復号成功を推測しない。
 
 ## ビルドと依存
@@ -20,6 +18,6 @@ AndroidのJNI CallerとWindowsの端末別Listenerは同じ `transport.cpp` と�
 
 `pnpm test:native-media` はビルド済みワーカー、同梱FFmpeg、利用可能なプライベートLAN IPv4を必要とする。合成映像と正弦波だけでH.264/AAC・H.265/AACの復号、UDPプロキシによる帯域・損失・遅延・切断、複数受信の独立性、親パイプ終了を確認する。カメラ・マイク・実登録情報を読み取らず、録画しない。これは実機の総遅延やOBS表示の測定を代替しない。
 
-LAN実機での更新・再接続測定、OBSの復号確認、未測定範囲は [2026-10-03の検証記録](../../docs/validation/native-outdoor-transport-2026-10-03.md) を参照。
+これらの自動検証は、実際の端末・ルーター・OBSでの動作確認を代替しません。
 
 ワーカーはコマンド引数を受け取らない。親が標準入力でLAN／Tailscale用の版1設定、または直接接続用の版2設定を1行渡し、パイプを所有する。直接接続では同じパイプで候補を更新し、正常な受信を維持する。標準出力は制限された版1 JSON状態だけ。資格情報や上流例外を出力しない。ユーザー向けの起動・終了・再試行・認証境界はPCの `OutdoorReceivers` と `SmartphoneController` が所有する。

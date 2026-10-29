@@ -12,6 +12,6 @@ Androidクライアントは、PC版とは独立したGradleプロジェクト�
 .\gradlew.bat testDebugUnitTest lintDebug assembleDebug
 ```
 
-生成される `app/build/outputs/apk/debug/app-debug.apk` は開発確認用です。配布用APKの署名鍵はリポジトリへ置かず、配布物は明示的な依頼がある場合だけ生成します。
+生成される `app/build/outputs/apk/debug/app-debug.apk` は開発確認用です。配布用APKには別途署名が必要です。署名鍵や `local.properties` はリポジトリへ含めないでください。
 
-接続先、バックグラウンド音声、権限、配布の正式仕様は [`docs/features/android-mobile-client.md`](../docs/features/android-mobile-client.md) を参照してください。
+利用方法と対応環境は[きゃすメイトのREADME](../README.md)を参照してください。
