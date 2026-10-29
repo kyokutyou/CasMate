@@ -1,0 +1,17 @@
+CasMate libsrt source changes (2026-10-04)
+
+libsrt 1.5.7, MPL-2.0, commit 899348d8318eb9a3c5a5b6ec43c4a1114288773a.
+https://github.com/Haivision/srt/tree/899348d8318eb9a3c5a5b6ec43c4a1114288773a
+
+CasMate adds verified IPV6_V6ONLY configuration in srtcore/channel.cpp.
+The original MPL-2.0 file header is retained. Mbed TLS sources are unchanged.
+The exact fixed source archive and SHA-256 are in licenses/outdoor/dependencies.json.
+The before/after SHA-256, source path, and single replacement are in
+licenses/outdoor/patches/verified-ipv6-only.json.
+To reproduce the modified corresponding source, download and verify that source
+archive, unpack it, verify the specified beforeSha256, replace the single "before"
+string with "after", and verify afterSha256. Both strings preserve LF newlines.
+The build script performs these checks before each build, including cached sources.
+
+Build instructions and scripts are in native/outdoor/README.md and
+tools/prepare-outdoor-native.mjs in the CasMate source repository.

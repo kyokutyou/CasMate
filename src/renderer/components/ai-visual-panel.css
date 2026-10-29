@@ -1,0 +1,10 @@
+.ai-visual { min-width: 0; }
+.ai-visual-toggle-help { overflow:auto; }
+.ai-visual select { width: 100%; min-width: 0; }
+.ai-visual .button-row { flex-wrap: wrap; }
+.ai-visual-status { height: 76px; overflow: auto; overflow-wrap: anywhere; font-size:var(--management-font-secondary, 12px); line-height: 1.5; padding: 8px 0; box-sizing: border-box; }
+.ai-visual-image { height: 240px; width: 100%; display: flex; align-items: center; justify-content: center; background: var(--studio-input, #111820); border: 1px solid var(--studio-line, #344151); border-radius: 8px; overflow: hidden; color: var(--studio-muted, #acbac8); }
+.ai-visual-image img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; }
+.ai-visual-debug { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--studio-line, #344151); }
+.ai-visual-result { height: 120px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; padding: 12px; border: 1px solid var(--studio-line, #344151); border-radius: 8px; }
+@media (max-width: 560px) { .ai-visual-image { height: 180px; } }

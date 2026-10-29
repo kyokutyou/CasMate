@@ -1,0 +1,10 @@
+RootEncoder 2.8.1 (cca548ab7942ab50d34dede272d5da90d46c6b67)
+Copyright (C) pedroSG94. Licensed under the Apache License 2.0.
+
+CasMate modifies the common, srt, encoder and library source modules:
+- Numeric transport snapshots with ACK, expiry, queue and frame progress.
+- Explicit video bitrate API results (not running, accepted, error).
+- GL submission and encoder timestamp correlation for live frame evidence.
+- MPEG-TS PCR aligned with PES presentation timestamps instead of device uptime.
+The original APIs are retained. Source provenance and changes are documented
+in android/vendor/rootencoder/UPSTREAM.md. The full license accompanies this notice.

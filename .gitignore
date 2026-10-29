@@ -1,0 +1,56 @@
+node_modules/
+.pnpm-store/
+dist/
+dist-electron/
+dist-tools/
+release/
+resources/speech-recognition-worker/
+resources/pc-status-worker/
+resources/outdoor-worker/
+android/app/.cxx/
+**/bin/
+**/obj/
+coverage/
+*.log
+.DS_Store
+Thumbs.db
+
+# Android (the Android project is intentionally independent from the desktop build)
+android/.gradle/
+android/.kotlin/
+android/.idea/
+android/local.properties
+android/**/build/
+android/captures/
+android/*.jks
+android/*.keystore
+!android/app/src/release/
+!android/app/src/release/**
+tmp/android-toolchain/
+tmp/outdoor-reference/
+tmp/casmate-display-*.xml
+tmp/pixel-casmate-*.png
+
+# Local build caches, debug credentials, and disposable validation output
+/.gradle-user-home/
+/.robolectric-home*/
+/.tmp-robolectric.jar
+/android/.android/
+/org/robolectric/
+/tmp/
+/_drawing_test.png
+
+# Local chat attachments and disposable audit files (tracked files need separate review)
+/.codex-remote-attachments/
+/.tmp/
+/.tmp-*
+
+# Keep credentials excluded even inside the Android release source directory
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.jks
+*.keystore
+*.p12
+*.pfx

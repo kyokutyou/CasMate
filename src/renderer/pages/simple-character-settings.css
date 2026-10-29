@@ -1,0 +1,39 @@
+main.character-settings-page { width:min(1200px,100%); }
+.character-settings-page .topbar { flex-wrap:wrap; }
+.character-settings-page h1 { overflow-wrap:anywhere; }
+.character-settings-notice { height:2.8em; overflow:auto; overflow-wrap:anywhere; line-height:1.4; color:#ffb5c0; }
+.character-settings-workspace { display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:20px; align-items:start; }
+.character-settings-controls { display:grid; gap:16px; min-width:0; }
+.character-settings-preview { position:sticky; top:16px; }
+.character-settings-preview h2 { margin:0; }
+.character-settings-preview .character-preview.large { min-height:160px; height:clamp(160px,calc(100dvh - 355px),480px); grid-template-rows:minmax(0,1fr); grid-template-columns:minmax(0,1fr); }
+.character-settings-preview .character-layers { display:grid; grid-template-rows:minmax(0,1fr); grid-template-columns:minmax(0,1fr); min-height:0; min-width:0; }
+.character-settings-preview>button { min-height:44px; }
+.character-settings-page .character-mouth-test-help { margin:0; text-align:center; font-size:.85rem; }
+.character-settings-controls .asset-controls { grid-template-columns:minmax(0,1fr); }
+.character-asset-order-help { margin:0; height:2.8em; line-height:1.4; overflow:auto; overflow-wrap:anywhere; }
+.character-asset-removals { display:flex; flex-wrap:wrap; gap:8px; padding-top:14px; margin-top:4px; border-top:1px solid #383a58; }
+.character-asset-removals h3 { flex-basis:100%; color:#b8bad1; font-size:.85rem; font-weight:500; }
+.character-asset-removals>button { min-width:0; max-width:100%; padding:.5rem .65rem; font-size:.8rem; overflow-wrap:anywhere; }
+.character-settings-controls .asset-drop-zone { min-width:0; overflow-wrap:anywhere; }
+.character-settings-controls .panel>h2 { margin:0; }
+.character-settings-controls .panel-heading { flex-wrap:wrap; }
+.character-motion-help { margin:0; line-height:1.5; }
+.character-motion-save { margin:0; height:1.5em; line-height:1.5; color:#a8dfc5; }
+.character-motion-save[data-state=error] { color:#ffb5c0; }
+.character-motion-save[data-state=pending], .character-motion-save[data-state=saving] { color:#f2d2a0; }
+.character-asset-warning { margin:0; height:2.8em; line-height:1.4; overflow:auto; overflow-wrap:anywhere; }
+.character-motion-group { display:grid; gap:14px; min-width:0; margin:0; padding:12px; border:1px solid #383a58; border-radius:10px; }
+.character-motion-group legend { padding:0 6px; font-weight:700; }
+.character-motion-group .motion-slider>span { flex-wrap:wrap; font-size:.88rem; }
+.character-motion-group .motion-slider output { margin-left:auto; }
+@media(max-width:719px) {
+  .character-settings-workspace { grid-template-columns:minmax(0,1fr); gap:16px; }
+  .character-settings-preview { position:static; }
+  .character-settings-preview .character-preview.large { height:clamp(180px,32dvh,300px); }
+}
+@media(max-width:420px) {
+  main.character-settings-page { padding:12px; gap:12px; }
+  .character-settings-page .panel { padding:14px; }
+}
+html:has(.character-settings-page), body:has(.character-settings-page), #root:has(.character-settings-page) { min-width:0; }

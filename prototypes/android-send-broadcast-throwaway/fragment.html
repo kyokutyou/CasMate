@@ -1,0 +1,491 @@
+<!-- Throwaway UI exploration: two send/broadcast layouts, local fictional state only. -->
+<div id="casmate-send-mock" aria-label="送信・配信の画面見本">
+  <div class="viz-carousel viz-dotted-background" aria-label="送信・配信のレイアウト" data-previous-label="前の案" data-next-label="次の案">
+    <section data-variant="区画カード" aria-label="区画カード">
+      <div class="cm-stage">
+        <div class="cm-phone cm-cards" data-testid="phone" data-appearance="auto">
+          <div class="cm-system"><span>9:41</span><span><i data-lucide="signal" aria-hidden="true"></i><i data-lucide="wifi" aria-hidden="true"></i><i data-lucide="battery-full" aria-hidden="true"></i></span></div>
+          <header class="cm-app-header">
+            <div class="cm-app-tabs"><button type="button" class="cm-tab cm-tab-active cursor-interaction" data-action="camera">カメラ</button><button type="button" class="cm-tab cursor-interaction" data-action="comments">コメント</button></div>
+            <button type="button" class="cm-icon cm-menu-trigger cursor-interaction" aria-label="送信・配信" data-action="menu"><i data-lucide="radio" aria-hidden="true"></i><span class="cm-trigger-dot"></span></button>
+            <button type="button" class="cm-icon cursor-interaction" aria-label="スマホ連携" data-action="link"><i data-lucide="smartphone" aria-hidden="true"></i></button>
+            <button type="button" class="cm-icon cursor-interaction" aria-label="映像・マイク" data-action="settings"><i data-lucide="sliders-horizontal" aria-hidden="true"></i></button>
+          </header>
+          <main class="cm-camera-area">
+            <div class="cm-landscape" aria-label="架空のカメラ映像"><div class="cm-landscape-hill"></div><div class="cm-landscape-near"></div><div class="cm-landscape-tree"></div></div>
+            <div class="cm-camera-badge"><span class="cm-small-dot"></span><span data-camera-label>PCへ送信中</span></div>
+            <div class="cm-closed-note" hidden>送信・配信は右上から開けます</div>
+          </main>
+          <div class="cm-scrim"></div>
+          <section class="cm-menu" data-testid="menu" aria-label="送信・配信">
+            <header class="cm-menu-header"><h1>送信・配信</h1><button type="button" class="cm-icon cursor-interaction" aria-label="送信・配信を閉じる" data-action="close"><i data-lucide="x" aria-hidden="true"></i></button></header>
+            <div class="cm-menu-scroll" data-testid="menu-scroll">
+              <section class="cm-send-section cm-product-section">
+                <div class="cm-section-heading"><h2>スマホの送信</h2><button type="button" class="cm-text-button cursor-interaction" data-action="send-details" data-testid="send-details">詳細<i data-lucide="chevron-right" aria-hidden="true"></i></button></div>
+                <p class="cm-section-description">映像・マイクをPCへ</p>
+                <div class="cm-state-block">
+                  <div class="cm-state-title" data-testid="send-status" aria-live="polite"><span class="cm-state-dot"></span><span data-send-status>送信中</span></div>
+                  <div class="cm-fact"><span>実送信</span><strong data-send-rate>2.4 Mbps</strong></div>
+                  <div class="cm-microphone"><i data-lucide="mic" aria-hidden="true"></i><span data-mic-state>マイク入力あり</span></div>
+                  <div class="cm-meter" aria-label="マイク入力レベル"><span data-mic-meter></span></div>
+                  <p class="cm-state-hint" data-send-hint>OBSでの表示は未確認です。</p>
+                </div>
+                <button type="button" class="cm-action cm-danger cursor-interaction" data-action="send" data-testid="send-action"><i data-lucide="video" aria-hidden="true"></i><span data-send-button>送信を停止</span></button>
+              </section>
+              <section class="cm-obs-section cm-product-section">
+                <div class="cm-section-heading"><h2>OBS配信</h2><button type="button" class="cm-text-button cursor-interaction" data-action="obs-details" data-testid="obs-details">詳細<i data-lucide="chevron-right" aria-hidden="true"></i></button></div>
+                <p class="cm-section-description">OBSから配信先へ</p>
+                <div class="cm-state-block">
+                  <div class="cm-state-title" data-testid="obs-status" aria-live="polite"><span class="cm-state-dot"></span><span data-obs-status>配信停止</span></div>
+                  <div class="cm-obs-connection"><i data-lucide="monitor" aria-hidden="true"></i><span data-obs-connection>OBSに接続済み</span></div>
+                  <p class="cm-state-hint" data-obs-hint>スマホの送信とは別に操作できます。</p>
+                </div>
+                <button type="button" class="cm-action cursor-interaction" data-action="obs" data-testid="obs-action"><i data-lucide="radio" aria-hidden="true"></i><span data-obs-button>OBS配信を開始</span></button>
+                <button type="button" class="cm-preview-button cursor-interaction" data-action="preview" data-testid="obs-preview"><i data-lucide="image" aria-hidden="true"></i><span>OBS映像を確認</span><i data-lucide="chevron-right" aria-hidden="true"></i></button>
+              </section>
+            </div>
+          </section>
+          <section class="cm-detail-screen cm-menu" hidden aria-label="詳細">
+            <header class="cm-menu-header"><button type="button" class="cm-icon cursor-interaction" aria-label="送信・配信へ戻る" data-action="back"><i data-lucide="arrow-left" aria-hidden="true"></i></button><h1 data-detail-title>スマホの送信</h1><button type="button" class="cm-icon cursor-interaction" aria-label="詳細を閉じる" data-action="back"><i data-lucide="x" aria-hidden="true"></i></button></header>
+            <div class="cm-detail-scroll"><h2 data-detail-status>送信中</h2><p data-detail-message></p><dl class="cm-detail-facts"><div><dt>接続先PC</dt><dd>デスクトップPC</dd></div><div><dt data-detail-label>実送信速度</dt><dd data-detail-value>2.4 Mbps</dd></div></dl><button type="button" class="cm-action cursor-interaction" data-action="retry">再試行</button><p class="cm-detail-notice" aria-live="polite" data-detail-notice></p><details class="cm-payload"><summary class="cursor-interaction">見本の状態を見る</summary><pre data-state-payload></pre></details></div>
+          </section>
+          <section class="cm-preview-screen cm-menu" data-testid="preview-screen" hidden aria-label="OBS映像を確認">
+            <header class="cm-menu-header"><button type="button" class="cm-icon cursor-interaction" aria-label="送信・配信へ戻る" data-action="back"><i data-lucide="arrow-left" aria-hidden="true"></i></button><h1>OBS映像</h1><button type="button" class="cm-icon cursor-interaction" aria-label="OBS映像を閉じる" data-action="back"><i data-lucide="x" aria-hidden="true"></i></button></header>
+            <div class="cm-detail-scroll"><div class="cm-obs-still" role="img" aria-label="架空のOBS静止画"><div class="cm-still-horizon"></div><div class="cm-still-panel"><span>きゃすメイト</span><strong>カメラ映像</strong></div><span class="cm-still-label">OBS プログラム映像</span></div><p class="cm-preview-time" aria-live="polite">取得時刻 <span data-preview-time>9:41:00</span></p><button type="button" class="cm-action cursor-interaction" data-action="preview-update" data-testid="preview-update"><i data-lucide="refresh-cw" aria-hidden="true"></i>画像を更新</button><p>OBSの現在映像を静止画で確認します。動画・音声や配信先での表示を確認する画面ではありません。</p><p class="cm-preview-caption">画像は操作見本用の架空表示です。</p></div>
+          </section>
+          <div class="cm-confirm-layer" hidden>
+            <section class="cm-confirmation" data-testid="confirmation" role="dialog" aria-modal="true" aria-label="操作の確認">
+              <h2 data-confirm-title>送信を停止しますか？</h2><p data-confirm-message>このスマホの映像とマイクの送信を停止します。OBS配信・コメント取得・読み上げは続きます。</p><div class="cm-confirm-context" data-confirm-context hidden><div>接続先 <strong>デスクトップPC</strong></div><div>現在 <strong data-confirm-current>配信停止</strong></div><p class="cm-confirm-expiry" aria-live="polite">確認期限 <strong data-confirm-seconds>10</strong> 秒</p></div><div class="cm-confirm-buttons"><button type="button" class="cm-outline-button cursor-interaction" data-action="dismiss-confirmation" data-testid="dismiss-confirmation">キャンセル</button><button type="button" class="cm-action cursor-interaction" data-action="confirm" data-testid="confirm-action"><span data-confirm-button>送信を停止</span></button></div><p class="cm-expired-note" data-expired-note hidden>確認期限が切れました。操作を選び直してください。</p>
+            </section>
+          </div>
+          <div class="cm-navigation"><button type="button" class="cm-nav-back cursor-interaction" aria-label="戻る" data-action="device-back"><i data-lucide="chevron-left" aria-hidden="true"></i></button><span></span><i data-lucide="square" aria-hidden="true"></i></div>
+        </div>
+      </div>
+    </section>
+    <section data-variant="すっきり区切り" aria-label="すっきり区切り" hidden>
+      <div class="cm-stage">
+        <div class="cm-phone cm-lines" data-testid="phone" data-appearance="auto">
+          <div class="cm-system"><span>9:41</span><span><i data-lucide="signal" aria-hidden="true"></i><i data-lucide="wifi" aria-hidden="true"></i><i data-lucide="battery-full" aria-hidden="true"></i></span></div>
+          <header class="cm-app-header"><div class="cm-app-tabs"><button type="button" class="cm-tab cm-tab-active cursor-interaction" data-action="camera">カメラ</button><button type="button" class="cm-tab cursor-interaction" data-action="comments">コメント</button></div><button type="button" class="cm-icon cm-menu-trigger cursor-interaction" aria-label="送信・配信" data-action="menu"><i data-lucide="radio" aria-hidden="true"></i><span class="cm-trigger-dot"></span></button><button type="button" class="cm-icon cursor-interaction" aria-label="スマホ連携" data-action="link"><i data-lucide="smartphone" aria-hidden="true"></i></button><button type="button" class="cm-icon cursor-interaction" aria-label="映像・マイク" data-action="settings"><i data-lucide="sliders-horizontal" aria-hidden="true"></i></button></header>
+          <main class="cm-camera-area"><div class="cm-landscape" aria-label="架空のカメラ映像"><div class="cm-landscape-hill"></div><div class="cm-landscape-near"></div><div class="cm-landscape-tree"></div></div><div class="cm-camera-badge"><span class="cm-small-dot"></span><span data-camera-label>PCへ送信中</span></div><div class="cm-closed-note" hidden>送信・配信は右上から開けます</div></main>
+          <div class="cm-scrim"></div>
+          <section class="cm-menu" data-testid="menu" aria-label="送信・配信">
+            <header class="cm-menu-header"><h1>送信・配信</h1><button type="button" class="cm-icon cursor-interaction" aria-label="送信・配信を閉じる" data-action="close"><i data-lucide="x" aria-hidden="true"></i></button></header>
+            <div class="cm-menu-scroll" data-testid="menu-scroll">
+              <section class="cm-send-section cm-product-section">
+                <div class="cm-section-heading"><h2>スマホの送信</h2><button type="button" class="cm-text-button cursor-interaction" data-action="send-details" data-testid="send-details">詳細<i data-lucide="chevron-right" aria-hidden="true"></i></button></div>
+                <div class="cm-line-intro"><p class="cm-section-description">映像・マイクをPCへ</p><div class="cm-state-title" data-testid="send-status" aria-live="polite"><span class="cm-state-dot"></span><span data-send-status>送信中</span></div></div>
+                <div class="cm-state-block"><div class="cm-fact"><span>実送信</span><strong data-send-rate>2.4 Mbps</strong></div><div class="cm-microphone"><i data-lucide="mic" aria-hidden="true"></i><span data-mic-state>マイク入力あり</span></div><div class="cm-meter" aria-label="マイク入力レベル"><span data-mic-meter></span></div><p class="cm-state-hint" data-send-hint>OBSでの表示は未確認です。</p></div>
+                <button type="button" class="cm-action cm-danger cursor-interaction" data-action="send" data-testid="send-action"><i data-lucide="video" aria-hidden="true"></i><span data-send-button>送信を停止</span></button>
+              </section>
+              <section class="cm-obs-section cm-product-section">
+                <div class="cm-section-heading"><h2>OBS配信</h2><button type="button" class="cm-text-button cursor-interaction" data-action="obs-details" data-testid="obs-details">詳細<i data-lucide="chevron-right" aria-hidden="true"></i></button></div>
+                <div class="cm-line-intro"><p class="cm-section-description">OBSから配信先へ</p><div class="cm-state-title" data-testid="obs-status" aria-live="polite"><span class="cm-state-dot"></span><span data-obs-status>配信停止</span></div></div>
+                <div class="cm-state-block"><div class="cm-obs-connection"><i data-lucide="monitor" aria-hidden="true"></i><span data-obs-connection>OBSに接続済み</span></div><p class="cm-state-hint" data-obs-hint>スマホの送信とは別に操作できます。</p></div>
+                <button type="button" class="cm-action cursor-interaction" data-action="obs" data-testid="obs-action"><i data-lucide="radio" aria-hidden="true"></i><span data-obs-button>OBS配信を開始</span></button><button type="button" class="cm-preview-button cursor-interaction" data-action="preview" data-testid="obs-preview"><i data-lucide="image" aria-hidden="true"></i><span>OBS映像を確認</span><i data-lucide="chevron-right" aria-hidden="true"></i></button>
+              </section>
+            </div>
+          </section>
+          <section class="cm-detail-screen cm-menu" hidden aria-label="詳細"><header class="cm-menu-header"><button type="button" class="cm-icon cursor-interaction" aria-label="送信・配信へ戻る" data-action="back"><i data-lucide="arrow-left" aria-hidden="true"></i></button><h1 data-detail-title>スマホの送信</h1><button type="button" class="cm-icon cursor-interaction" aria-label="詳細を閉じる" data-action="back"><i data-lucide="x" aria-hidden="true"></i></button></header><div class="cm-detail-scroll"><h2 data-detail-status>送信中</h2><p data-detail-message></p><dl class="cm-detail-facts"><div><dt>接続先PC</dt><dd>デスクトップPC</dd></div><div><dt data-detail-label>実送信速度</dt><dd data-detail-value>2.4 Mbps</dd></div></dl><button type="button" class="cm-action cursor-interaction" data-action="retry">再試行</button><p class="cm-detail-notice" aria-live="polite" data-detail-notice></p><details class="cm-payload"><summary class="cursor-interaction">見本の状態を見る</summary><pre data-state-payload></pre></details></div></section>
+          <section class="cm-preview-screen cm-menu" data-testid="preview-screen" hidden aria-label="OBS映像を確認"><header class="cm-menu-header"><button type="button" class="cm-icon cursor-interaction" aria-label="送信・配信へ戻る" data-action="back"><i data-lucide="arrow-left" aria-hidden="true"></i></button><h1>OBS映像</h1><button type="button" class="cm-icon cursor-interaction" aria-label="OBS映像を閉じる" data-action="back"><i data-lucide="x" aria-hidden="true"></i></button></header><div class="cm-detail-scroll"><div class="cm-obs-still" role="img" aria-label="架空のOBS静止画"><div class="cm-still-horizon"></div><div class="cm-still-panel"><span>きゃすメイト</span><strong>カメラ映像</strong></div><span class="cm-still-label">OBS プログラム映像</span></div><p class="cm-preview-time" aria-live="polite">取得時刻 <span data-preview-time>9:41:00</span></p><button type="button" class="cm-action cursor-interaction" data-action="preview-update" data-testid="preview-update"><i data-lucide="refresh-cw" aria-hidden="true"></i>画像を更新</button><p>OBSの現在映像を静止画で確認します。動画・音声や配信先での表示を確認する画面ではありません。</p><p class="cm-preview-caption">画像は操作見本用の架空表示です。</p></div></section>
+          <div class="cm-confirm-layer" hidden><section class="cm-confirmation" data-testid="confirmation" role="dialog" aria-modal="true" aria-label="操作の確認"><h2 data-confirm-title>送信を停止しますか？</h2><p data-confirm-message>このスマホの映像とマイクの送信を停止します。OBS配信・コメント取得・読み上げは続きます。</p><div class="cm-confirm-context" data-confirm-context hidden><div>接続先 <strong>デスクトップPC</strong></div><div>現在 <strong data-confirm-current>配信停止</strong></div><p class="cm-confirm-expiry" aria-live="polite">確認期限 <strong data-confirm-seconds>10</strong> 秒</p></div><div class="cm-confirm-buttons"><button type="button" class="cm-outline-button cursor-interaction" data-action="dismiss-confirmation" data-testid="dismiss-confirmation">キャンセル</button><button type="button" class="cm-action cursor-interaction" data-action="confirm" data-testid="confirm-action"><span data-confirm-button>送信を停止</span></button></div><p class="cm-expired-note" data-expired-note hidden>確認期限が切れました。操作を選び直してください。</p></section></div>
+          <div class="cm-navigation"><button type="button" class="cm-nav-back cursor-interaction" aria-label="戻る" data-action="device-back"><i data-lucide="chevron-left" aria-hidden="true"></i></button><span></span><i data-lucide="square" aria-hidden="true"></i></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+<style>
+  #casmate-send-mock { width:100%; }
+  #casmate-send-mock .cm-stage { min-height:832px; padding:16px 0; display:flex; justify-content:center; align-items:flex-start; }
+  #casmate-send-mock .cm-phone {
+    --cm-primary:light-dark(#236245,#B6E9CB); --cm-on-primary:light-dark(#FFFFFF,#003821);
+    --cm-bg:light-dark(#F5F7F4,#151B19); --cm-surface:light-dark(#FFFFFF,#212A26);
+    --cm-text:light-dark(#1D3029,#E9F2EC); --cm-variant:light-dark(#EAF1E9,#293D30);
+    --cm-secondary:light-dark(#52685C,#B5C6BB); --cm-outline:light-dark(#D9E3DB,#3A4B40);
+    --cm-error:light-dark(#A13535,#FFB4AB); --cm-on-error:light-dark(#FFFFFF,#601410);
+    --cm-shadow:light-dark(#16332130,#00000066); --cm-scrim:light-dark(#132B193D,#03080570);
+    --cm-scale:1; width:min(100%,var(--cm-width,400px)); height:800px; flex-shrink:1;
+    position:relative; overflow:hidden; border:1px solid var(--cm-outline); border-radius:23px;
+    background:var(--cm-bg); color:var(--cm-text); font:calc(14px * var(--cm-scale))/1.45 "Noto Sans JP","Yu Gothic",Meiryo,system-ui,sans-serif; box-shadow:0 8px 30px var(--cm-shadow); isolation:isolate;
+  }
+  #casmate-send-mock .cm-phone[data-appearance="light"] { color-scheme:light; }
+  #casmate-send-mock .cm-phone[data-appearance="dark"] { color-scheme:dark; }
+  #casmate-send-mock .cm-phone * { box-sizing:border-box; }
+  #casmate-send-mock .cm-phone [hidden] { display:none!important; }
+  #casmate-send-mock .cm-phone button { font:inherit; color:inherit; -webkit-tap-highlight-color:transparent; }
+  #casmate-send-mock .cm-phone svg { width:20px; height:20px; flex-shrink:0; }
+  #casmate-send-mock .cm-phone h1,#casmate-send-mock .cm-phone h2,#casmate-send-mock .cm-phone p { margin:0; }
+  #casmate-send-mock .cm-phone h1 { font-size:1.25em; line-height:1.3; font-weight:600; }
+  #casmate-send-mock .cm-phone h2 { font-size:1.13em; line-height:1.35; font-weight:600; }
+  #casmate-send-mock .cm-system { height:28px; padding:5px 18px; font:500 12px/18px system-ui,sans-serif; display:flex; justify-content:space-between; background:var(--cm-bg); }
+  #casmate-send-mock .cm-system>span:last-child { display:flex; gap:5px; }
+  #casmate-send-mock .cm-system svg { width:15px; height:15px; }
+  #casmate-send-mock .cm-app-header { height:58px; padding:0 7px; display:flex; align-items:center; background:var(--cm-surface); border-bottom:1px solid var(--cm-outline); }
+  #casmate-send-mock .cm-app-tabs { display:flex; flex:1; min-width:0; }
+  #casmate-send-mock .cm-tab { min-height:48px; padding:0 8px; border:0; background:transparent; font-size:12px!important; white-space:nowrap; }
+  #casmate-send-mock .cm-tab-active { color:var(--cm-primary)!important; box-shadow:inset 0 -3px var(--cm-primary); font-weight:600!important; }
+  #casmate-send-mock .cm-icon { min-width:48px; width:48px; min-height:48px; padding:12px; display:flex; align-items:center; justify-content:center; background:transparent; border:0; border-radius:50%; }
+  #casmate-send-mock .cm-menu-trigger { color:var(--cm-primary)!important; position:relative; background:var(--cm-variant); }
+  #casmate-send-mock .cm-trigger-dot { position:absolute; right:10px; top:10px; width:6px; height:6px; border-radius:50%; background:var(--cm-primary); }
+  #casmate-send-mock .cm-camera-area { position:absolute; inset:86px 0 48px; overflow:hidden; }
+  #casmate-send-mock .cm-landscape { position:absolute; inset:0; background:linear-gradient(180deg,color-mix(in srgb,var(--cm-primary) 24%,var(--cm-bg)) 0%,var(--cm-variant) 49%,color-mix(in srgb,var(--cm-primary) 65%,var(--cm-bg)) 50%); }
+  #casmate-send-mock .cm-landscape-hill { position:absolute; width:140%; height:55%; left:-25%; bottom:12%; border-radius:45% 55% 0 0; background:color-mix(in srgb,var(--cm-primary) 45%,var(--cm-variant)); transform:rotate(-14deg); }
+  #casmate-send-mock .cm-landscape-near { position:absolute; width:150%; height:40%; left:-18%; bottom:-8%; border-radius:50% 50% 0 0; background:color-mix(in srgb,var(--cm-primary) 72%,var(--cm-bg)); transform:rotate(14deg); }
+  #casmate-send-mock .cm-landscape-tree { position:absolute; width:90px; height:140px; right:20px; bottom:140px; border-radius:80% 50% 40% 30%; background:color-mix(in srgb,var(--cm-text) 65%,var(--cm-primary)); transform:rotate(7deg); }
+  #casmate-send-mock .cm-camera-badge { position:absolute; top:17px; left:14px; padding:7px 10px; display:flex; gap:7px; align-items:center; font-size:12px; border-radius:8px; color:var(--cm-text); background:var(--cm-surface); }
+  #casmate-send-mock .cm-small-dot { width:6px; height:6px; border-radius:50%; background:var(--cm-primary); }
+  #casmate-send-mock .cm-closed-note { position:absolute; top:70px; left:20px; right:20px; padding:12px; background:var(--cm-surface); border-radius:12px; font-size:1em; }
+  #casmate-send-mock .cm-scrim { position:absolute; inset:86px 0 48px; background:var(--cm-scrim); }
+  #casmate-send-mock .cm-menu { position:absolute; right:12px; left:12px; top:94px; max-width:420px; height:658px; max-height:85%; background:var(--cm-surface); border:1px solid var(--cm-outline); border-radius:18px; box-shadow:0 8px 28px var(--cm-shadow); display:flex; flex-direction:column; overflow:hidden; }
+  #casmate-send-mock .cm-menu-header { min-height:62px; padding:7px 10px 7px 20px; display:flex; gap:5px; align-items:center; flex-shrink:0; border-bottom:1px solid var(--cm-outline); }
+  #casmate-send-mock .cm-menu-header h1 { flex:1; }
+  #casmate-send-mock .cm-menu-scroll { padding:14px; overflow-y:auto; overscroll-behavior:contain; min-height:0; }
+  #casmate-send-mock .cm-product-section { padding:10px; border:1px solid var(--cm-outline); border-radius:12px; }
+  #casmate-send-mock .cm-product-section+.cm-product-section { margin-top:12px; }
+  #casmate-send-mock .cm-section-heading { display:flex; justify-content:space-between; align-items:center; gap:4px; min-height:48px; }
+  #casmate-send-mock .cm-section-heading h2 { min-width:0; }
+  #casmate-send-mock .cm-text-button { display:flex; align-items:center; justify-content:center; gap:1px; background:transparent; border:0; min-height:48px; padding:0 0 0 8px; min-width:55px; flex-shrink:0; color:var(--cm-primary)!important; font-size:.9em!important; }
+  #casmate-send-mock .cm-text-button svg { width:16px; height:16px; }
+  #casmate-send-mock .cm-section-description { font-size:.87em; color:var(--cm-secondary); margin-top:-5px!important; margin-bottom:10px!important; }
+  #casmate-send-mock .cm-state-block { padding:8px 10px 0; background:var(--cm-variant); border-radius:8px; }
+  #casmate-send-mock .cm-state-title { display:flex; align-items:center; gap:8px; min-height:1.6em; font-weight:600; font-size:1.06em; }
+  #casmate-send-mock .cm-state-dot { width:7px; height:7px; flex-shrink:0; border-radius:50%; background:var(--cm-primary); }
+  #casmate-send-mock [data-tone="muted"] .cm-state-dot { background:var(--cm-secondary); }
+  #casmate-send-mock [data-tone="error"] { color:var(--cm-error); }
+  #casmate-send-mock [data-tone="error"] .cm-state-dot { background:var(--cm-error); }
+  #casmate-send-mock .cm-fact { min-height:1.6em; margin-top:4px; display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  #casmate-send-mock .cm-fact>span { color:var(--cm-secondary); font-size:.86em; }
+  #casmate-send-mock .cm-fact strong { font-weight:500; font-variant-numeric:tabular-nums; font-size:.93em; }
+  #casmate-send-mock .cm-microphone,#casmate-send-mock .cm-obs-connection { display:flex; align-items:center; gap:6px; min-height:1.6em; font-size:.87em; margin-top:3px; color:var(--cm-secondary); }
+  #casmate-send-mock .cm-microphone svg,#casmate-send-mock .cm-obs-connection svg { width:15px; height:15px; }
+  #casmate-send-mock .cm-meter { height:4px; border-radius:3px; background:color-mix(in srgb,var(--cm-secondary) 15%,transparent); overflow:hidden; margin:5px 0 4px; }
+  #casmate-send-mock .cm-meter span { display:block; width:38%; height:100%; border-radius:3px; background:var(--cm-primary); }
+  #casmate-send-mock .cm-state-hint { font-size:.85em; line-height:1.4; color:var(--cm-secondary); height:2.8em; margin-top:7px!important; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  #casmate-send-mock .cm-state-hint[data-error="true"] { color:var(--cm-error); }
+  #casmate-send-mock .cm-action { width:100%; min-height:48px; display:flex; align-items:center; justify-content:center; gap:8px; border:0; border-radius:9px; background:var(--cm-primary); color:var(--cm-on-primary)!important; padding:12px 10px; margin-top:10px; font-size:1em!important; font-weight:600!important; line-height:1.4!important; }
+  #casmate-send-mock .cm-action.cm-danger { background:var(--cm-error); color:var(--cm-on-error)!important; }
+  #casmate-send-mock .cm-phone button:disabled { background:var(--cm-variant); color:var(--cm-secondary)!important; opacity:.72; }
+  #casmate-send-mock .cm-preview-button { width:100%; display:flex; align-items:center; justify-content:flex-start; gap:8px; min-height:48px; margin-top:7px; padding:10px 8px; border:0; border-radius:9px; color:var(--cm-primary)!important; background:transparent; }
+  #casmate-send-mock .cm-preview-button>span { flex:1; text-align:left; }
+  #casmate-send-mock .cm-preview-button>svg:last-child { width:16px; }
+  #casmate-send-mock .cm-lines .cm-menu-scroll { padding:8px 20px 14px; }
+  #casmate-send-mock .cm-lines .cm-product-section { padding:9px 0 16px; border:0; border-radius:0; }
+  #casmate-send-mock .cm-lines .cm-product-section+.cm-product-section { border-top:1px solid var(--cm-outline); margin-top:0; padding-top:12px; }
+  #casmate-send-mock .cm-line-intro { display:flex; align-items:baseline; justify-content:space-between; gap:5px; flex-wrap:wrap; margin-bottom:8px; }
+  #casmate-send-mock .cm-phone[data-font-scale="1.5"] .cm-line-intro,#casmate-send-mock .cm-phone[data-font-scale="2"] .cm-line-intro { flex-direction:column; align-items:flex-start; }
+  #casmate-send-mock .cm-lines .cm-section-description { margin:0!important; }
+  #casmate-send-mock .cm-lines .cm-state-title { font-size:.88em; }
+  #casmate-send-mock .cm-lines .cm-state-block { padding:1px 0 0; background:transparent; border-radius:0; }
+  #casmate-send-mock .cm-lines .cm-fact { margin-top:0; }
+  #casmate-send-mock .cm-lines .cm-action { margin-top:5px; }
+  #casmate-send-mock .cm-lines .cm-state-hint { height:2.8em; }
+  #casmate-send-mock .cm-detail-screen .cm-menu-header,#casmate-send-mock .cm-preview-screen .cm-menu-header { padding-left:4px; }
+  #casmate-send-mock .cm-detail-scroll { padding:22px; overflow-y:auto; min-height:0; overscroll-behavior:contain; }
+  #casmate-send-mock .cm-detail-scroll>p { margin-top:14px; }
+  #casmate-send-mock .cm-detail-facts { margin:20px 0; }
+  #casmate-send-mock .cm-detail-facts>div { border-bottom:1px solid var(--cm-outline); padding:10px 0; }
+  #casmate-send-mock .cm-detail-facts dt { font-size:.87em; color:var(--cm-secondary); }
+  #casmate-send-mock .cm-detail-facts dd { margin:3px 0 0; overflow-wrap:anywhere; }
+  #casmate-send-mock .cm-detail-notice { min-height:1.5em; color:var(--cm-primary); }
+  #casmate-send-mock .cm-payload { margin-top:20px; font-size:.87em; color:var(--cm-secondary); }
+  #casmate-send-mock .cm-payload summary { min-height:48px; padding:12px 0; }
+  #casmate-send-mock .cm-payload pre { white-space:pre-wrap; overflow-wrap:anywhere; font-size:12px; color:var(--cm-text); background:var(--cm-variant); padding:12px; border-radius:8px; }
+  #casmate-send-mock .cm-obs-still { position:relative; aspect-ratio:16/9; overflow:hidden; background:color-mix(in srgb,var(--cm-primary) 20%,var(--cm-variant)); border-radius:8px; }
+  #casmate-send-mock .cm-still-horizon { position:absolute; height:65%; width:140%; bottom:-15%; left:-20%; transform:rotate(-10deg); border-radius:50% 50% 0 0; background:color-mix(in srgb,var(--cm-primary) 64%,var(--cm-bg)); }
+  #casmate-send-mock .cm-still-panel { position:absolute; top:12%; left:8%; right:30%; padding:8px; display:grid; background:var(--cm-surface); border-radius:5px; font-size:.74em; }
+  #casmate-send-mock .cm-still-panel strong { font-weight:600; }
+  #casmate-send-mock .cm-still-label { position:absolute; bottom:5px; left:8px; font-size:10px; padding:3px 6px; border-radius:4px; background:var(--cm-surface); }
+  #casmate-send-mock .cm-preview-time { font-size:.9em; color:var(--cm-secondary); font-variant-numeric:tabular-nums; }
+  #casmate-send-mock .cm-preview-caption { color:var(--cm-secondary); font-size:.87em; }
+  #casmate-send-mock .cm-preview-error { color:var(--cm-error); font-size:.87em; line-height:1.4; height:4.2em; margin:0 0 10px!important; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  #casmate-send-mock .cm-preview-error[data-error="false"] { color:var(--cm-secondary); }
+  #casmate-send-mock .cm-preview-scene { color:var(--cm-secondary); font-size:.9em; height:2.9em; margin-top:10px!important; }
+  #casmate-send-mock .cm-still-placeholder { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:12px; color:var(--cm-secondary); font-size:.9em; }
+  #casmate-send-mock .cm-confirm-layer { position:absolute; inset:86px 0 48px; background:var(--cm-scrim); display:flex; align-items:center; justify-content:center; padding:20px; }
+  #casmate-send-mock .cm-confirmation { width:100%; max-height:100%; overflow-y:auto; background:var(--cm-surface); border-radius:18px; padding:23px 20px; box-shadow:0 8px 28px var(--cm-shadow); }
+  #casmate-send-mock .cm-confirmation>p { margin-top:14px; }
+  #casmate-send-mock .cm-confirm-context { background:var(--cm-variant); border-radius:8px; padding:12px; margin-top:16px; font-size:.9em; }
+  #casmate-send-mock .cm-confirm-context strong { font-weight:500; }
+  #casmate-send-mock .cm-confirm-expiry { margin-top:10px!important; color:var(--cm-secondary); }
+  #casmate-send-mock .cm-confirm-buttons { display:flex; flex-direction:column-reverse; gap:8px; margin-top:20px; }
+  #casmate-send-mock .cm-confirm-buttons .cm-action { margin-top:0; }
+  #casmate-send-mock .cm-outline-button { width:100%; min-height:48px; border:1px solid var(--cm-outline); border-radius:9px; background:transparent; padding:10px; }
+  #casmate-send-mock .cm-expired-note { color:var(--cm-error); font-size:.9em; }
+  #casmate-send-mock .cm-navigation { position:absolute; bottom:0; left:0; right:0; height:48px; display:flex; align-items:center; justify-content:space-around; background:var(--cm-bg); }
+  #casmate-send-mock .cm-nav-back { min-width:48px; height:48px; display:flex; align-items:center; justify-content:center; background:transparent; border:0; }
+  #casmate-send-mock .cm-navigation>span { width:12px; height:12px; border:1.5px solid var(--cm-secondary); border-radius:50%; }
+  #casmate-send-mock .cm-navigation svg { width:16px; height:16px; }
+  @media(max-width:360px) { #casmate-send-mock .cm-menu { left:8px; right:8px; } #casmate-send-mock .cm-menu-scroll { padding:10px; } #casmate-send-mock .cm-lines .cm-menu-scroll { padding:8px 16px 14px; } }
+</style>
+<script>
+(() => {
+  const root = document.getElementById('casmate-send-mock');
+  if (!root) return;
+  const phones = [...root.querySelectorAll('.cm-phone')];
+  const scenarios = [
+    {label:'通常',value:'normal'}, {label:'停止',value:'stopped'}, {label:'送信だけ',value:'sending-only'},
+    {label:'OBSだけ',value:'obs-only'}, {label:'再接続',value:'reconnecting'}, {label:'OBS切断',value:'obs-disconnected'},
+    {label:'送信エラー',value:'send-error'}, {label:'OBS結果不明',value:'obs-unknown-result'}, {label:'OBS確認待ち',value:'obs-busy'},
+    {label:'OBS開始中',value:'obs-starting'}, {label:'OBS終了中',value:'obs-stopping'}
+  ];
+  const prefs = {appearance:'auto',fontScale:'1',width:'400',scenario:'normal'};
+  const state = {send:'sending',obs:'stopped',obsConnected:true,operationResult:null,busy:false,scenario:'normal',surface:'menu',pending:null,previewTime:null,previewUpdatedAt:null,previewRevision:0,notice:'',detail:'send',expired:false};
+  for (const phone of phones) {
+    phone.querySelectorAll('.cm-detail-screen [data-action="back"],.cm-preview-screen [data-action="back"]').forEach(button => button.dataset.testid = 'surface-close');
+    phone.querySelector('[data-action="retry"]').dataset.testid = 'retry';
+    const previewBody = phone.querySelector('.cm-preview-screen .cm-detail-scroll');
+    const error = document.createElement('p'); error.className = 'cm-preview-error'; error.dataset.previewError = '';
+    previewBody.prepend(error);
+    const scene = document.createElement('p'); scene.className = 'cm-preview-scene'; scene.dataset.previewScene = ''; scene.textContent = '本番シーン：カメラとコメント';
+    previewBody.querySelector('.cm-obs-still').after(scene);
+    const placeholder = document.createElement('div'); placeholder.className = 'cm-still-placeholder'; placeholder.dataset.stillPlaceholder = ''; placeholder.textContent = '画像を取得できません';
+    previewBody.querySelector('.cm-obs-still').append(placeholder);
+  }
+  let timer = null;
+  let returnFocus = null;
+  const ownSavedSignatures = new Set();
+  const savedSignature = saved => JSON.stringify({modelContent:saved?.modelContent ?? null,privateContent:saved?.privateContent ?? null});
+  function snapshot() {
+    return {...state,pending:state.pending ? {...state.pending} : null,appearance:prefs.appearance,fontScale:Number(prefs.fontScale),width:Number(prefs.width)};
+  }
+  function save() {
+    const payload = {modelContent:{scenario:prefs.scenario,appearance:prefs.appearance,fontScale:Number(prefs.fontScale),width:Number(prefs.width),send:state.send,obs:state.obs,obsConnected:state.obsConnected,operationResult:state.operationResult},privateContent:{surface:state.surface === 'confirmation' ? 'menu' : state.surface,detail:state.detail}};
+    const signature = savedSignature(payload);
+    ownSavedSignatures.delete(signature); ownSavedSignatures.add(signature);
+    if (ownSavedSignatures.size > 32) ownSavedSignatures.delete(ownSavedSignatures.values().next().value);
+    if (window.openai?.setWidgetState) Promise.resolve(window.openai.setWidgetState(payload)).catch(() => {});
+  }
+  function cancelPending() {
+    if (timer) { clearInterval(timer); timer = null; }
+    state.pending = null;
+    state.expired = false;
+  }
+  function applyScenario(name) {
+    const choice = scenarios.find(x => x.value === name || x.label === name);
+    if (!choice) return;
+    cancelPending(); prefs.scenario = choice.value; state.scenario = choice.value; state.notice = '';
+    Object.assign(state,{send:'sending',obs:'stopped',obsConnected:true,operationResult:null,busy:false});
+    if (choice.value === 'stopped') state.send = 'stopped';
+    if (choice.value === 'obs-only') { state.send = 'stopped'; state.obs = 'streaming'; }
+    if (choice.value === 'reconnecting') state.send = 'reconnecting';
+    if (choice.value === 'obs-disconnected') { state.obs = 'unknown'; state.obsConnected = false; state.previewTime = null; state.previewUpdatedAt = null; }
+    if (choice.value === 'send-error') state.send = 'error';
+    if (choice.value === 'obs-unknown-result') { state.obs = 'streaming'; state.operationResult = 'unknown'; }
+    if (choice.value === 'obs-busy') state.busy = true;
+    if (choice.value === 'obs-starting') state.obs = 'starting';
+    if (choice.value === 'obs-stopping') state.obs = 'stopping';
+    if (state.surface === 'confirmation') state.surface = 'menu';
+  }
+  function restore(saved) {
+    if (!saved || typeof saved !== 'object') return;
+    const model = saved.modelContent || {};
+    if (['auto','light','dark'].includes(model.appearance)) prefs.appearance = model.appearance;
+    if ([1,1.5,2].includes(Number(model.fontScale))) prefs.fontScale = String(model.fontScale);
+    if ([320,360,400].includes(Number(model.width))) prefs.width = String(model.width);
+    if (scenarios.some(x => x.value === model.scenario)) applyScenario(model.scenario);
+    if (['sending','stopped','reconnecting','error'].includes(model.send)) state.send = model.send;
+    if (['stopped','streaming','unknown','starting','stopping'].includes(model.obs)) state.obs = model.obs;
+    if (typeof model.obsConnected === 'boolean') state.obsConnected = model.obsConnected;
+    if (model.operationResult === 'unknown' || model.operationResult === null) state.operationResult = model.operationResult;
+    const privateData = saved.privateContent || {};
+    if (['menu','send-details','obs-details','closed'].includes(privateData.surface)) state.surface = privateData.surface;
+    if (privateData.surface === 'preview') state.surface = 'menu';
+    if (['send','obs'].includes(privateData.detail)) state.detail = privateData.detail;
+  }
+  const text = (phone,selector,value) => phone.querySelectorAll(selector).forEach(element => { if (element.textContent !== String(value ?? '')) element.textContent = value ?? ''; });
+  const sendLabel = () => ({sending:'送信中',stopped:'停止中',reconnecting:'再接続中',error:'要確認'}[state.send]);
+  const obsLabel = () => !state.obsConnected ? '状態不明' : ({stopped:'配信停止',streaming:'配信中',unknown:'状態不明',starting:'開始中',stopping:'終了中'}[state.obs]);
+  function sendHint(full = false) {
+    if (state.send === 'error') return full ? 'PCへの映像・マイク送信でエラーが発生しました。PCがスリープしていないか、選択した接続経路やPCの受信設定を確認してください。接続先「デスクトップPC」に応答がなく、最後の接続確認から送信を再開できていません。確認後に再試行してください。送信を止める場合は「送信を停止」を選んでください。' : 'PCに接続できません。詳細で接続先を確認してください。';
+    return {sending:'OBSでの表示は未確認です。',stopped:'映像とマイクはPCへ送信していません。',reconnecting:'PCに再接続しています。OBS配信は別に動作します。'}[state.send];
+  }
+  function obsHint(full = false) {
+    if (!state.obsConnected) return full ? 'OBSとの制御接続が切れたため、現在の配信状態を確認できません。配信自体が続いている可能性があります。PC側のOBSを確認し、接続が戻って最新状態を取得してから操作してください。開始・終了操作を自動で送り直すことはありません。' : 'OBS接続が切れました。配信状態を確認できません。';
+    if (state.operationResult === 'unknown') return full ? '前回のOBS操作の結果を確認できませんでした。現在状態の取得結果では配信中です。詳細の「状態を再取得」で最新状態を確認してから操作してください。配信開始・終了の操作は送り直しません。' : '前回の操作結果は不明です。現在状態を再取得してください。';
+    if (state.busy) return '別の操作の確認待ちです。確認が終わるまで操作できません。';
+    if (state.obs === 'unknown') return full ? 'OBS配信操作の応答を取得できず、結果を確認できませんでした。配信状態は不明です。PC側のOBSを確認するか、再試行で最新状態を取得してください。開始・終了操作は自動で送り直しません。' : '操作結果を確認できません。詳細から現在状態を再取得してください。';
+    if (state.obs === 'starting') return 'OBS配信を開始しています。結果を確認するまでお待ちください。';
+    if (state.obs === 'stopping') return 'OBS配信を終了しています。結果を確認するまでお待ちください。';
+    return 'スマホの送信とは別に操作できます。';
+  }
+  function obsDisabled() { return !state.obsConnected || state.operationResult === 'unknown' || state.busy || ['unknown','starting','stopping'].includes(state.obs); }
+  function render() {
+    const sendActive = ['sending','reconnecting','error'].includes(state.send);
+    const isConfirm = state.surface === 'confirmation';
+    const isDetails = ['send-details','obs-details'].includes(state.surface);
+    const isPreview = state.surface === 'preview';
+    const isClosed = state.surface === 'closed';
+    const pending = state.pending;
+    for (const phone of phones) {
+      phone.dataset.appearance = prefs.appearance;
+      phone.dataset.fontScale = prefs.fontScale;
+      phone.style.setProperty('--cm-scale',prefs.fontScale);
+      phone.style.setProperty('--cm-width',`${prefs.width}px`);
+      phone.querySelector('[data-testid="menu"]').hidden = isDetails || isPreview || isClosed;
+      phone.querySelector('.cm-detail-screen').hidden = !isDetails;
+      phone.querySelector('.cm-preview-screen').hidden = !isPreview;
+      phone.querySelector('.cm-confirm-layer').hidden = !isConfirm;
+      phone.querySelector('.cm-scrim').hidden = isClosed;
+      phone.querySelector('.cm-closed-note').hidden = !isClosed;
+      phone.querySelector('[data-testid="menu"]').inert = isConfirm;
+      text(phone,'[data-send-status]',sendLabel());
+      phone.querySelector('[data-testid="send-status"]').dataset.tone = state.send === 'error' ? 'error' : state.send === 'stopped' ? 'muted' : 'active';
+      text(phone,'[data-send-rate]',state.send === 'sending' ? '2.4 Mbps' : '—');
+      text(phone,'[data-mic-state]',sendActive ? 'マイク入力あり' : 'マイク停止中');
+      phone.querySelector('[data-mic-meter]').style.width = sendActive ? '38%' : '0%';
+      text(phone,'[data-send-hint]',sendHint());
+      phone.querySelector('[data-send-hint]').dataset.error = String(state.send === 'error');
+      text(phone,'[data-send-button]',sendActive ? '送信を停止' : '送信を開始');
+      const sendButton = phone.querySelector('[data-testid="send-action"]');
+      sendButton.disabled = false; sendButton.classList.toggle('cm-danger',sendActive);
+      text(phone,'[data-obs-status]',obsLabel());
+      phone.querySelector('[data-testid="obs-status"]').dataset.tone = !state.obsConnected || state.obs === 'unknown' ? 'error' : state.obs === 'stopped' ? 'muted' : 'active';
+      text(phone,'[data-obs-connection]',state.obsConnected ? 'OBSに接続済み' : 'OBSとの接続なし');
+      text(phone,'[data-obs-hint]',obsHint());
+      phone.querySelector('[data-obs-hint]').dataset.error = String(!state.obsConnected || state.obs === 'unknown' || state.operationResult === 'unknown');
+      text(phone,'[data-obs-button]',state.obs === 'streaming' || state.obs === 'stopping' ? 'OBS配信を終了' : 'OBS配信を開始');
+      const obsButton = phone.querySelector('[data-testid="obs-action"]');
+      obsButton.disabled = obsDisabled(); obsButton.classList.toggle('cm-danger',state.obs === 'streaming');
+      phone.querySelector('[data-testid="obs-preview"]').disabled = !state.obsConnected;
+      text(phone,'[data-camera-label]',sendActive ? state.send === 'sending' ? 'PCへ送信中' : state.send === 'error' ? '送信：要確認' : '再接続中' : '送信停止中');
+      const detailIsSend = state.detail === 'send';
+      text(phone,'[data-detail-title]',detailIsSend ? 'スマホの送信' : 'OBS配信');
+      text(phone,'[data-detail-status]',detailIsSend ? sendLabel() : obsLabel());
+      text(phone,'[data-detail-message]',detailIsSend ? sendHint(true) : obsHint(true));
+      text(phone,'[data-detail-label]',detailIsSend ? '実送信速度' : 'OBSとの接続');
+      text(phone,'[data-detail-value]',detailIsSend ? state.send === 'sending' ? '2.4 Mbps' : '—' : state.obsConnected ? '接続済み' : '未接続');
+      text(phone,'[data-detail-notice]',state.notice);
+      const retryButton = phone.querySelector('[data-action="retry"]');
+      retryButton.hidden = detailIsSend ? !['error','reconnecting'].includes(state.send) : state.obsConnected && state.operationResult !== 'unknown' && state.obs !== 'unknown';
+      retryButton.disabled = !detailIsSend && ['starting','stopping'].includes(state.obs);
+      retryButton.textContent = detailIsSend ? '再試行' : '状態を再取得';
+      text(phone,'[data-state-payload]',JSON.stringify(snapshot(),null,2));
+      text(phone,'[data-preview-time]',state.previewTime || '—');
+      const previewAvailable = state.obsConnected && state.previewTime !== null;
+      phone.querySelectorAll('.cm-obs-still>:not([data-still-placeholder])').forEach(element => element.hidden = !previewAvailable);
+      phone.querySelector('[data-still-placeholder]').hidden = previewAvailable;
+      text(phone,'[data-preview-scene]',previewAvailable ? '本番シーン：カメラとコメント' : '本番シーン：—');
+      text(phone,'[data-preview-error]',previewAvailable ? '現在の本番シーンを静止画で表示しています。' : state.obsConnected ? '接続が戻りました。「画像を更新」で取得してください。' : 'OBS接続が切れました。接続復帰後に更新してください。');
+      phone.querySelector('[data-preview-error]').dataset.error = String(!state.obsConnected);
+      phone.querySelector('[data-testid="preview-update"]').disabled = !state.obsConnected;
+      if (pending) {
+        const stoppingSend = pending.kind === 'send-stop';
+        const stoppingObs = pending.kind === 'obs-stop';
+        text(phone,'[data-confirm-title]',stoppingSend ? '送信を停止しますか？' : stoppingObs ? 'OBS配信を終了しますか？' : 'OBS配信を開始しますか？');
+        text(phone,'[data-confirm-message]',stoppingSend ? 'このスマホの映像とマイクの送信を停止します。OBS配信・コメント取得・読み上げは続きます。' : stoppingObs ? 'デスクトップPCのOBS配信を終了します。スマホの送信・コメント取得・読み上げは続きます。' : 'デスクトップPCのOBSから配信を開始します。OBSで設定している配信先へ送信します。');
+        text(phone,'[data-confirm-button]',stoppingSend ? '送信を停止' : stoppingObs ? 'OBS配信を終了' : 'OBS配信を開始');
+        phone.querySelector('[data-confirm-context]').hidden = stoppingSend;
+        text(phone,'[data-confirm-current]',pending.obsAtOpen === 'streaming' ? '配信中' : '配信停止');
+        text(phone,'[data-confirm-seconds]',Math.max(0,Math.ceil((pending.expiresAt-Date.now())/1000)));
+        const confirmButton = phone.querySelector('[data-testid="confirm-action"]');
+        confirmButton.classList.toggle('cm-danger',stoppingSend || stoppingObs);
+        confirmButton.disabled = state.expired;
+      }
+      phone.querySelector('[data-expired-note]').hidden = !state.expired;
+    }
+  }
+  function focusVisible(selector, preferredPhone) {
+    const phone = preferredPhone && !preferredPhone.closest('[data-variant]').hidden ? preferredPhone : phones.find(p => !p.closest('[data-variant]').hidden);
+    const element = phone?.querySelector(selector);
+    if (element && !element.disabled && !element.hidden) element.focus({preventScroll:true});
+  }
+  function go(surface,phone,action) {
+    cancelPending(); state.surface = surface; state.notice = '';
+    if (surface !== 'preview') { state.previewTime = null; state.previewUpdatedAt = null; }
+    if (surface === 'send-details' || surface === 'obs-details') { state.detail = surface === 'send-details' ? 'send' : 'obs'; returnFocus = {phone,selector:`[data-action="${action}"]`}; }
+    if (surface === 'preview') { returnFocus = {phone,selector:'[data-action="preview"]'}; updatePreview(); }
+    render(); save();
+    focusVisible(surface === 'menu' ? returnFocus?.selector || '[data-action="close"]' : surface === 'closed' ? '[data-action="menu"]' : '[data-action="back"]',phone);
+  }
+  function beginConfirmation(kind,phone) {
+    cancelPending(); returnFocus = {phone,selector:kind === 'send-stop' ? '[data-action="send"]' : '[data-action="obs"]'};
+    state.pending = {kind,obsAtOpen:state.obs,expiresAt:kind === 'send-stop' ? null : Date.now()+10000}; state.surface = 'confirmation';
+    render(); save(); focusVisible('[data-testid="dismiss-confirmation"]',phone);
+    if (kind !== 'send-stop') timer = setInterval(() => {
+      if (!state.pending) return;
+      if (Date.now() >= state.pending.expiresAt) { clearInterval(timer); timer = null; state.expired = true; }
+      render();
+    },250);
+  }
+  function dismiss() {
+    cancelPending(); state.surface = 'menu'; render(); save(); focusVisible(returnFocus?.selector || '[data-action="close"]',returnFocus?.phone);
+  }
+  function updatePreview() {
+    if (!state.obsConnected) return;
+    state.previewUpdatedAt = Date.now();
+    state.previewTime = new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(new Date(state.previewUpdatedAt));
+    state.previewRevision += 1;
+  }
+  root.addEventListener('click',event => {
+    const button = event.target.closest('button[data-action]');
+    if (!button || button.disabled) return;
+    const phone = button.closest('.cm-phone'); const action = button.dataset.action;
+    if (action === 'menu') { go('menu',phone); return; }
+    if (['close','camera','comments','settings','link'].includes(action)) { go('closed',phone); return; }
+    if (action === 'back' || action === 'device-back') {
+      if (state.surface === 'confirmation') dismiss();
+      else go(state.surface === 'menu' ? 'closed' : 'menu',phone);
+      return;
+    }
+    if (['send-details','obs-details','preview'].includes(action)) { go(action,phone,action); return; }
+    if (action === 'send') {
+      if (['sending','reconnecting','error'].includes(state.send)) beginConfirmation('send-stop',phone);
+      else { cancelPending(); state.send = 'sending'; render(); save(); }
+      return;
+    }
+    if (action === 'obs' && !obsDisabled()) { beginConfirmation(state.obs === 'streaming' ? 'obs-stop' : 'obs-start',phone); return; }
+    if (action === 'dismiss-confirmation') { dismiss(); return; }
+    if (action === 'confirm') {
+      const pending = state.pending;
+      if (!pending || state.expired || (pending.kind !== 'send-stop' && (Date.now() >= pending.expiresAt || obsDisabled()))) return;
+      if (pending.kind === 'send-stop') state.send = 'stopped';
+      else { state.obs = pending.kind === 'obs-start' ? 'streaming' : 'stopped'; state.operationResult = null; }
+      dismiss(); return;
+    }
+    if (action === 'retry') {
+      cancelPending();
+      if (state.detail === 'send') state.send = 'sending';
+      else { state.obsConnected = true; if (state.obs === 'unknown') state.obs = 'stopped'; state.operationResult = null; state.busy = false; }
+      state.notice = state.detail === 'send' ? 'PCへ再接続しました。' : '現在の配信状態を取得しました。'; render(); save(); return;
+    }
+    if (action === 'preview-update') {
+      updatePreview(); render(); save();
+    }
+  });
+  root.addEventListener('keydown',event => {
+    if (event.key === 'Escape') { event.preventDefault(); if (state.surface === 'confirmation') dismiss(); else go(state.surface === 'menu' ? 'closed' : 'menu',event.target.closest('.cm-phone')); }
+    if (event.key === 'Tab' && state.surface === 'confirmation') {
+      const phone = phones.find(p => !p.closest('[data-variant]').hidden);
+      const buttons = [...phone.querySelectorAll('.cm-confirmation button:not(:disabled)')];
+      const first = buttons[0], last = buttons[buttons.length-1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    }
+  });
+  restore(window.openai?.widgetState);
+  render();
+  window.addEventListener('openai:set_globals',event => {
+    const saved = event.detail?.globals?.widgetState;
+    if (saved && !ownSavedSignatures.has(savedSignature(saved))) { restore(saved); render(); }
+  });
+  if (globalThis.Tweak) {
+    const tweak = new Tweak({container:root,onChange:() => {
+      if (prefs.scenario !== state.scenario) applyScenario(prefs.scenario);
+      render(); save();
+    }});
+    tweak.addSelect(prefs,'appearance',{label:'配色',options:[{label:'自動',value:'auto'},{label:'ライト',value:'light'},{label:'ダーク',value:'dark'}]});
+    tweak.addSelect(prefs,'fontScale',{label:'文字倍率',options:[{label:'1倍',value:'1'},{label:'1.5倍',value:'1.5'},{label:'2倍',value:'2'}]});
+    tweak.addSelect(prefs,'width',{label:'画面幅',options:[{label:'320dp',value:'320'},{label:'360dp',value:'360'},{label:'400dp',value:'400'}]});
+    tweak.addSelect(prefs,'scenario',{label:'状態',options:scenarios});
+  }
+  root.casmateMock = {
+    setScenario(name) { applyScenario(name); render(); save(); },
+    setAppearance(name) { if (['auto','light','dark'].includes(name)) { prefs.appearance = name; render(); save(); } },
+    setFontScale(number) { if ([1,1.5,2].includes(Number(number))) { prefs.fontScale = String(number); render(); save(); } },
+    setWidth(number) { if ([320,360,400].includes(Number(number))) { prefs.width = String(number); render(); save(); } },
+    getState:snapshot,
+    showMenu() { go('menu'); }
+  };
+})();
+</script>

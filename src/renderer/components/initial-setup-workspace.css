@@ -1,0 +1,242 @@
+.management-editor-content { min-width:0; }
+.management-shell.setup-workspace-active { grid-template-rows:max-content max-content minmax(0,1fr) max-content; }
+.setup-workspace-active .initial-setup { max-width:1100px; }
+.setup-workspace-active .setup-title-row h1 { font-size:1.5em; }
+.setup-topic-nav { display:flex; flex-wrap:wrap; border-bottom:1px solid var(--studio-line); margin-top:20px; }
+.management-shell .setup-topic-nav button { display:flex; align-items:center; gap:8px; padding:12px 18px; background:none; color:var(--studio-muted); border:0; border-bottom:3px solid transparent; border-radius:0; }
+.setup-topic-nav button>span { width:24px; height:24px; border:1px solid var(--studio-line); border-radius:50%; display:grid; place-items:center; font-size:.85em; }
+.management-shell .setup-topic-nav button[aria-current] { border-bottom-color:var(--studio-accent); color:var(--studio-accent); }
+.setup-topic-nav button[aria-disabled=true] { opacity:.45; cursor:default; }
+.setup-purpose { margin:14px 0 20px; color:var(--studio-muted); line-height:1.7; }
+.setup-workspace { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,.8fr); align-items:start; gap:22px; max-width:1100px; margin-inline:auto; }
+.setup-workspace .management-editor-content { display:flex; flex-direction:column; gap:16px; }
+.setup-workspace .settings-card { margin:0; }
+.setup-workspace .setup-review { padding:24px; border:1px solid var(--studio-line); border-radius:14px; background:var(--studio-surface); min-width:0; position:sticky; top:0; overflow-anchor:none; }
+.setup-workspace h2,.setup-workspace h3 { font-size:var(--management-font-heading); font-weight:700; line-height:1.6; margin:0 0 16px; }
+.setup-number { display:inline-grid; place-items:center; width:28px; height:28px; border-radius:8px; margin-right:12px; background:var(--studio-soft); color:var(--studio-accent); flex-shrink:0; }
+.setup-workspace .setup-step-card,.setup-workspace .acquisition-list { padding:20px; border:1px solid var(--studio-line); border-radius:14px; background:var(--studio-surface); }
+.setup-step-card p { line-height:1.7; }
+.setup-workspace .acquisition-panel { border:0; padding:0; background:transparent; }
+.setup-workspace .acquisition-panel .card-details { display:grid; gap:16px; }
+.setup-workspace .acquisition-panel .acquisition-list { display:block; }
+.setup-source-selector { display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; }
+.setup-source-selector button { flex:1; min-width:75px; }
+.management-shell .setup-source-selector button[aria-pressed=true] { border-color:var(--studio-accent); color:var(--studio-accent); box-shadow:inset 0 0 0 1px var(--studio-accent); }
+.setup-workspace .acquisition-panel .acquisition-source { display:block; border:0; padding:0; background:transparent; }
+.setup-workspace .acquisition-panel .acquisition-identity,.setup-workspace .acquisition-panel .acquisition-status,.setup-workspace .acquisition-panel .acquisition-toggle { display:none; }
+.setup-workspace .acquisition-fields { display:grid; gap:8px; }
+.setup-workspace .acquisition-fields label { font-weight:600; }
+.setup-workspace .acquisition-message { font-size:var(--management-font-secondary); }
+.management-shell .setup-primary { background:var(--studio-accent); color:var(--studio-accent-text); border-color:var(--studio-accent); }
+.setup-connect,.setup-obs-connect,.setup-engine-check { min-width:min(12em,100%); max-width:100%; min-height:48px; }
+.management-shell .setup-connect,.management-shell .setup-obs-connect,.management-shell .setup-engine-check { display:inline-grid; grid-template-columns:minmax(0,1fr); white-space:normal; }
+.setup-connect::before,.setup-obs-connect::before,.setup-engine-check::before { grid-area:1/1; visibility:hidden; }
+.setup-connect::before { content:'接続を停止する'; }
+.setup-obs-connect::before { content:'OBSの接続を停止する'; }
+.setup-engine-check::before { content:'VOICEVOXを自動で探して準備する'; }
+.setup-connect>span,.setup-obs-connect>span,.setup-engine-check>span { grid-area:1/1; align-self:center; }
+.setup-test-actions { display:grid; gap:8px; }
+.setup-source-preview { text-align:center; }
+.setup-source-preview>span,.setup-voice-sample>span { display:block; font-size:50px; color:var(--studio-accent); margin:24px 0; }
+.setup-source-preview>strong { display:block; }
+.setup-source-preview>p { color:var(--studio-muted); overflow-wrap:anywhere; height:3.5em; overflow:auto; }
+.setup-source-states { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; font-size:var(--management-font-secondary); margin:16px 0; }
+.setup-source-states>div { min-width:0; }
+.setup-all-source-states { margin:12px 0; font-size:var(--management-font-secondary); }
+.setup-all-source-states summary { color:var(--studio-accent); cursor:pointer; }
+.setup-source-states dt { height:1.7em; }
+.setup-source-states dd { margin:0; height:5.1em; overflow:auto; overflow-wrap:anywhere; color:var(--studio-muted); }
+.setup-review h2 { margin-top:9px; }
+.setup-review-state { height:9em; overflow:auto; font-size:var(--management-font-secondary); line-height:1.7; padding:12px 15px; background:var(--studio-input); border-left:3px solid var(--studio-line); border-radius:5px; overflow-wrap:anywhere; }
+.setup-review-state p { margin:4px 0 0; color:var(--studio-muted); }
+.setup-review .setup-record-warning { min-height:0; white-space:pre-wrap; }
+.setup-review .setup-record-area { margin-top:8px; }
+.setup-review #setup-reload { min-height:38px; }
+.setup-review .setup-guide { padding:0; border:0; background:none; margin-bottom:16px; }
+.setup-review .setup-guide>summary { cursor:pointer; color:var(--studio-accent); }
+.setup-review-help { color:var(--studio-muted); font-size:var(--management-font-secondary); line-height:1.7; }
+.setup-voice-sample { text-align:center; }
+.setup-voice-sample>strong { display:block; height:3.5em; overflow:auto; overflow-wrap:anywhere; }
+.setup-wave { color:var(--studio-accent); font-size:28px; height:2em; overflow:hidden; white-space:nowrap; }
+.setup-voice-sample p { font-size:var(--management-font-secondary); }
+.setup-display-sample { height:240px; display:flex; flex-direction:column; justify-content:space-between; padding:14px; margin:20px 0; background:var(--studio-input); border:1px solid var(--studio-line); border-radius:7px; overflow:auto; }
+.setup-display-sample>span { font-size:var(--management-font-secondary); color:var(--studio-muted); }
+.setup-display-sample>div { background:var(--studio-soft); padding:9px; border-radius:5px; overflow-wrap:anywhere; line-height:1.5; }
+.setup-display-sample small { font-size:.65em; }
+.setup-display-sample>div>* { font-size:.6em; }
+.setup-personal-check { border-top:1px solid var(--studio-line); margin-top:20px; padding-top:16px; }
+.management-shell .setup-personal-check .setup-confirm { display:flex; gap:10px; align-items:start; text-align:left; padding:0; border:0; background:none; color:var(--studio-text); white-space:normal; width:100%; margin:0; min-height:4em; line-height:1.6; }
+.setup-check-box { display:grid; place-items:center; width:20px; height:20px; border:1px solid var(--studio-line); border-radius:4px; color:var(--studio-accent); margin-top:calc((1.6em - 20px)/2); flex-shrink:0; line-height:1; }
+.setup-confirm small { display:block; font-size:var(--management-font-secondary); color:var(--studio-muted); font-weight:400; margin-top:4px; }
+.setup-confirm-record { height:3.5em; overflow:auto; font-size:var(--management-font-secondary); color:var(--studio-muted); margin:8px 0 0; }
+.setup-workspace .comment-speech-panel .speech-section,.setup-workspace .comment-speech-panel .speech-runtime { padding:20px; border-radius:14px; }
+.setup-workspace .comment-speech-panel .speech-section { gap:16px; }
+.setup-workspace .comment-speech-panel .speech-section h3 { margin:0; }
+.setup-workspace .comment-speech-panel .speech-runtime h3 { margin:0; }
+.setup-workspace .speech-lower-sections,.setup-workspace .speech-runtime .speech-row:nth-child(n+2) { display:none; }
+.setup-speech-install { display:grid; gap:14px; line-height:1.7; }
+.setup-speech-install p:last-of-type { color:var(--studio-muted); font-size:var(--management-font-secondary); }
+.setup-speech-install button { justify-self:start; }
+.setup-workspace .speech-preview-sample { background:var(--studio-input); }
+.setup-workspace .speech-preview-sample>p:last-child { display:none; }
+.management-shell .setup-workspace .obs-control-panel { order:-1; padding:20px; border:1px solid var(--studio-line); border-radius:14px; background:var(--studio-surface); }
+.setup-workspace .obs-control-panel .oc-content { display:flex; flex-direction:column; gap:12px; }
+.setup-workspace .obs-control-panel .oc-connection-details { order:-1; border:0; padding:0; background:transparent; }
+.setup-workspace .oc-connection-details>summary { display:none; }
+.setup-workspace .obs-control-panel .oc-connection-body { padding:0; display:flex; flex-direction:column; }
+.setup-workspace .obs-control-panel .oc-details { order:-1; padding:0; border:0; margin:0 0 12px; }
+.setup-workspace .obs-control-panel .oc-live { padding:0; border:0; background:none; }
+.setup-workspace .oc-operation { margin-top:12px; }
+.setup-workspace .oc-live-top,.setup-workspace .oc-save-status,.setup-workspace .oc-connection-body>button { display:none; }
+.management-shell .setup-workspace .comment-overlay-panel { padding:20px; border:1px solid var(--studio-line); border-radius:14px; background:var(--studio-surface); }
+.setup-workspace .comment-overlay-panel .overlay-setting-section { padding:0; border:0; background:none; }
+.setup-workspace .comment-overlay-panel .overlay-setting-section:has(.overlay-switch-row) { display:none; }
+.setup-mode-field { display:grid; align-content:start; gap:8px; }
+.setup-workspace .comment-overlay-panel .card-details { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.setup-workspace .comment-overlay-panel .card-details>* { grid-column:1/-1; }
+.setup-workspace .comment-overlay-panel .overlay-setting-section:first-child { display:contents; }
+.setup-workspace .comment-overlay-panel .overlay-setting-section:first-child>h3 { grid-column:1/-1; grid-row:1; }
+.setup-workspace .setup-mode-field { grid-column:1; grid-row:2; }
+.setup-workspace .comment-overlay-panel .overlay-setting-section:nth-child(2) { grid-column:2; grid-row:2; }
+.setup-workspace .comment-overlay-panel .overlay-note { grid-column:1/-1; grid-row:3; }
+.setup-workspace .overlay-field-grid,.setup-workspace .overlay-single-timing { display:none; }
+.setup-workspace-actions { display:grid; gap:16px; }
+.setup-workspace .setup-display-row { padding:0; border:0; gap:8px; }
+.setup-display-row:only-of-type>strong { display:none; }
+.setup-display-row>strong { width:100%; }
+.setup-display-row button { white-space:normal; max-width:100%; }
+.setup-workspace-active>.setup-footer { margin:0; max-width:none; padding:12px 26px; background:var(--studio-surface); display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:16px; }
+.setup-workspace-active>.setup-footer .setup-save-help { margin:0; height:3.5em; font-size:var(--management-font-secondary); }
+.setup-footer-lead { display:block; color:var(--studio-text); margin-bottom:4px; }
+.setup-workspace-active>.setup-footer button { min-width:70px; }
+@media(max-width:760px) {
+  .setup-workspace { grid-template-columns:minmax(0,1fr); gap:16px; }
+  .setup-workspace .setup-review { order:-1; position:static; padding:17px; }
+  .setup-source-preview>span,.setup-voice-sample>span,.setup-wave { display:none; }
+  .setup-source-preview>p { height:1.7em; }
+  .setup-review-state { height:7em; }
+  .setup-display-sample { height:140px; }
+  .setup-workspace-active>.setup-footer { padding:10px 16px; grid-template-columns:minmax(0,1fr); gap:6px; }
+  .setup-workspace-active>.setup-footer .setup-save-help { height:3em; }
+  .setup-workspace-active>.setup-footer .setup-footer-actions button { flex:1; }
+  .management-shell .setup-topic-nav button { padding:10px 8px; font-size:var(--management-font-secondary); }
+}
+@media(max-width:430px) {
+  .setup-workspace-active .setup-title-row { flex-wrap:nowrap; gap:10px; }
+  .setup-workspace-active .setup-title-row h1 { font-size:1.25em; }
+  .setup-workspace-active #setup-interrupt { font-size:var(--management-font-secondary); padding:8px; min-height:36px; white-space:nowrap; }
+  .setup-topic-nav { flex-wrap:nowrap; }
+  .setup-topic-nav:has(button:nth-child(4)) { flex-wrap:wrap; }
+  .management-shell .setup-topic-nav button { flex:1 1 auto; min-width:0; padding:10px 3px; gap:5px; font-size:.75em; }
+  .setup-topic-nav button>span { width:20px; height:20px; flex-shrink:0; }
+  .setup-workspace-active>.setup-footer .setup-footer-actions button { font-size:var(--management-font-secondary); padding:8px; min-width:0; flex:1.2; }
+  .setup-workspace-active>.setup-footer .setup-footer-actions button:first-child { flex:.65; }
+  .setup-workspace-active>.setup-footer .setup-footer-actions button:last-child { flex:1.5; }
+  .setup-workspace .speech-fields,.setup-workspace .oc-grid,.setup-workspace .comment-overlay-panel .card-details { grid-template-columns:1fr; }
+  .setup-workspace .comment-overlay-panel .overlay-setting-section:nth-child(2) { grid-column:1; grid-row:3; }
+  .setup-workspace .comment-overlay-panel .overlay-note { grid-row:4; }
+}
+/* Adopted A: smartphone / recognition preparation beside live confirmation. */
+.setup-workspace .smartphone-panel{padding:0;border:0;background:transparent}
+.setup-workspace .smartphone-panel>.card-details{padding:0;border:0}
+.setup-phone-steps{display:grid;gap:16px}
+.setup-phone-steps .setup-number{border-radius:50%}
+.setup-phone-use-overview{padding:16px 20px;border:1px solid var(--studio-line);border-radius:14px;background:var(--studio-surface);min-width:0}
+.setup-phone-use-heading{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px 24px}
+.setup-workspace .setup-phone-use-heading h3,.setup-phone-use-heading p{margin:0}
+.setup-phone-use-summary{overflow-wrap:anywhere}
+.setup-phone-use-overview .setup-phone-use-editor{margin-top:8px}
+.setup-phone-prerequisites{display:grid;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--studio-line)}
+.setup-phone-prerequisite{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:16px;min-width:0}
+.setup-phone-prerequisite-status{min-width:0;font-size:var(--management-font-secondary);line-height:1.7}
+.setup-phone-prerequisite-status[data-ready=true]{color:var(--studio-success)}
+.setup-phone-prerequisite-action button{max-width:100%;white-space:normal}
+.setup-phone-prerequisites .setup-phone-return-help{margin:0}
+/* Flatten only this setup stage so its existing controls remain mounted. */
+[data-setup-step=smartphone] .setup-workspace .management-editor-content,
+[data-setup-step=smartphone] .setup-workspace .smartphone-panel:not([hidden]),
+[data-setup-step=smartphone] .setup-workspace .smartphone-panel>.card-details,
+[data-setup-step=smartphone] .setup-phone-steps{display:contents}
+[data-setup-step=smartphone] .setup-phone-use-overview{grid-column:1/-1;grid-row:1}
+[data-setup-step=smartphone] .setup-phone-steps>.setup-step-card{grid-column:1}
+[data-setup-step=smartphone] .setup-workspace-actions{grid-column:1;grid-row:5}
+[data-setup-step=smartphone] .setup-workspace>.setup-review{grid-column:2;grid-row:2/span 3}
+@media(max-width:760px){
+  [data-setup-step=smartphone] .setup-workspace>.setup-review{grid-column:1;grid-row:2}
+  [data-setup-step=smartphone] .setup-workspace-actions{grid-row:6}
+  .setup-phone-use-overview{padding:16px}
+}
+@media(max-width:430px){.setup-phone-prerequisite{grid-template-columns:minmax(0,1fr);gap:6px}.setup-phone-prerequisite-action{justify-self:start}}
+.setup-phone-steps .setup-phone-uses{position:relative;border:0;padding:0;margin:15px 0;gap:14px}
+.setup-phone-steps .setup-phone-uses label{align-items:start;line-height:1.7}
+.setup-phone-uses small{display:block;font-size:var(--management-font-secondary);color:var(--studio-muted);font-weight:400;margin-top:3px}
+.setup-phone-uses legend.visually-hidden{position:absolute;width:1px;height:1px;clip-path:inset(50%);overflow:hidden}
+.setup-phone-uses input{flex-shrink:0;accent-color:var(--studio-accent)}
+.setup-phone-steps .setup-phone-network{display:grid;gap:10px;font-weight:600;margin-bottom:14px}
+.setup-phone-network select{width:100%}
+.setup-phone-preparation{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px}
+.setup-phone-steps .muted,.setup-phone-checks{font-size:var(--management-font-secondary);line-height:1.9}
+.setup-phone-feedback{font-size:var(--management-font-secondary);line-height:1.7;color:var(--studio-muted);padding:10px 12px;background:var(--studio-input);border-left:3px solid var(--studio-line);border-radius:5px}
+.setup-phone-steps details{margin-top:16px;min-width:0}.setup-phone-steps summary{font-size:var(--management-font-secondary);cursor:pointer;color:var(--studio-muted)}
+.setup-phone-steps .sp-qr-button{background:var(--studio-accent);color:var(--studio-accent-text);min-height:46px;max-width:100%;white-space:normal}
+.setup-phone-device-list{display:grid;gap:10px;margin-top:15px}.setup-phone-device-list article{border:1px solid var(--studio-line);border-radius:9px;padding:14px;min-width:0;overflow-wrap:anywhere}
+.setup-phone-device-list article>p{height:3.8em;overflow:auto;font-size:var(--management-font-secondary);line-height:1.9}
+.setup-phone-device-list button{white-space:normal;max-width:100%}.setup-phone-speech{border-left:3px solid var(--studio-accent);padding-left:12px}
+.setup-device-states{margin:20px 0}.setup-device-states>div{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;padding:10px 0;border-bottom:1px solid var(--studio-line);font-size:var(--management-font-secondary);line-height:1.7}
+.setup-device-states dt,.setup-device-states dd{height:3.4em;overflow:auto;overflow-wrap:anywhere}.setup-device-states dt{color:var(--studio-muted)}.setup-device-states dd{margin:0;text-align:right;font-weight:600}
+.setup-phone-picture{display:flex;align-items:center;justify-content:center;gap:12px;background:var(--studio-input);border:1px solid var(--studio-line);border-radius:10px;padding:26px 10px;margin:20px 0}
+.setup-phone-picture>div{font-size:38px;line-height:1;text-align:center;color:var(--studio-muted)}.setup-phone-picture small{display:block;font-size:var(--management-font-secondary);margin-top:12px}.setup-phone-picture>span{font-size:var(--management-font-secondary);color:var(--studio-muted);max-width:8em;text-align:center}
+.setup-device-feedback{height:13em;overflow:auto;font-size:var(--management-font-secondary);line-height:1.8;padding:12px;background:var(--studio-input);border-left:3px solid var(--studio-line);border-radius:5px;overflow-wrap:anywhere}.setup-device-feedback p{color:var(--studio-muted);margin-top:7px}
+.setup-recognition-result{height:230px;overflow:auto;background:var(--studio-input);border:1px solid var(--studio-line);border-radius:10px;padding:17px;margin-top:20px;overflow-wrap:anywhere}.setup-recognition-result>small{color:var(--studio-muted);font-size:var(--management-font-secondary)}.setup-recognition-result .recognition-entry{margin-top:14px}.setup-recognition-result p{font-size:1.15em;line-height:1.9}.setup-recognition-result time,.setup-recognition-result .recognition-entry>span{font-size:var(--management-font-secondary);color:var(--studio-muted)}
+.setup-workspace .speech-recognition-panel .recognition-section{padding:20px;border-radius:14px;gap:14px}.setup-workspace .speech-recognition-panel>.card-details{gap:16px}
+.setup-workspace .recognition-model{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}.setup-workspace .recognition-model-actions{justify-self:start;max-width:100%;width:13em}
+.setup-workspace .recognition-master>.setup-personal-check,.setup-recognition-note{width:100%;flex-basis:100%}.setup-recognition-note{font-size:var(--management-font-secondary);line-height:1.8;color:var(--studio-muted)}
+.setup-workspace .recognition-microphone{grid-template-columns:minmax(0,1fr)}.setup-workspace .recognition-microphone button{justify-self:start;max-width:100%;height:auto;min-height:42px}
+.setup-workspace .recognition-preview-heading{grid-template-columns:minmax(0,1fr);gap:14px}.setup-workspace .recognition-preview-heading>button{max-width:100%;height:3.2em;white-space:normal}.setup-workspace .recognition-latest[hidden]{display:none}
+.setup-workspace .recognition-number input{width:100%}.setup-workspace .recognition-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+.setup-workspace .recognition-section button{max-width:100%;white-space:normal}.setup-workspace .recognition-master>div:first-child{flex-basis:240px}.setup-workspace .setup-personal-check{min-width:0}
+@media(max-width:760px){.setup-device-review .setup-phone-picture{padding-block:16px;margin-block:14px}.setup-device-states{margin:14px 0}.setup-device-feedback{height:11em}.setup-recognition-result{height:180px}.setup-workspace .speech-recognition-panel .recognition-section{padding:17px}}
+@media(max-width:430px){.setup-workspace .recognition-fields{grid-template-columns:minmax(0,1fr)}.setup-phone-picture>div{font-size:30px}.setup-phone-picture{gap:8px}.setup-phone-network{font-size:var(--management-font-secondary)}.setup-phone-preparation{align-items:start}.setup-phone-device-list article{padding:12px}}
+.smartphone-panel>.card-details{display:flex;flex-direction:column}.sp-shared-layout,.sp-normal-options{display:contents}.setup-workspace .smartphone-panel>.card-details{display:grid}
+@media(max-height:450px){
+  .setup-workspace-active:is([data-setup-step=smartphone],[data-setup-step=speechRecognition],[data-setup-step=aiListener],[data-setup-step=textEffects],[data-setup-step=character])>.setup-footer{padding-block:6px;gap:4px}
+  .setup-workspace-active:is([data-setup-step=smartphone],[data-setup-step=speechRecognition],[data-setup-step=aiListener],[data-setup-step=textEffects],[data-setup-step=character])>.setup-footer .setup-save-help{height:2.4em}
+  .setup-workspace-active:is([data-setup-step=smartphone],[data-setup-step=speechRecognition],[data-setup-step=aiListener],[data-setup-step=textEffects],[data-setup-step=character]) .setup-footer-actions>button{padding:6px;min-height:36px}
+}
+@media(max-width:430px) and (max-height:450px){
+  .setup-workspace-active:is([data-setup-step=smartphone],[data-setup-step=speechRecognition],[data-setup-step=aiListener],[data-setup-step=textEffects],[data-setup-step=character]) .management-header{--management-header-height:40px}
+  .setup-workspace-active:is([data-setup-step=smartphone],[data-setup-step=speechRecognition],[data-setup-step=aiListener],[data-setup-step=textEffects],[data-setup-step=character]) .management-nav{grid-template-columns:repeat(4,minmax(0,1fr));padding:2px 8px;min-height:0}
+  .setup-workspace-active:is([data-setup-step=smartphone],[data-setup-step=speechRecognition],[data-setup-step=aiListener],[data-setup-step=textEffects],[data-setup-step=character]) .management-nav>button[data-page]{padding:2px 0;line-height:1.3}
+  .setup-workspace-active:is([data-setup-step=smartphone],[data-setup-step=speechRecognition],[data-setup-step=aiListener],[data-setup-step=textEffects],[data-setup-step=character]) .management-nav>.management-warning-count{min-height:0;padding:0;line-height:1.3}
+  .setup-workspace-active:is([data-setup-step=smartphone],[data-setup-step=speechRecognition],[data-setup-step=aiListener],[data-setup-step=textEffects],[data-setup-step=character]) .management-tab-full{display:none}
+  .setup-workspace-active:is([data-setup-step=smartphone],[data-setup-step=speechRecognition],[data-setup-step=aiListener],[data-setup-step=textEffects],[data-setup-step=character]) .management-tab-compact{display:inline}
+}
+@media(max-height:300px){
+  .setup-workspace-active:is([data-setup-step=smartphone],[data-setup-step=speechRecognition],[data-setup-step=aiListener],[data-setup-step=textEffects],[data-setup-step=character])>.setup-footer{padding-block:4px;gap:2px}
+  .setup-workspace-active:is([data-setup-step=smartphone],[data-setup-step=speechRecognition],[data-setup-step=aiListener],[data-setup-step=textEffects],[data-setup-step=character])>.setup-footer .setup-save-help{height:1.3em;line-height:1.3}
+  .setup-workspace-active:is([data-setup-step=smartphone],[data-setup-step=speechRecognition],[data-setup-step=aiListener],[data-setup-step=textEffects],[data-setup-step=character])>.setup-footer .setup-footer-lead{display:none}
+}
+.sp-normal-controls:not([hidden]){display:contents}
+.setup-phone-steps input[aria-disabled=true]{opacity:.45;cursor:default}
+.management-shell .setup-phone-preparation{display:inline-grid;grid-template-columns:minmax(0,1fr);max-width:100%;min-height:46px;white-space:normal;text-align:center}
+.setup-phone-preparation::before{content:'PCの接続準備を停止する';visibility:hidden;grid-area:1/1}
+.setup-phone-preparation>span{grid-area:1/1;align-self:center}
+.setup-phone-preparation[aria-disabled=true]{opacity:.45;cursor:default}
+.setup-phone-route{height:3.4em;overflow:auto;font-size:var(--management-font-secondary);line-height:1.7;color:var(--studio-muted)}
+.setup-recognition-model .recognition-model>div:has(.recognition-model-state){padding:14px;background:var(--studio-input);border-radius:8px}
+
+.setup-footer-actions>button[aria-disabled=true],.initial-setup #setup-reload[aria-disabled=true]{opacity:.45;cursor:default}.setup-comment-prerequisite{padding:12px 15px;margin:12px 0 18px;border-left:3px solid var(--studio-accent);background:var(--studio-soft);font-size:var(--management-font-secondary);line-height:1.8}.setup-comment-prerequisite p{margin:0 0 6px}.setup-comment-prerequisite button{max-width:100%;white-space:normal}
+.management-initial-setup .speech-voice-refresh{display:inline-grid}
+.management-initial-setup .speech-voice-refresh::before{content:'話者一覧を更新';visibility:hidden;grid-area:1/1}
+.management-initial-setup .speech-voice-refresh>span{grid-area:1/1}
+.management-initial-setup .comment-speech-panel [aria-disabled=true]{opacity:.6;cursor:default}
+.setup-workspace .comment-speech-panel>.card-warning{display:none}
+.management-initial-setup .comment-speech-panel .slim-switch>span:last-child{width:2.25em;text-align:center;flex-shrink:0}
+.management-initial-setup :is(#setup-detail,#setup-comment-settings,#setup-smartphone-input,#setup-phone-speech-settings)[aria-disabled=true]{opacity:.45;cursor:default}
+
+/* Current preparation uses theme success colors; text and a reserved check also identify success. */
+.setup-workspace .setup-review[data-ready=true] { border-color:var(--studio-success); background:var(--studio-success-surface); }
+.setup-review .setup-status-value::after { content:' ✓'; white-space:pre; visibility:hidden; }
+.setup-review .setup-status-value[data-ready=true] { color:var(--studio-success); font-weight:700; }
+.setup-review .setup-status-value[data-ready=true]::after { visibility:visible; }
+.setup-review .setup-review-state[data-ready=true],.setup-review .setup-device-feedback[data-ready=true] { background:var(--studio-success-surface); border-left-color:var(--studio-success); }

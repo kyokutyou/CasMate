@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">きゃすメイト アプリアイコン</title>
+  <desc id="desc">紫の吹き出しと白い3本の音声波形、ピンクの尻尾</desc>
+  <defs>
+    <linearGradient id="body" x1="250" y1="205" x2="795" y2="770" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A996FF"/>
+      <stop offset="0.46" stop-color="#8667FF"/>
+      <stop offset="1" stop-color="#7150E9"/>
+    </linearGradient>
+    <linearGradient id="tail" x1="700" y1="670" x2="860" y2="850" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF8ABE"/>
+      <stop offset="1" stop-color="#FF6FAE"/>
+    </linearGradient>
+    <linearGradient id="wave" x1="512" y1="294" x2="512" y2="604" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F1EDFF"/>
+    </linearGradient>
+    <filter id="shadow" x="-12%" y="-12%" width="124%" height="132%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="26" stdDeviation="24" flood-color="#241947" flood-opacity="0.28"/>
+    </filter>
+    <clipPath id="bodyClip">
+      <rect x="128" y="160" width="768" height="584" rx="222"/>
+    </clipPath>
+  </defs>
+  <g filter="url(#shadow)">
+    <path d="M691 688c20 75 77 132 171 160-46-55-65-113-59-174l-112 14Z" fill="url(#tail)"/>
+    <rect x="128" y="160" width="768" height="584" rx="222" fill="url(#body)"/>
+    <ellipse cx="389" cy="214" rx="222" ry="125" fill="#FFFFFF" opacity="0.12" clip-path="url(#bodyClip)"/>
+    <path d="M180 516c22 114 109 178 231 189" fill="none" stroke="#4F35B6" stroke-width="18" stroke-linecap="round" opacity="0.12"/>
+  </g>
+  <g fill="url(#wave)">
+    <rect x="342" y="369" width="86" height="166" rx="43"/>
+    <rect x="469" y="294" width="86" height="316" rx="43"/>
+    <rect x="596" y="342" width="86" height="220" rx="43"/>
+  </g>
+</svg>

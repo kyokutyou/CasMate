@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 560">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff8fbd"/><stop offset="1" stop-color="#8c68ff"/></linearGradient></defs>
+  <path fill="url(#g)" d="M240 24c68 0 124 56 124 124v40c43 37 70 92 70 154v170H46V342c0-62 27-117 70-154v-40C116 80 172 24 240 24Z"/>
+  <circle cx="190" cy="164" r="15" fill="#fff"/><circle cx="290" cy="164" r="15" fill="#fff"/>
+  <path d="M196 221c30 25 58 25 88 0" fill="none" stroke="#fff" stroke-width="13" stroke-linecap="round"/>
+  <path d="M118 118 68 55l10 103M362 118l50-63-10 103" fill="url(#g)" stroke="#fff" stroke-width="7" stroke-linejoin="round"/>
+  <text x="240" y="420" text-anchor="middle" fill="#fff" font-size="34" font-family="sans-serif" font-weight="700">きゃすメイト</text>
+</svg>

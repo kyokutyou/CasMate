@@ -1,0 +1,25 @@
+{
+  "type": "casmate.outdoor",
+  "version": 13,
+  "pcId": "22222222-2222-4222-8222-222222222222",
+  "network": "direct",
+  "pcKey": {
+    "algorithm": "sha256-spki",
+    "fingerprint": "57a9107266db870f0c194786feb80f8c713479958436b1a6d6b025b2e152859a"
+  },
+  "endpoints": [
+    {
+      "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "family": "ipv4",
+      "address": "8.8.8.8",
+      "tcpPort": 3001
+    },
+    {
+      "id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      "family": "ipv6",
+      "address": "2606:4700:4700::1111",
+      "tcpPort": 3001
+    }
+  ],
+  "token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}

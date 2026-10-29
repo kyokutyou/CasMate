@@ -1,0 +1,238 @@
+<!-- Throwaway: three comment-list editor layouts within the existing management shell; memory-only state. -->
+<style>
+#cl-designs{--cl-bg:light-dark(#f1f5f3,#14232d);--cl-panel:light-dark(#fff,#1c2d37);--cl-raised:light-dark(#e8efec,#263c46);--cl-line:light-dark(#ccd9d2,#3b535f);--cl-text:light-dark(#223d34,#e4eef0);--cl-muted:light-dark(#526b61,#adc2cb);--cl-accent:light-dark(#28694f,#abd8bf);--cl-on:light-dark(#fff,#163e2c);--cl-intro:light-dark(#e5f1e9,#203a36);--cl-introline:light-dark(#a9cbb7,#375749);--cl-error:light-dark(#a03424,#ffb5a5);font:14px/1.6 'Segoe UI','Yu Gothic UI',Meiryo,sans-serif;color:var(--cl-text);width:100%;overflow-wrap:anywhere}
+#cl-designs *{box-sizing:border-box;min-width:0}
+#cl-designs [hidden]{display:none!important}
+#cl-designs :is(button,input,select){font:inherit;color:inherit}
+#cl-designs button{cursor:pointer;border:1px solid var(--cl-line);background:var(--cl-raised);border-radius:7px;padding:8px 13px;min-height:38px}
+#cl-designs button:hover{filter:brightness(1.08)}
+#cl-designs button:disabled{opacity:.5;cursor:not-allowed}
+#cl-designs :is(button,input,select,summary):focus-visible{outline:2px solid var(--cl-accent);outline-offset:3px}
+#cl-designs :is(h1,h2,h3,p){margin:0}
+#cl-designs h1{font-size:21px;font-weight:600}
+#cl-designs h2{font-size:14px;font-weight:600}
+#cl-designs small{font-size:12px;color:var(--cl-muted)}
+#cl-designs .cl-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+#cl-designs .cl-between{justify-content:space-between}
+#cl-designs .cl-stack{display:grid;gap:18px}
+#cl-designs .cl-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+#cl-designs .cl-gallery{padding:14px 0 18px;display:grid;gap:12px}
+#cl-designs .cl-design-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#cl-designs .cl-design-options button{display:grid;text-align:left;gap:4px;background:var(--cl-panel);padding:13px 16px}
+#cl-designs .cl-design-options button[aria-pressed=true]{border-color:var(--cl-accent);box-shadow:inset 0 -2px var(--cl-accent)}
+#cl-designs .cl-design-options b{color:var(--cl-accent);font-size:12px}
+#cl-designs .cl-window{background:var(--cl-bg);border:1px solid var(--cl-line);border-radius:12px;overflow:hidden;position:relative}
+#cl-designs .cl-header{height:72px;position:relative;background:var(--cl-panel);display:flex;align-items:center;justify-content:space-between;padding:0 22px}
+#cl-designs .cl-brand{display:flex;gap:9px;align-items:center;letter-spacing:.06em}
+#cl-designs .cl-logo{width:31px;height:31px;display:grid;place-items:center;border-radius:8px;background:var(--cl-raised);color:var(--cl-accent)}
+#cl-designs .cl-connected{color:var(--cl-accent);font-size:12px}
+#cl-designs .cl-symbol{display:none}
+#cl-designs .cl-toast{position:absolute;top:18px;left:50%;transform:translateX(-50%);height:36px;width:280px;max-width:calc(100% - 420px);border-radius:8px;padding:7px 12px;color:var(--cl-on);background:var(--cl-accent);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+#cl-designs .cl-nav{display:flex;align-items:center;gap:6px;padding:8px 22px;border-bottom:1px solid var(--cl-line)}
+#cl-designs .cl-nav button{background:transparent;border-color:transparent;padding:5px 14px}
+#cl-designs .cl-nav button[aria-current=page]{color:var(--cl-accent);background:var(--cl-raised)}
+#cl-designs .cl-nav .cl-warning{margin-left:auto;font-size:12px;padding:5px 8px;font-variant-numeric:tabular-nums;min-width:104px}
+#cl-designs .cl-body{padding:22px 26px 28px}
+#cl-designs .cl-heading{display:grid;gap:22px;margin-bottom:18px}
+#cl-designs .cl-title{display:flex;gap:13px;align-items:center;flex-wrap:wrap}
+#cl-designs .cl-back{width:38px;height:38px;padding:0;font-size:18px;background:transparent;flex:none}
+#cl-designs .cl-intro{display:flex;align-items:center;gap:14px;padding:12px 16px;border:1px solid var(--cl-introline);border-radius:8px;background:var(--cl-intro);color:var(--cl-accent)}
+#cl-designs .cl-intro>span{font-size:25px;flex:none}
+#cl-designs .cl-intro strong{font-size:13px;font-weight:600}
+#cl-designs .cl-intro p{font-size:12px;margin-top:3px;color:var(--cl-muted)}
+#cl-designs .cl-section{padding:18px;background:var(--cl-panel);border:1px solid var(--cl-line);border-radius:9px}
+#cl-designs .cl-section h2{margin-bottom:14px}
+#cl-designs .cl-section h2 span{font-weight:400;color:var(--cl-muted);font-size:12px;margin-left:8px}
+#cl-designs .cl-window-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px 18px;background:var(--cl-panel);border:1px solid var(--cl-line);border-radius:9px}
+#cl-designs .cl-window-actions strong{font-size:13px}
+#cl-designs .cl-window-actions small{display:block}
+#cl-designs .cl-window-actions button{font-size:12px;min-width:110px}
+#cl-designs .cl-primary{background:var(--cl-accent);color:var(--cl-on);border-color:transparent}
+#cl-designs .cl-switches{display:grid;gap:2px}
+#cl-designs .cl-switch-row{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:42px;cursor:pointer}
+#cl-designs .cl-switch-row input{appearance:none;position:relative;width:34px;height:18px;background:var(--cl-line);border-radius:10px;flex:none;cursor:pointer;margin:0}
+#cl-designs .cl-switch-row input::after{content:'';position:absolute;left:3px;top:3px;width:12px;height:12px;border-radius:50%;background:var(--cl-muted)}
+#cl-designs .cl-switch-row input:checked{background:var(--cl-accent)}
+#cl-designs .cl-switch-row input:checked::after{left:19px;background:var(--cl-on)}
+#cl-designs .cl-help{font-size:12px;line-height:20px;min-height:40px;margin-top:6px;color:var(--cl-muted)}
+#cl-designs .cl-error{color:var(--cl-error)}
+#cl-designs .cl-field{display:grid;gap:7px;font-size:12px;color:var(--cl-muted)}
+#cl-designs input:not([type=checkbox]):not([type=range]),#cl-designs select{width:100%;padding:8px 10px;border:1px solid var(--cl-line);border-radius:6px;background:var(--cl-bg);color:var(--cl-text);height:40px}
+#cl-designs input[type=range]{width:100%;accent-color:var(--cl-accent)}
+#cl-designs input[type=color]{padding:3px!important;cursor:pointer}
+#cl-designs .cl-color{display:grid;grid-template-columns:40px minmax(0,1fr);gap:8px}
+#cl-designs .cl-color input[type=text]{font-family:Consolas,monospace;font-size:13px}
+#cl-designs .cl-size{display:grid;grid-template-columns:minmax(0,1fr) 90px;gap:12px;align-items:center}
+#cl-designs .cl-directions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#cl-designs .cl-directions button{background:var(--cl-bg);display:grid;gap:6px;padding:13px 8px;align-content:center;font-size:12px}
+#cl-designs .cl-directions button[aria-pressed=true]{border-color:var(--cl-accent);color:var(--cl-accent);box-shadow:inset 0 0 0 1px var(--cl-accent)}
+#cl-designs .cl-direction-icon{font-size:20px;line-height:1.3;letter-spacing:2px}
+#cl-designs .cl-preview{border:1px solid var(--cl-line);border-radius:9px;overflow:hidden;background:var(--cl-panel)}
+#cl-designs .cl-preview-head{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--cl-line);font-size:12px;flex-wrap:wrap}
+#cl-designs .cl-preview-label{display:flex;gap:8px;align-items:center}
+#cl-designs .cl-dot{width:6px;height:6px;border-radius:50%;background:var(--cl-accent)}
+#cl-designs .cl-preview-stage{background:repeating-conic-gradient(#35434b 0% 25%,#2b3840 0% 50%) 50% / 16px 16px;padding:14px;min-height:194px;max-height:470px;overflow:auto}
+#cl-designs .cl-comment{border-radius:7px;padding:10px 12px;margin-bottom:8px;overflow-wrap:anywhere;line-height:1.55}
+#cl-designs .cl-comment:last-child{margin-bottom:0}
+#cl-designs .cl-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px;font-size:.8em}
+#cl-designs .cl-badge{border-radius:5px;padding:.15em .4em;color:#c9cbe0;background:#2d2f48;font-size:.72em}
+#cl-designs .cl-preview-foot{padding:10px 16px;font-size:12px;color:var(--cl-muted)}
+#cl-designs summary{cursor:pointer;font-size:13px;color:var(--cl-accent)}
+#cl-designs details>.cl-preview{margin-top:12px}
+#cl-designs .cl-studio{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,1fr);align-items:start;gap:18px}
+#cl-designs .cl-studio .cl-preview-stage{min-height:310px}
+#cl-designs .cl-inspector{background:var(--cl-panel);border:1px solid var(--cl-line);border-radius:9px;padding:0 18px}
+#cl-designs .cl-inspector>.cl-section{border:0;border-radius:0;padding:16px 0;border-bottom:1px solid var(--cl-line)}
+#cl-designs .cl-inspector>.cl-section:last-child{border:0}
+#cl-designs .cl-inspector .cl-help{min-height:40px}
+#cl-designs .cl-tabs{display:flex;border-bottom:1px solid var(--cl-line);gap:8px;margin-bottom:20px}
+#cl-designs .cl-tabs button{flex:1;background:transparent;border:0;border-radius:0;padding:12px 6px;color:var(--cl-muted);font-size:13px}
+#cl-designs .cl-tabs button[aria-selected=true]{color:var(--cl-accent);box-shadow:inset 0 -2px var(--cl-accent)}
+#cl-designs .cl-tab-content{max-width:740px;margin:auto;display:grid;gap:18px}
+#cl-designs .cl-flat{background:transparent;border:0;padding:0}
+#cl-designs .cl-endbar{display:flex;align-items:center;gap:12px;justify-content:space-between;margin:14px auto;max-width:520px;padding:8px;border-radius:30px;background:var(--cl-panel);border:1px solid var(--cl-line)}
+#cl-designs .cl-endbar button{border:0;background:transparent;border-radius:50%;width:40px;padding:6px}
+#cl-designs .cl-endbar span{font-size:12px;text-align:center}
+#cl-designs .cl-debug{font-size:12px;color:var(--cl-muted);padding:10px 0}
+#cl-designs pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px}
+#cl-designs .cl-sim{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px}
+#cl-designs .cl-sim select{width:auto;max-width:100%;font-size:12px;height:32px;padding:4px 8px}
+#cl-designs .cl-sim button{min-height:32px;font-size:12px;padding:4px 10px}
+#cl-designs dialog{width:min(520px,calc(100% - 24px));max-height:85vh;overflow:auto;background:var(--cl-panel);color:var(--cl-text);border:1px solid var(--cl-line);border-radius:12px;padding:20px}
+#cl-designs dialog::backdrop{background:#0008}
+#cl-designs .cl-modal-body{margin:16px 0;font-size:13px}
+@media(max-width:800px){#cl-designs .cl-studio{grid-template-columns:1fr}#cl-designs .cl-studio .cl-preview-stage{min-height:194px;max-height:280px}}
+@media(max-width:640px){#cl-designs .cl-brand strong,#cl-designs .cl-connection-text{display:none}#cl-designs .cl-symbol{display:inline}#cl-designs .cl-toast{max-width:calc(100% - 120px)}}
+@media(max-width:600px){#cl-designs .cl-body{padding:18px 16px}#cl-designs .cl-section{padding:16px}#cl-designs .cl-flat{padding:0}#cl-designs .cl-grid{grid-template-columns:1fr}#cl-designs .cl-design-options button{padding:10px}#cl-designs .cl-design-options small{display:none}}
+@media(max-width:400px){#cl-designs .cl-body{padding:16px 10px}#cl-designs .cl-header{padding:0 10px}#cl-designs .cl-nav{padding:8px}#cl-designs .cl-nav button{padding:5px 9px}#cl-designs .cl-intro{padding:12px;gap:10px}#cl-designs .cl-design-options button{font-size:12px;padding:8px}#cl-designs .cl-window-actions{padding:14px}#cl-designs .cl-tabs{gap:0}#cl-designs .cl-tabs button{font-size:12px}#cl-designs .cl-window-actions .cl-row{gap:8px}#cl-designs .cl-window-actions button{min-width:0;padding:8px;font-size:12px}}
+@media(pointer:coarse){#cl-designs button,#cl-designs .cl-switch-row,#cl-designs summary{min-height:44px}#cl-designs input:not([type=checkbox]),#cl-designs select{font-size:16px}}
+</style>
+<div id="cl-designs" aria-label="コメント一覧の設定・3案比較">
+  <div class="cl-gallery">
+    <div class="cl-row cl-between"><small>COMMENT LIST / DESIGN STUDY</small><small>操作できる見本 · 本体の設定は変更しません</small></div>
+    <nav class="cl-design-options" aria-label="デザイン案"></nav>
+    <div class="cl-row cl-between"><small id="cl-concept"></small><label class="cl-sim">状態の見本<select id="cl-scenario"><option value="normal">通常</option><option value="empty">コメントなし</option><option value="save-error">保存失敗</option><option value="disconnected">再接続中</option></select></label></div>
+  </div>
+  <div class="cl-window">
+    <header class="cl-header"><div class="cl-brand" aria-label="きゃすメイト"><span class="cl-logo" aria-hidden="true">▤</span><strong>きゃすメイト</strong></div><div id="cl-toast" class="cl-toast" role="status" hidden></div><span class="cl-connected" aria-label="バックエンド接続済み（見本）"><span class="cl-connection-text">バックエンド接続済み</span><span class="cl-symbol" aria-hidden="true">✓</span></span></header>
+    <nav class="cl-nav" aria-label="メインナビゲーション"><button data-page="home">ホーム</button><button data-page="settings" aria-current="page">設定</button><button class="cl-warning" data-action="warnings">⚠ 要確認 <span id="cl-warning-count">0</span>件</button></nav>
+    <main class="cl-body" id="cl-main"></main>
+    <dialog id="cl-dialog" aria-labelledby="cl-dialog-title"><div class="cl-row cl-between"><h2 id="cl-dialog-title"></h2><button data-action="close-dialog" aria-label="閉じる">✕</button></div><div class="cl-modal-body" id="cl-dialog-body"></div></dialog>
+  </div>
+  <div class="cl-endbar"><button data-cycle="-1" aria-label="前の案">←</button><span id="cl-current"></span><button data-cycle="1" aria-label="次の案">→</button></div>
+  <details class="cl-debug"><summary>比較用の操作・状態</summary><div class="cl-sim"><button data-action="toast">成功通知を試す</button><button data-action="long-toast">長い通知を試す</button></div><pre id="cl-payload"></pre></details>
+</div>
+<script>
+(() => {
+  const root = document.getElementById('cl-designs');
+  const q = selector => root.querySelector(selector);
+  const variants = { A: ['一覧で調整', '全項目を見渡す', '必要な設定に、そのまま手が届く。'], B: ['プレビュー中心', '見え方から調整', 'コメントの見え方を主役に、外観を整える。'], C: ['目的別タブ', 'ひとつずつ集中', '表示内容・文字と色・ウィンドウを分けて編集。'] };
+  let variant = new URLSearchParams(location.search).get('variant') || 'A';
+  if (!variants[variant]) variant = 'A';
+  const settings = { showSource:true, showAuthor:true, showContent:true, fontSizePx:16, fontFamily:'Yu Gothic UI', textColor:'#edf0ffff', backgroundColor:'#131524ff', stackDirection:'newestBottom' };
+  const samples = [['YouTube','はる','こんばんは！ 今日も配信楽しみにしていました。'],['Twitch','mikan','声、よく聞こえています！'],['したらば','名無しさん','このあと何をする予定ですか？']];
+  const errors = {}, drafts = {};
+  let tab = 'content', page = 'editor', origin = 'settings', scenario = 'normal', windowVisible = false, toastTimer, dialogOpener;
+  const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const section = (title, content, flat = false) => `<section class="cl-section${flat ? ' cl-flat' : ''}"><h2>${title}</h2>${content}</section>`;
+  const switches = () => `<div class="cl-switches">${[['showSource','サービス名'],['showAuthor','投稿者名'],['showContent','本文']].map(([key,label])=>`<label class="cl-switch-row" for="cl-${key}"><span>${label}</span><input id="cl-${key}" data-setting="${key}" type="checkbox" role="switch" aria-describedby="cl-fields-help" ${settings[key]?'checked':''}></label>`).join('')}</div><div id="cl-fields-help" class="cl-help ${errors.fields?'cl-error':''}" role="status">${errors.fields || '少なくとも1項目を表示します。'}</div>`;
+  const directions = () => `<div class="cl-directions" role="group" aria-label="積み上げ方向">${[['newestBottom','新着を下','☰ ↓'],['newestTop','新着を上','↑ ☰']].map(([key,label,icon])=>`<button data-direction="${key}" aria-pressed="${settings.stackDirection===key}"><span class="cl-direction-icon" aria-hidden="true">${icon}</span>${label}</button>`).join('')}</div><p class="cl-help">新しいコメントが追加される側を選びます。</p>`;
+  const fonts = () => `<div class="cl-field"><label for="cl-fontSizePx">文字サイズ（px）</label><div class="cl-size"><input type="range" id="cl-size-range" aria-label="文字サイズのスライダー" min="8" max="200" value="${settings.fontSizePx}" data-range="fontSizePx"><input type="number" id="cl-fontSizePx" data-setting="fontSizePx" min="8" max="200" value="${settings.fontSizePx}" aria-describedby="cl-size-help"></div><div class="cl-help" id="cl-size-help">8〜200pxで設定できます。</div></div><div class="cl-field"><label for="cl-fontFamily">フォント</label><input id="cl-fontFamily" data-setting="fontFamily" value="${esc(settings.fontFamily)}" list="cl-fonts" aria-describedby="cl-font-help"><datalist id="cl-fonts"><option value="Yu Gothic UI"></option><option value="Meiryo"></option><option value="Segoe UI"></option></datalist><div class="cl-help" id="cl-font-help">表示する端末にあるフォント名を入力します。</div></div>`;
+  const colors = () => `<div class="cl-grid">${[['textColor','文字色'],['backgroundColor','背景色']].map(([key,label])=>`<div class="cl-field"><label for="cl-${key}">${label}</label><div class="cl-color"><input type="color" data-color="${key}" aria-label="${label}を選択" value="${settings[key].slice(0,7)}"><input id="cl-${key}" type="text" data-setting="${key}" value="${settings[key]}" aria-describedby="cl-${key}-help" spellcheck="false"></div><div class="cl-help" id="cl-${key}-help">#RRGGBBAA形式。末尾2桁は不透明度です。</div></div>`).join('')}</div>`;
+  const windowActions = () => `<section class="cl-window-actions"><div><strong>独立ウィンドウ</strong><small id="cl-window-state">${windowVisible?'表示中':'閉じています'}</small></div><div class="cl-row"><button class="cl-primary" data-action="window" aria-pressed="${windowVisible}">${windowVisible?'非表示にする':'ウィンドウを開く'}</button><button data-action="browser">ブラウザで開く ↗</button></div></section>`;
+  const preview = () => `<section class="cl-preview" aria-label="コメント一覧のプレビュー"><div class="cl-preview-head"><span class="cl-preview-label"><span class="cl-dot" aria-hidden="true"></span>プレビュー</span><small>${scenario==='empty'?'コメントなし':'サンプルコメント'}</small></div><div class="cl-preview-stage"></div><div class="cl-preview-foot">設定の変更を、その場で確認できます。</div></section>`;
+  function layoutA() { return `<div class="cl-stack">${windowActions()}<div class="cl-grid">${section('表示する項目', switches())}${section('積み上げ方向', directions())}</div>${section('文字と色', `<div class="cl-grid">${fonts()}</div>${colors()}`)}<details id="cl-preview-disclosure"><summary>コメント一覧のプレビューを表示</summary>${preview()}</details></div>`; }
+  function layoutB() { return `<div class="cl-stack"><div class="cl-studio"><div class="cl-stack">${preview()}${windowActions()}</div><div class="cl-inspector">${section('文字', fonts())}${section('色', colors())}${section('表示する項目', switches())}${section('積み上げ方向', directions())}</div></div></div>`; }
+  function layoutC() { return `<div class="cl-tabs" role="tablist" aria-label="設定の分類">${[['content','表示内容'],['appearance','文字と色'],['window','ウィンドウ']].map(([key,label])=>`<button role="tab" id="cl-tab-${key}" data-tab="${key}" aria-controls="cl-tabpanel" aria-selected="${tab===key}" tabindex="${tab===key?'0':'-1'}">${label}</button>`).join('')}</div><div role="tabpanel" id="cl-tabpanel" aria-labelledby="cl-tab-${tab}" class="cl-tab-content">${tab==='content'?`<div class="cl-grid">${section('表示する項目',switches(),true)}${section('積み上げ方向',directions(),true)}</div>`:tab==='appearance'?`<div class="cl-grid">${fonts()}</div>${colors()}`:`${windowActions()}<small>独立ウィンドウの表示状態と配置は、次回起動時に復元されます。最前面表示は、開いた一覧のヘッダーで切り替えます。</small>`}${preview()}</div>`; }
+  function render() {
+    q('.cl-design-options').innerHTML = Object.entries(variants).map(([key,[name,desc]])=>`<button data-variant="${key}" aria-pressed="${variant===key}"><b>${key}案</b><span>${name}</span><small>${desc}</small></button>`).join('');
+    q('#cl-concept').textContent = variants[variant][2];
+    q('#cl-current').textContent = `${variant}案 · ${variants[variant][0]}`;
+    root.querySelectorAll('[data-page]').forEach(el => el.setAttribute('aria-current', (page==='editor'?'settings':page)===el.dataset.page?'page':'false'));
+    q('#cl-main').innerHTML = page==='editor' ? `<div class="cl-heading"><div class="cl-title"><button class="cl-back" data-action="back" aria-label="${origin==='home'?'ホーム':'設定'}に戻る" title="${origin==='home'?'ホーム':'設定'}に戻る">←</button><h1>コメント一覧</h1></div><div class="cl-intro"><span aria-hidden="true">◇</span><div><strong>配信中のコメントを、自分の見やすい一覧に</strong><p>独立ウィンドウ・ブラウザ・スマホの表示を調整します。OBSコメント表示とは別の設定です。</p></div></div></div>${variant==='A'?layoutA():variant==='B'?layoutB():layoutC()}` : `<div class="cl-stack"><h1>${page==='home'?'配信のホーム':'設定'}</h1><section class="cl-section"><h2>${page==='home'?'ウィンドウを開く':'表示・演出'}</h2><button data-action="editor" id="cl-entry">コメント一覧 <small>表示項目・文字と色・積み上げ方向</small> ›</button></section><small>比較見本では、コメント一覧の編集先を確認できます。</small></div>`;
+    root.querySelectorAll('[data-setting]:not([type=checkbox])').forEach(input => {
+      const key=input.dataset.setting;
+      if(Object.hasOwn(drafts,key))input.value=drafts[key];
+      const helper=q(key==='fontSizePx'?'#cl-size-help':key==='fontFamily'?'#cl-font-help':`#cl-${key}-help`);
+      helper.dataset.default=helper.textContent;
+      if(errors[key]){helper.textContent=errors[key];helper.classList.add('cl-error');input.setAttribute('aria-invalid','true');}
+    });
+    updatePreview(); updateStatus(); updatePayload();
+  }
+  function updatePreview() {
+    root.querySelectorAll('.cl-preview-stage').forEach(stage => {
+      stage.replaceChildren();
+      if (scenario==='empty') { const p=document.createElement('p'); p.textContent='コメントはまだありません'; p.style.color='#edf0ff'; stage.append(p); return; }
+      const ordered=settings.stackDirection==='newestTop'?[...samples].reverse():samples;
+      ordered.forEach(([source,author,content]) => {
+        const article=document.createElement('article'); article.className='cl-comment';
+        Object.assign(article.style,{fontFamily:settings.fontFamily,fontSize:`${settings.fontSizePx}px`,color:settings.textColor,backgroundColor:settings.backgroundColor});
+        if (settings.showSource || settings.showAuthor) { const meta=document.createElement('div'); meta.className='cl-meta'; if(settings.showSource){const badge=document.createElement('span');badge.className='cl-badge';badge.textContent=source;meta.append(badge);} if(settings.showAuthor){const name=document.createElement('strong');name.textContent=author;meta.append(name);} article.append(meta); }
+        if (settings.showContent) { const body=document.createElement('div');body.textContent=content;article.append(body); }
+        stage.append(article);
+      });
+    });
+  }
+  function updatePayload() { q('#cl-payload').textContent=JSON.stringify({variant,tab,page,scenario,windowVisible,settings,drafts,errors},null,2); }
+  function updateStatus() {
+    const count=Object.keys(errors).length+(['save-error','disconnected'].includes(scenario)?1:0);
+    q('#cl-warning-count').textContent=count;
+    const connection=q('.cl-connected'); connection.setAttribute('aria-label',scenario==='disconnected'?'再接続中（見本）':'バックエンド接続済み（見本）');
+    connection.querySelector('.cl-connection-text').textContent=scenario==='disconnected'?'再接続中':'バックエンド接続済み'; connection.querySelector('.cl-symbol').textContent=scenario==='disconnected'?'↻':'✓';
+  }
+  function toast(message) { clearTimeout(toastTimer);const el=q('#cl-toast');el.textContent=`✓ ${message}`;el.title=message;el.hidden=false;toastTimer=setTimeout(()=>{el.hidden=true;},4000); }
+  function finishChange() { updatePreview();updateStatus();updatePayload(); if(scenario==='normal'||scenario==='empty')toast('見本に反映しました'); }
+  function setError(key,message,helpId) { if(message)errors[key]=message;else delete errors[key];const help=q(helpId);if(help){help.textContent=message||help.dataset.default||'';help.classList.toggle('cl-error',Boolean(message));} updateStatus();updatePayload(); }
+  function chooseVariant(next) { variant=next;try{const url=new URL(location.href);url.searchParams.set('variant',variant);history.replaceState(null,'',url);}catch{/* Inline host may disallow URL changes. */}render(); }
+  function showDialog(title,body,opener) { dialogOpener=opener; q('#cl-dialog-title').textContent=title;q('#cl-dialog-body').innerHTML=body;q('#cl-dialog').showModal(); }
+  root.addEventListener('click',event=>{
+    const button=event.target.closest('button'); if(!button)return;
+    if(button.dataset.variant){chooseVariant(button.dataset.variant);q(`[data-variant="${variant}"]`).focus();return;}
+    if(button.dataset.cycle){const all=Object.keys(variants);chooseVariant(all[(all.indexOf(variant)+Number(button.dataset.cycle)+3)%3]);return;}
+    if(button.dataset.direction){settings.stackDirection=button.dataset.direction;root.querySelectorAll('[data-direction]').forEach(el=>el.setAttribute('aria-pressed',el.dataset.direction===settings.stackDirection));finishChange();return;}
+    if(button.dataset.tab){tab=button.dataset.tab;render();q(`[data-tab="${tab}"]`).focus();return;}
+    if(button.dataset.page){page=button.dataset.page;origin=page;render();return;}
+    switch(button.dataset.action){
+      case 'back':page=origin;render();q('#cl-entry').focus();break;
+      case 'editor':origin=page;page='editor';render();q('.cl-back').focus();break;
+      case 'window':windowVisible=!windowVisible;button.textContent=windowVisible?'非表示にする':'ウィンドウを開く';button.setAttribute('aria-pressed',windowVisible);q('#cl-window-state').textContent=windowVisible?'表示中':'閉じています';toast(windowVisible?'独立ウィンドウを表示しました（見本）':'独立ウィンドウを非表示にしました（見本）');updatePayload();break;
+      case 'browser':showDialog('ブラウザのコメント一覧（見本）',preview()+'<small>この操作は表示の見本です。実際のブラウザは開きません。</small>',button);updatePreview();break;
+      case 'warnings':{const messages=[...Object.values(errors),...(scenario==='save-error'?['設定を保存できませんでした。接続を確認して、再保存してください。']:[]),...(scenario==='disconnected'?['きゃすメイトに接続できません。再接続中です。']:[])];showDialog('要確認',messages.length?messages.map(message=>`<p>${esc(message)}</p>`).join('')+(scenario==='save-error'?'<button data-action="retry">再保存を試す（見本）</button>':''):'<p>現在、要確認事項はありません。</p>',button);break;}
+      case 'retry':scenario='normal';q('#cl-scenario').value='normal';q('#cl-dialog-body').innerHTML='<p>現在、要確認事項はありません。</p>';updateStatus();updatePayload();toast('再保存しました（見本）');break;
+      case 'close-dialog':q('#cl-dialog').close();break;
+      case 'toast':toast('設定を保存しました（見本）');break;
+      case 'long-toast':toast('コメント一覧の表示設定を保存しました。開いている独立ウィンドウとブラウザにも反映しました（見本）。');break;
+    }
+  });
+  q('#cl-dialog').addEventListener('close',()=>dialogOpener?.focus());
+  function handleInput(event) {
+    const input=event.target;
+    if(input.dataset.range){settings.fontSizePx=Number(input.value);drafts.fontSizePx=input.value;q('#cl-fontSizePx').value=input.value;const helper=q('#cl-size-help');helper.textContent='8〜200pxで設定できます。';helper.classList.remove('cl-error');delete errors.fontSizePx;q('#cl-fontSizePx').removeAttribute('aria-invalid');finishChange();return;}
+    if(input.dataset.color){const key=input.dataset.color;settings[key]=input.value+settings[key].slice(7);drafts[key]=settings[key];const text=q(`#cl-${key}`);text.value=settings[key];text.removeAttribute('aria-invalid');delete errors[key];q(`#cl-${key}-help`).textContent='#RRGGBBAA形式。末尾2桁は不透明度です。';q(`#cl-${key}-help`).classList.remove('cl-error');finishChange();return;}
+    const key=input.dataset.setting;if(!key)return;
+    if(input.type==='checkbox'){
+      if(!input.checked&&['showSource','showAuthor','showContent'].filter(k=>settings[k]).length===1){input.checked=true;setError('fields','少なくとも1項目をオンにしてください。','#cl-fields-help');return;}
+      settings[key]=input.checked;delete errors.fields;q('#cl-fields-help').textContent='少なくとも1項目を表示します。';q('#cl-fields-help').classList.remove('cl-error');finishChange();return;
+    }
+    drafts[key]=input.value;
+    let message='',value=input.value;
+    if(key==='fontSizePx'){value=Number(value);if(input.value===''||!Number.isInteger(value)||value<8||value>200)message='8〜200の整数で入力してください。';}
+    if(key==='fontFamily'&&!value.trim())message='フォント名を入力してください。';
+    if(['textColor','backgroundColor'].includes(key)&&!/^#[0-9a-f]{8}$/i.test(value))message='#と8桁の16進数で入力してください。';
+    const helper=q(key==='fontSizePx'?'#cl-size-help':key==='fontFamily'?'#cl-font-help':`#cl-${key}-help`);
+    if(!helper.dataset.default)helper.dataset.default=helper.textContent;
+    setError(key,message,`#${helper.id}`);input.setAttribute('aria-invalid',Boolean(message));
+    if(!message){settings[key]=value;if(key==='fontSizePx')q('#cl-size-range').value=value;if(['textColor','backgroundColor'].includes(key))q(`[data-color="${key}"]`).value=value.slice(0,7);finishChange();}
+  }
+  root.addEventListener('input',event=>{if(event.target.type!=='checkbox')handleInput(event);});
+  root.addEventListener('change',event=>{if(event.target.type==='checkbox')handleInput(event);});
+  q('#cl-scenario').addEventListener('change',event=>{scenario=event.target.value;q('#cl-toast').hidden=true;render();});
+  root.addEventListener('keydown',event=>{
+    if(event.target.matches('input,textarea,select,[contenteditable]'))return;
+    if(event.target.matches('[data-tab]')&&['ArrowLeft','ArrowRight','Home','End'].includes(event.key)){event.preventDefault();const tabs=['content','appearance','window'];tab=event.key==='Home'?'content':event.key==='End'?'window':tabs[(tabs.indexOf(tab)+(event.key==='ArrowRight'?1:2))%3];render();q(`[data-tab="${tab}"]`).focus();return;}
+    if(['ArrowLeft','ArrowRight'].includes(event.key)&&!q('#cl-dialog').open){event.preventDefault();const keys=Object.keys(variants);chooseVariant(keys[(keys.indexOf(variant)+(event.key==='ArrowRight'?1:2))%3]);q(`[data-variant="${variant}"]`).focus();}
+  });
+  render();
+  if(globalThis.Tweak){const design={variant};const tweak=new Tweak({container:root,onChange:()=>chooseVariant(design.variant)});tweak.addSelect(design,'variant',{label:'比較する案',options:Object.entries(variants).map(([value,[label]])=>({value,label:`${value} · ${label}`}))});}
+})();
+</script>

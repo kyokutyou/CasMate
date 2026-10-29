@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; font-src 'none'; connect-src 'none'; media-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>きゃすメイト Android UI・UX 8案</title>
+  <style>html{color-scheme:light}body{box-sizing:border-box;max-width:1100px;margin:auto;padding:24px;background:#f4f3ef}button,input,select{font:inherit}@media(max-width:600px){body{padding:12px}}</style>
+</head>
+<body><!-- Throwaway Android UI/UX exploration: eight independent concepts, fictional shared data, no production integration. -->
+<div id="cm-eight" aria-label="きゃすメイト Android UI・UX 8案">
+  <header class="cx-intro">
+    <div class="cx-kicker">きゃすメイト / ANDROID CONCEPTS</div>
+    <h2>8つの、配信の手ざわり。</h2>
+    <p>同じ機能、同じデータ。画面の組み立て方と操作の入口を見比べる。</p>
+    <span class="cx-sample">独立した見本 · 実際の配信には接続しません</span>
+  </header>
+  <div class="cx-toolbar" aria-label="全案の比較画面">
+    <span>比較する画面</span>
+    <div class="cx-screen-picker"></div>
+  </div>
+  <section class="cx-detail" hidden aria-label="拡大して確認"></section>
+  <section class="cx-gallery" aria-label="8案の一覧"></section>
+  <p class="cx-foot">共通サンプル：配信PC / Tailscale · 映像・マイク送信中 · OBS配信中 · 読み上げ待機中</p>
+</div>
+<style>
+#cm-eight { --cx-text:light-dark(#263333,#e8ecec); --cx-muted:light-dark(#566865,#b3c0bc); --cx-line:light-dark(#d6dfdc,#414e4a); --cx-surface:light-dark(#edf3ef,#27312c); font-family:"Segoe UI","Yu Gothic UI","Meiryo",sans-serif; color:var(--cx-text); width:100%; box-sizing:border-box; }
+#cm-eight * { box-sizing:border-box; }
+#cm-eight [hidden] { display:none!important; }
+#cm-eight .cx-intro { padding:8px 0 22px; }
+#cm-eight .cx-kicker { font-size:11px; font-weight:600; letter-spacing:1.5px; color:var(--cx-muted); }
+#cm-eight .cx-intro h2 { margin:10px 0; font-size:30px; font-weight:650; line-height:1.3; letter-spacing:-1px; }
+#cm-eight .cx-intro p { margin:0 0 12px; font-size:14px; line-height:1.6; }
+#cm-eight .cx-sample { font-size:12px; color:var(--cx-muted); }
+#cm-eight .cx-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:10px; padding:12px 0 18px; border-top:1px solid var(--cx-line); font-size:12px; }
+#cm-eight .cx-screen-picker { display:flex; gap:5px; flex-wrap:wrap; }
+#cm-eight .cx-shell-button { min-height:44px; border:1px solid var(--cx-line); background:transparent; color:var(--cx-text); border-radius:9px; padding:9px 12px; font:500 13px/1.4 "Segoe UI","Yu Gothic UI",sans-serif; cursor:var(--cursor-interaction,pointer); }
+#cm-eight .cx-shell-button[aria-pressed=true] { background:var(--cx-text); color:light-dark(#fff,#182420); border-color:var(--cx-text); }
+#cm-eight .cx-gallery { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:25px 15px; }
+#cm-eight .cx-concept { min-width:0; }
+#cm-eight .cx-concept-head { display:flex; gap:7px; align-items:baseline; margin:0 0 9px; }
+#cm-eight .cx-number { font-size:12px; color:var(--cx-muted); font-variant-numeric:tabular-nums; }
+#cm-eight .cx-concept h3 { margin:0; font-size:15px; font-weight:600; }
+#cm-eight .cx-preview-button { display:block; width:100%; padding:0; border:0; background:transparent; border-radius:20px; text-align:initial; cursor:var(--cursor-interaction,pointer); }
+#cm-eight .cx-preview { aspect-ratio:360/770; position:relative; width:100%; overflow:hidden; border-radius:20px; background:var(--cx-surface); }
+#cm-eight .cx-preview .cm-phone { position:absolute; width:360px; height:770px; top:0; left:0; transform:scale(var(--preview-scale,.5)); transform-origin:top left; pointer-events:none; }
+#cm-eight .cx-preview-hit { position:absolute; inset:0; width:100%; height:100%; padding:0; background:transparent; border:0; border-radius:20px; cursor:var(--cursor-interaction,pointer); }
+#cm-eight .cx-zoom { display:flex; justify-content:space-between; align-items:center; font-size:12px; padding:10px 0 6px; color:var(--cx-text); min-height:44px; }
+#cm-eight .cx-concept p { font-size:12px; line-height:1.7; margin:4px 0; color:var(--cx-muted); }
+#cm-eight .cx-concept p b { color:var(--cx-text); font-weight:600; }
+#cm-eight .cx-detail { margin:0 0 30px; padding:20px 0 24px; border-block:1px solid var(--cx-line); }
+#cm-eight .cx-detail-top { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:17px; }
+#cm-eight .cx-detail-top h3 { margin:0 auto 0 0; font-size:20px; font-weight:600; }
+#cm-eight .cx-detail-body { display:grid; grid-template-columns:minmax(0,360px) minmax(0,1fr); gap:24px; align-items:start; }
+#cm-eight .cx-device-wrap { width:100%; max-width:360px; margin:0 auto; }
+#cm-eight .cx-detail-notes { min-width:0; font-size:13px; line-height:1.8; }
+#cm-eight .cx-detail-notes h4 { margin:0 0 7px; font-size:15px; font-weight:600; }
+#cm-eight .cx-detail-notes p { margin:0 0 20px; }
+#cm-eight .cx-detail-notes dl { margin:0; }
+#cm-eight .cx-detail-notes dt { font-weight:600; margin-top:16px; }
+#cm-eight .cx-detail-notes dd { margin:4px 0 0; color:var(--cx-muted); }
+#cm-eight .cx-detail-screens { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:20px; }
+#cm-eight .cx-foot { font-size:12px; line-height:1.6; color:var(--cx-muted); border-top:1px solid var(--cx-line); padding:18px 0 0; margin-top:28px; }
+#cm-eight .cm-phone { --p-bg:#f4f7f5; --p-surface:#fff; --p-ink:#213b33; --p-muted:#5e736a; --p-line:#d6e1da; --p-accent:#216d54; --p-tint:#e1f1e8; --p-on:#fff; --p-danger:#a43138; --p-radius:18px; position:relative; width:100%; height:770px; border:5px solid #27332e; border-radius:30px; background:var(--p-bg); color:var(--p-ink); overflow:hidden; font:14px/1.55 "Segoe UI","Yu Gothic UI","Meiryo",sans-serif; isolation:isolate; }
+#cm-eight .cm-phone button,#cm-eight .cm-phone input,#cm-eight .cm-phone select { font:inherit; }
+#cm-eight .cm-phone button { cursor:var(--cursor-interaction,pointer); }
+#cm-eight .cm-phone button:disabled { cursor:default; opacity:.53; }
+#cm-eight .cm-phone button:focus-visible,#cm-eight .cx-shell-button:focus-visible,#cm-eight .cx-preview-button:focus-visible { outline:3px solid #2285da; outline-offset:2px; }
+#cm-eight .cm-os { padding:8px 18px 4px; height:31px; display:flex; align-items:center; justify-content:space-between; font-size:11px; font-weight:650; }
+#cm-eight .cm-os span:last-child { letter-spacing:2px; }
+#cm-eight .cm-app { height:calc(100% - 43px); display:flex; flex-direction:column; overflow:hidden; }
+#cm-eight .cm-android-bar { height:12px; display:flex; justify-content:center; align-items:center; background:var(--p-surface); }
+#cm-eight .cm-android-bar:before { content:""; width:94px; height:3px; border-radius:4px; background:var(--p-ink); }
+#cm-eight .cm-top { padding:12px 16px 10px; display:flex; align-items:center; gap:10px; }
+#cm-eight .cm-top .cm-brand { font-size:19px; font-weight:700; letter-spacing:-.5px; margin-right:auto; }
+#cm-eight .cm-top .cm-kicker { color:var(--p-muted); font-size:10px; letter-spacing:1.5px; font-weight:650; }
+#cm-eight .cm-top .cm-title { font-size:25px; font-weight:700; line-height:1.35; }
+#cm-eight .cm-icon-button { width:48px; min-height:48px; border:0; border-radius:14px; background:var(--p-tint); color:var(--p-accent); display:grid; place-content:center; font-size:23px!important; }
+#cm-eight .cm-scroll { overflow:auto; min-height:0; flex:1; scrollbar-width:thin; }
+#cm-eight .cm-pad { padding:12px 16px 16px; }
+#cm-eight .cm-heading { display:flex; justify-content:space-between; align-items:center; gap:6px; margin:0 0 12px; }
+#cm-eight .cm-heading h4 { font-size:22px; margin:0; line-height:1.4; }
+#cm-eight .cm-small { font-size:11px; line-height:1.6; color:var(--p-muted); }
+#cm-eight .cm-status { display:flex; gap:8px; align-items:center; justify-content:space-between; padding:10px 14px; color:var(--p-ink); font-size:12px; border-block:1px solid var(--p-line); }
+#cm-eight .cm-status strong { font-weight:600; }
+#cm-eight .cm-dot { display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--p-accent); margin-right:5px; vertical-align:middle; }
+#cm-eight .cm-pill { display:inline-flex; align-items:center; border-radius:20px; padding:3px 8px; background:var(--p-tint); color:var(--p-accent); font-size:11px; white-space:nowrap; }
+#cm-eight .cm-button { display:flex; align-items:center; justify-content:center; gap:7px; min-height:48px; width:100%; border:1px solid var(--p-line); border-radius:12px; background:var(--p-surface); color:var(--p-ink); padding:9px 10px; font-weight:600!important; text-align:center; line-height:1.4!important; }
+#cm-eight .cm-primary { background:var(--p-accent); border-color:var(--p-accent); color:var(--p-on); }
+#cm-eight .cm-soft { background:var(--p-tint); border-color:transparent; color:var(--p-accent); }
+#cm-eight .cm-danger { background:var(--p-surface); color:var(--p-danger); border-color:var(--p-danger); }
+#cm-eight .cm-button-small { width:auto; font-size:12px!important; min-width:48px; }
+#cm-eight .cm-row { display:flex; gap:8px; align-items:center; }
+#cm-eight .cm-row>* { flex:1; min-width:0; }
+#cm-eight .cm-spacer { height:12px; }
+#cm-eight .cm-panel { background:var(--p-surface); border-radius:var(--p-radius); padding:14px; margin-bottom:12px; }
+#cm-eight .cm-section-title { font-size:12px; font-weight:650; color:var(--p-muted); margin:4px 0 10px; letter-spacing:.4px; }
+#cm-eight .cm-audio { display:flex; align-items:center; gap:12px; padding:12px; background:var(--p-tint); border-radius:var(--p-radius); }
+#cm-eight .cm-audio-copy { flex:1; min-width:0; }
+#cm-eight .cm-audio-copy b { display:block; font-size:14px; }
+#cm-eight .cm-audio .cm-button { width:65px; background:var(--p-surface); border:0; color:var(--p-accent); }
+#cm-eight .cm-feed { display:flex; flex-direction:column; gap:0; }
+#cm-eight .cm-comment { padding:15px 0; border-bottom:1px solid var(--p-line); }
+#cm-eight .cm-comment-meta { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:5px; font-size:11px; }
+#cm-eight .cm-service { font-weight:650; color:var(--p-accent); }
+#cm-eight .cm-author { color:var(--p-muted); }
+#cm-eight .cm-body { font-size:16px; overflow-wrap:anywhere; }
+#cm-eight .cm-feed-control { display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-size:11px; }
+#cm-eight .cm-auto { min-height:48px; border:0; background:transparent; color:var(--p-accent); padding:8px 0 8px 8px; font-size:11px!important; }
+#cm-eight .cm-nav { display:flex; min-height:64px; flex-shrink:0; background:var(--p-surface); border-top:1px solid var(--p-line); }
+#cm-eight .cm-nav button { flex:1; min-width:0; min-height:56px; border:0; background:transparent; color:var(--p-muted); font-size:11px!important; padding:6px 3px; }
+#cm-eight .cm-nav button[aria-current=page] { color:var(--p-accent); font-weight:700; }
+#cm-eight .cm-nav .cm-nav-symbol { display:block; font-size:20px; line-height:1.2; margin-bottom:4px; }
+#cm-eight .cm-safety { padding:9px 14px; flex-shrink:0; background:var(--p-surface); border-top:1px solid var(--p-line); }
+#cm-eight .cm-safety .cm-button { min-height:48px; font-size:12px!important; }
+#cm-eight .cm-safety .cm-row { margin-bottom:7px; }
+#cm-eight .cm-safety .cm-row .cm-button { font-size:12px!important; }
+#cm-eight .cm-obs { display:flex; align-items:center; gap:8px; margin-top:8px; }
+#cm-eight .cm-obs .cm-obs-text { flex:1; font-size:12px; }
+#cm-eight .cm-obs .cm-button { width:auto; min-width:108px; font-size:12px!important; }
+#cm-eight .cm-preview-image { position:relative; width:100%; aspect-ratio:16/9; border-radius:var(--p-radius); overflow:hidden; background:linear-gradient(180deg,#a8c7ce 0%,#d8e3d2 46%,#8ca39b 47%,#5d8184 67%,#718b74 68%,#355a43 100%); }
+#cm-eight .cm-preview-image:before { content:""; position:absolute; width:70%; height:45%; left:-5%; bottom:15%; background:#78955e; transform:rotate(-15deg); border-radius:50% 70% 0 0; box-shadow:180px 20px 0 #668649; }
+#cm-eight .cm-preview-image:after { content:""; position:absolute; width:100%; height:45%; bottom:-23%; background:#beaf88; transform:rotate(-27deg); border-radius:60%; }
+#cm-eight .cm-preview-top { position:absolute; z-index:1; top:11px; left:11px; right:11px; display:flex; justify-content:space-between; font-size:11px; color:#fff; }
+#cm-eight .cm-preview-top span { padding:3px 7px; border-radius:6px; background:#243d35e6; }
+#cm-eight .cm-preview-caption { position:absolute; z-index:1; bottom:10px; left:10px; color:#fff; font-size:11px; border-radius:6px; padding:4px 8px; background:#22392be6; }
+#cm-eight .cm-preview-hidden { background:#253331; color:#fff; display:grid; place-content:center; text-align:center; padding:16px; }
+#cm-eight .cm-preview-hidden:before,#cm-eight .cm-preview-hidden:after { display:none; }
+#cm-eight .cm-preview-hidden b { font-size:18px; }
+#cm-eight .cm-preview-hidden span { font-size:12px; }
+#cm-eight .cm-meter { display:flex; height:6px; gap:3px; margin:8px 0; }
+#cm-eight .cm-meter span { width:10%; background:var(--p-accent); opacity:.85; border-radius:1px; }
+#cm-eight .cm-meter span:nth-child(n+7) { opacity:.18; }
+#cm-eight .cm-muted-meter span { opacity:.18; }
+#cm-eight .cm-metrics { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--p-line); border:1px solid var(--p-line); border-radius:12px; overflow:hidden; margin:12px 0; }
+#cm-eight .cm-metrics>div { padding:10px 11px; background:var(--p-surface); }
+#cm-eight .cm-metrics b { display:block; font-size:20px; letter-spacing:-.5px; line-height:1.4; }
+#cm-eight .cm-metrics span { font-size:11px; color:var(--p-muted); }
+#cm-eight .cm-setting-row { display:flex; justify-content:space-between; align-items:center; gap:8px; padding:11px 0; border-bottom:1px solid var(--p-line); font-size:13px; min-height:48px; }
+#cm-eight .cm-setting-row b { font-weight:600; }
+#cm-eight .cm-setting-row span:last-child { text-align:right; color:var(--p-muted); }
+#cm-eight .cm-setting-label { display:block; font-size:12px; color:var(--p-muted); margin:10px 0 5px; }
+#cm-eight .cm-phone select { width:100%; min-height:48px; font-size:14px; color:var(--p-ink); background:var(--p-surface); border:1px solid var(--p-line); border-radius:10px; padding:8px; }
+#cm-eight .cm-phone input[type=range] { width:100%; min-height:48px; accent-color:var(--p-accent); }
+#cm-eight .cm-network-list { display:flex; flex-direction:column; gap:8px; margin:12px 0; }
+#cm-eight .cm-network { text-align:left; justify-content:space-between; font-size:13px!important; }
+#cm-eight .cm-network small { font-size:11px; font-weight:400; }
+#cm-eight .cm-network[aria-pressed=true] { background:var(--p-tint); border:2px solid var(--p-accent); opacity:1; }
+#cm-eight .cm-registration { display:flex; flex-direction:column; margin-bottom:12px; }
+#cm-eight .cm-registration>div { display:flex; justify-content:space-between; align-items:center; min-height:42px; font-size:12px; border-bottom:1px solid var(--p-line); }
+#cm-eight .cm-registration b { font-weight:600; color:var(--p-accent); }
+#cm-eight .cm-connection-hero { padding:22px 14px; text-align:center; background:var(--p-tint); border-radius:var(--p-radius); margin-bottom:15px; }
+#cm-eight .cm-connection-hero b { font-size:24px; display:block; }
+#cm-eight .cm-connection-hero small { font-size:12px; color:var(--p-muted); }
+#cm-eight .cm-bottom-menu { padding:10px 16px; flex-shrink:0; border-top:1px solid var(--p-line); background:var(--p-surface); display:flex; gap:8px; }
+#cm-eight .cm-bottom-menu .cm-button { flex:1; }
+#cm-eight .cm-sheet-backdrop { position:absolute; inset:31px 0 12px; background:#13282188; display:flex; align-items:flex-end; z-index:8; }
+#cm-eight .cm-sheet { width:100%; max-height:100%; overflow:auto; background:var(--p-surface); color:var(--p-ink); border-radius:24px 24px 0 0; padding:18px 16px 20px; box-shadow:0 -10px 35px #12271b33; }
+#cm-eight .cm-sheet h4 { margin:0; font-size:20px; }
+#cm-eight .cm-sheet p { font-size:13px; line-height:1.7; }
+#cm-eight .cm-sheet .cm-heading { margin:0 0 12px; }
+#cm-eight .cm-sheet .cm-heading .cm-button { width:48px; }
+#cm-eight .cm-sheet .cm-menu-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+#cm-eight .cm-menu-grid .cm-button { min-height:76px; flex-direction:column; }
+#cm-eight .cm-diagnostic-tabs { display:flex; gap:4px; margin:14px 0; }
+#cm-eight .cm-diagnostic-tabs button { flex:1; padding:7px 2px; min-height:48px; font-size:11px!important; }
+#cm-eight .cm-live-caption { font-size:11px; color:var(--p-muted); margin:8px 0; }
+/* 01: conventional destinations, airy cards, always-visible lower safety controls. */
+#cm-eight .cm-v0 .cm-top { padding-top:13px; }
+#cm-eight .cm-v0 .cm-comment { border-bottom:0; background:var(--p-surface); border-radius:14px; padding:13px; margin-bottom:8px; }
+#cm-eight .cm-v0 .cm-feed { margin-top:10px; }
+/* 02: instrument hierarchy, segmented workspaces, compact text rows, dark control rack. */
+#cm-eight .cm-v1 { --p-bg:#111e29; --p-surface:#1d2b36; --p-ink:#e2edf2; --p-muted:#a1b7c4; --p-line:#374a57; --p-accent:#7bdfdf; --p-tint:#263c48; --p-on:#10262e; --p-danger:#f4a59b; --p-radius:5px; border-color:#112634; }
+#cm-eight .cm-v1 .cm-brand { font-family:Consolas,monospace; font-size:18px; font-weight:600; }
+#cm-eight .cm-v1 .cm-top { padding-bottom:3px; }
+#cm-eight .cm-v1 .cm-status { margin:0 14px; border:0; padding:0 0 7px; font-size:11px; }
+#cm-eight .cm-v1 .cm-nav { margin:0 14px 10px; background:#172833; border:1px solid var(--p-line); border-radius:5px; min-height:48px; }
+#cm-eight .cm-v1 .cm-nav button { min-height:48px; padding:9px 2px; }
+#cm-eight .cm-v1 .cm-nav button[aria-current=page] { background:var(--p-accent); color:var(--p-on); }
+#cm-eight .cm-v1 .cm-nav-symbol { display:none; }
+#cm-eight .cm-v1 .cm-metrics b { font:600 22px/1.4 Consolas,monospace; }
+#cm-eight .cm-v1 .cm-metrics { margin:8px 0 13px; border-radius:4px; }
+#cm-eight .cm-v1 .cm-comment { padding:12px 0; border-left:2px solid var(--p-line); padding-left:10px; }
+#cm-eight .cm-v1 .cm-body { font-size:15px; }
+#cm-eight .cm-v1 .cm-button { border-radius:5px; }
+#cm-eight .cm-v1 .cm-audio { padding:8px 10px; }
+#cm-eight .cm-v1 .cm-safety { background:#0d1a23; }
+#cm-eight .cm-v1 .cm-preview-image { aspect-ratio:16/9; }
+/* 03: reading-first editorial page; navigation and tools summoned from one bottom menu. */
+#cm-eight .cm-v2 { --p-bg:#f9f5ee; --p-surface:#fffcf7; --p-ink:#4a352f; --p-muted:#79655b; --p-line:#e3d6ca; --p-accent:#9a543a; --p-tint:#f1e4d5; --p-on:#fff; --p-danger:#a12c32; --p-radius:20px; border-color:#4b3a31; }
+#cm-eight .cm-v2 .cm-top { align-items:flex-start; padding:17px 20px 10px; }
+#cm-eight .cm-v2 .cm-title { font-family:"Yu Mincho","Georgia",serif; font-size:29px; }
+#cm-eight .cm-v2 .cm-comment { padding:18px 0; }
+#cm-eight .cm-v2 .cm-body { font-size:19px; line-height:1.7; font-family:"Yu Mincho","Georgia",serif; }
+#cm-eight .cm-v2 .cm-pad { padding:4px 20px 16px; }
+#cm-eight .cm-v2 .cm-comment-meta { gap:8px; }
+#cm-eight .cm-v2 .cm-safety { background:var(--p-bg); border-top:0; padding:0 20px 10px; }
+#cm-eight .cm-v2 .cm-audio { border-radius:20px; padding:14px; }
+#cm-eight .cm-v2 .cm-status { margin:0 20px; padding:7px 0; font-size:11px; }
+/* 04: explicit sequence of independent tasks; progress structure is navigation, never automation. */
+#cm-eight .cm-v3 { --p-bg:#fff7ef; --p-surface:#fff; --p-ink:#543526; --p-muted:#81614f; --p-line:#ecd7c7; --p-accent:#b35520; --p-tint:#ffe5ca; --p-on:#fff; --p-danger:#a92e38; --p-radius:16px; border-color:#513e31; }
+#cm-eight .cm-v3 .cm-step-tabs { display:flex; gap:4px; margin:0 14px 10px; }
+#cm-eight .cm-v3 .cm-step-tabs button { flex:1; min-height:60px; border:0; padding:7px 3px; background:var(--p-surface); color:var(--p-muted); font-size:11px!important; border-radius:10px; }
+#cm-eight .cm-v3 .cm-step-tabs button span { display:block; font-size:10px; margin-bottom:3px; }
+#cm-eight .cm-v3 .cm-step-tabs button[aria-current=page] { background:var(--p-accent); color:#fff; }
+#cm-eight .cm-v3 .cm-task { display:grid; grid-template-columns:30px 1fr; gap:10px; padding:15px 0; border-bottom:1px solid var(--p-line); }
+#cm-eight .cm-v3 .cm-task-number { width:28px; height:28px; background:var(--p-tint); border-radius:50%; text-align:center; line-height:28px; font-size:12px; font-weight:650; }
+#cm-eight .cm-v3 .cm-task h5 { font-size:16px; margin:0 0 3px; }
+#cm-eight .cm-v3 .cm-task .cm-button { margin-top:9px; }
+#cm-eight .cm-v3 .cm-audio { padding:10px; }
+#cm-eight .cm-v3 .cm-comment { padding:12px; background:var(--p-surface); border:0; border-radius:12px; margin-top:8px; }
+/* 05: persistent split workspace; existing camera and comment content share attention. */
+#cm-eight .cm-v4 { --p-bg:#f0edf7; --p-surface:#fff; --p-ink:#382f53; --p-muted:#706583; --p-line:#dcd4e7; --p-accent:#71569d; --p-tint:#e6ddf2; --p-on:#fff; --p-danger:#a63349; --p-radius:14px; border-color:#40394e; }
+#cm-eight .cm-v4 .cm-preview-image { border-radius:0; aspect-ratio:16/9; }
+#cm-eight .cm-v4 .cm-split-camera { display:flex; align-items:center; gap:12px; padding:10px 14px; background:var(--p-surface); }
+#cm-eight .cm-v4 .cm-split-preview { width:140px; flex-shrink:0; }
+#cm-eight .cm-v4 .cm-split-preview .cm-preview-image { border-radius:8px; }
+#cm-eight .cm-v4 .cm-split-preview .cm-preview-top { top:5px; left:5px; right:5px; font-size:9px; }
+#cm-eight .cm-v4 .cm-split-preview .cm-preview-top span:last-child { display:none; }
+#cm-eight .cm-v4 .cm-split-preview .cm-preview-caption { display:none; }
+#cm-eight .cm-v4 .cm-split-preview .cm-preview-hidden b { font-size:12px; }
+#cm-eight .cm-v4 .cm-split-preview .cm-preview-hidden span { font-size:10px; }
+#cm-eight .cm-v4 .cm-compact-speed { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; font-size:12px; }
+#cm-eight .cm-v4 .cm-preview-sub { padding:0 14px; }
+#cm-eight .cm-v4 .cm-split-title { display:flex; justify-content:space-between; align-items:center; gap:8px; background:var(--p-surface); padding:7px 14px; font-size:13px; font-weight:650; border-block:1px solid var(--p-line); }
+#cm-eight .cm-v4 .cm-audio { padding:8px 10px; border-radius:10px; }
+#cm-eight .cm-v4 .cm-pad { padding:10px 14px; }
+#cm-eight .cm-v4 .cm-comment { padding:10px 0; }
+#cm-eight .cm-v4 .cm-body { font-size:15px; }
+#cm-eight .cm-v4 .cm-nav { min-height:56px; }
+#cm-eight .cm-v4 .cm-nav button { min-height:56px; }
+#cm-eight .cm-v4 .cm-nav-symbol { display:none; }
+#cm-eight .cm-v4 .cm-safety { padding:8px 12px; }
+#cm-eight .cm-v4 .cm-mini-feed { padding:0 12px 10px; background:var(--p-surface); }
+/* 06: content above, all frequent actions within the lower thumb zone. */
+#cm-eight .cm-v5 { --p-bg:#152944; --p-surface:#203858; --p-ink:#f2f6fd; --p-muted:#b1c3df; --p-line:#40587b; --p-accent:#a9c8ff; --p-tint:#2c4469; --p-on:#102b52; --p-danger:#ffb5ba; --p-radius:22px; border-color:#162840; }
+#cm-eight .cm-v5 .cm-top { padding:13px 18px; }
+#cm-eight .cm-v5 .cm-brand { font-size:16px; }
+#cm-eight .cm-v5 .cm-comment { padding:16px 0; }
+#cm-eight .cm-v5 .cm-body { font-size:18px; }
+#cm-eight .cm-v5 .cm-thumb-zone { background:var(--p-surface); border-radius:24px 24px 0 0; padding:16px 14px 9px; border-top:1px solid var(--p-line); box-shadow:0 -10px 30px #06172f35; }
+#cm-eight .cm-v5 .cm-thumb-zone .cm-row { margin-bottom:8px; }
+#cm-eight .cm-v5 .cm-thumb-zone .cm-button { border-radius:16px; min-height:56px; font-size:13px!important; }
+#cm-eight .cm-v5 .cm-safety { padding:0; border:0; }
+#cm-eight .cm-v5 .cm-nav { border:0; }
+#cm-eight .cm-v5 .cm-nav-symbol { display:none; }
+#cm-eight .cm-v5 .cm-nav button { min-height:52px; font-size:12px!important; }
+#cm-eight .cm-v5 .cm-preview-image { aspect-ratio:16/9; border-radius:22px; }
+/* 07: notebook typographic hierarchy, quiet margins and page index navigation. */
+#cm-eight .cm-v6 { --p-bg:#f5f6ef; --p-surface:#fffffa; --p-ink:#34413a; --p-muted:#68756a; --p-line:#d6dfd0; --p-accent:#536f4f; --p-tint:#e4ebdc; --p-on:#fff; --p-danger:#a1423e; --p-radius:3px; border-color:#3f493b; }
+#cm-eight .cm-v6 .cm-top { padding:15px 20px 5px; }
+#cm-eight .cm-v6 .cm-brand { font-family:"Yu Mincho",serif; font-size:22px; font-weight:600; }
+#cm-eight .cm-v6 .cm-title { font-family:"Yu Mincho",serif; font-size:25px; }
+#cm-eight .cm-v6 .cm-pad { padding:8px 20px 14px; }
+#cm-eight .cm-v6 .cm-comment { display:grid; grid-template-columns:66px 1fr; gap:9px; padding:17px 0; }
+#cm-eight .cm-v6 .cm-comment-meta { align-content:start; align-items:start; flex-direction:column; gap:5px; margin:2px 0 0; }
+#cm-eight .cm-v6 .cm-service { font-size:10px; }
+#cm-eight .cm-v6 .cm-author { font-size:11px; }
+#cm-eight .cm-v6 .cm-body { font-size:17px; line-height:1.8; }
+#cm-eight .cm-v6 .cm-audio { border-block:1px solid var(--p-line); background:transparent; border-radius:0; padding:10px 0; }
+#cm-eight .cm-v6 .cm-button { border-radius:3px; }
+#cm-eight .cm-v6 .cm-status { font-size:11px; margin:0 20px; padding:9px 0; }
+#cm-eight .cm-v6 .cm-safety { border-top:0; padding:10px 20px; }
+#cm-eight .cm-v6 .cm-bottom-menu { padding:10px 20px; }
+/* 08: bold rectangular modules and verb navigation, two independent control blocks. */
+#cm-eight .cm-v7 { --p-bg:#232323; --p-surface:#303030; --p-ink:#f4f1e6; --p-muted:#c2beb0; --p-line:#53534c; --p-accent:#e8d264; --p-tint:#444132; --p-on:#272619; --p-danger:#efa59d; --p-radius:0px; border-color:#2d2e27; }
+#cm-eight .cm-v7 .cm-brand { font-size:22px; font-weight:750; }
+#cm-eight .cm-v7 .cm-top { border-bottom:3px solid var(--p-accent); }
+#cm-eight .cm-v7 .cm-module-label { font-size:10px; letter-spacing:2px; font-weight:600; color:var(--p-accent); margin:0 0 7px; }
+#cm-eight .cm-v7 .cm-panel { padding:14px; border-left:3px solid var(--p-accent); }
+#cm-eight .cm-v7 .cm-button,#cm-eight .cm-v7 .cm-icon-button,#cm-eight .cm-v7 .cm-metrics { border-radius:0; }
+#cm-eight .cm-v7 .cm-comment { padding:14px 0; }
+#cm-eight .cm-v7 .cm-comment-meta { padding-bottom:4px; }
+#cm-eight .cm-v7 .cm-body { font-size:17px; font-weight:600; }
+#cm-eight .cm-v7 .cm-nav { min-height:60px; }
+#cm-eight .cm-v7 .cm-nav button { font-size:13px!important; min-height:60px; border-right:1px solid var(--p-line); }
+#cm-eight .cm-v7 .cm-nav button[aria-current=page] { background:var(--p-accent); color:var(--p-on); }
+#cm-eight .cm-v7 .cm-nav-symbol { display:none; }
+#cm-eight .cm-v7 .cm-audio { border-radius:0; }
+#cm-eight .cm-v7 .cm-safety { background:#191b18; }
+#cm-eight .cm-v7 .cm-preview-image { aspect-ratio:16/9; }
+@media(max-width:720px) { #cm-eight .cx-gallery { grid-template-columns:repeat(2,minmax(0,1fr)); gap:25px 16px; } }
+@media(max-width:610px) { #cm-eight .cx-detail-body { grid-template-columns:1fr; gap:20px; } #cm-eight .cx-detail-notes { max-width:360px; margin:auto; } #cm-eight .cx-intro h2 { font-size:25px; } }
+@media(max-width:360px) { #cm-eight .cx-gallery { gap:22px 10px; } #cm-eight .cx-concept h3 { font-size:13px; } #cm-eight .cx-number { font-size:11px; } #cm-eight .cx-screen-picker { gap:4px; } #cm-eight .cx-shell-button { font-size:12px; padding:9px; } #cm-eight .cm-pad { padding-inline:12px; } #cm-eight .cm-top { padding-inline:12px; } #cm-eight .cm-body { font-size:16px; } #cm-eight .cm-v6 .cm-comment { grid-template-columns:60px 1fr; gap:7px; } }
+</style>
+<script>
+(() => {
+  const root = document.getElementById('cm-eight');
+  const screens = { comments:'コメント', outdoor:'外配信', connection:'スマホ連携', settings:'設定' };
+  const designs = [
+    { name:'ポケット', feature:'下部4ナビ＋やわらかいカード', aim:'見慣れた操作で、迷わず行き来。', detail:'コメント、外配信、スマホ連携、設定を同じ深さに配置。配信中の状態と安全操作を下に残す、覚えやすい基本形。', flow:'下部ナビで移動 → 下の固定ボタンで映像・マイクを操作。', trade:'操作を常設する分、コメントの表示面積は控えめ。' },
+    { name:'コックピット', feature:'数値中心の操作盤＋上部切替', aim:'配信の状態を一目で把握。', detail:'機材の操作盤のように、送信速度とOBS配信を先に見せる。機能は上部の切替、頻繁な操作は下のラックへ。', flow:'上部の機能切替 → 数値を確認 → 下の操作ラック。', trade:'情報量が多め。細かい状態を見たい人向け。' },
+    { name:'フォーカス', feature:'大きな本文＋呼び出し式メニュー', aim:'読むことに集中し、必要時だけ操作。', detail:'本文を大きく、余白を広く。映像や設定へは下部の「画面と操作」から移動し、普段は読み上げと短い状態だけを見せる。', flow:'下の「画面と操作」 → 行き先・安全操作を選択。', trade:'隠す・ミュートに1操作多く必要。誤タップは抑えやすい。' },
+    { name:'ステップ', feature:'連携・映像送信・OBS操作の手順型', aim:'別々の操作を順番に理解。', detail:'連携、映像・マイクの送信、OBS配信を独立した段階として見せる。各操作を結び付けず、何が済んでいるかを明示する。', flow:'上部の工程へ移動 → 対象の操作を実行。コメントは下から。', trade:'手順説明に面積を使う。外配信を始めるときに分かりやすい。' },
+    { name:'スプリット', feature:'映像とコメントを上下に併置', aim:'画面移動を減らして両方を見る。', detail:'コメント画面にも小さな映像、外配信画面にもコメントを置く。どちらを広く見るかを下部で切り替える構成。', flow:'下部でコメント／外配信を選ぶ → 重点を入れ替える。', trade:'同時に見える分、一つ一つの表示領域は小さめ。' },
+    { name:'サムゾーン', feature:'下部にまとまる大きな操作', aim:'親指の移動を少なくする。', detail:'上はコンテンツ、下は操作という明確な分担。映像非表示・ミュート・読み上げと、その他の操作への入口を親指の近くにまとめる。', flow:'下部の大きなボタン → 「操作」からOBS・送信停止。', trade:'下部操作域が大きい。長い一覧はスクロールが増える。' },
+    { name:'ノート', feature:'余白と罫線＋ページ索引', aim:'情報の流れを落ち着いて読む。', detail:'サービスと投稿者を左、本文を右に置く余白重視の組版。設定もノートの項目のように整理し、下部の索引でページを選ぶ。', flow:'下の「ページ」から移動 → 「操作」で安全操作。', trade:'サービス・投稿者の列に幅を使う。長文本文は折り返しが増える。' },
+    { name:'モジュール', feature:'角形の操作ブロック＋動詞ナビ', aim:'目的と操作対象をはっきり分ける。', detail:'「見る・送る・つなぐ・整える」をナビに採用。映像送信とOBS配信を別の操作ブロックにし、大きな文字と明快な区切りで示す。', flow:'下部で動詞を選択 → 対象のブロックで操作。', trade:'強いコントラストと区切り。穏やかな見た目より明瞭さを優先。' }
+  ];
+  const sample = [
+    { service:'YouTube', author:'みなみ', body:'景色がきれいですね' },
+    { service:'Twitch', author:'あお', body:'音声ちゃんと聞こえてます！' },
+    { service:'したらば', author:'名無しさん', body:'次は川沿いを歩いてみて' },
+    { service:'YouTube', author:'こはる', body:'風が気持ちよさそう。ゆっくり楽しんでね' }
+  ];
+  const initial = () => ({ sending:true, obs:true, speech:true, auto:true, hidden:false, muted:false, preview:true, route:'Tailscale', volume:100, sheet:null, confirmExpiry:0, expired:false, diagnostic:'概要' });
+  const saved = window.openai?.widgetState;
+  const state = { selectedDesign: Number.isInteger(saved?.privateContent?.selectedDesign) && saved.privateContent.selectedDesign>=0 && saved.privateContent.selectedDesign<8 ? saved.privateContent.selectedDesign : 0, screen:screens[saved?.privateContent?.screen] ? saved.privateContent.screen : 'comments', expanded: false, phones:designs.map(initial) };
+  let confirmTimer = null;
+  const esc = value => String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const button = (label, action, cls='', attrs='') => `<button type="button" class="cm-button ${cls}" data-action="${action}" ${attrs}>${label}</button>`;
+  const navButton = (key,label,symbol,screen) => `<button type="button" data-action="nav" data-screen="${key}" ${key===screen?'aria-current="page"':''}><span class="cm-nav-symbol" aria-hidden="true">${symbol}</span>${label}</button>`;
+  const nav = (screen,verbs=false) => `<nav class="cm-nav" aria-label="アプリ内の画面">${navButton('comments',verbs?'見る':'コメント','▤',screen)}${navButton('outdoor',verbs?'送る':'外配信','▣',screen)}${navButton('connection',verbs?'つなぐ':'連携','⌁',screen)}${navButton('settings',verbs?'整える':'設定','⚙',screen)}</nav>`;
+  const status = s => `<div class="cm-status"><strong><span class="cm-dot"></span>OBSへの送信 ${s.sending?'中':'停止'}</strong><span>OBS配信 ${s.obs?'中':'停止'}</span></div>`;
+  const audio = s => `<div class="cm-audio"><div class="cm-audio-copy"><b>読み上げ ${s.speech?'待機中':'停止中'}</b><span class="cm-small">${s.speech?'新着コメントをイヤホンで聞く':'コメント表示は継続'}</span></div>${button(s.speech?'停止':'聞く','speech')}</div>`;
+  const auto = s => `<div class="cm-feed-control"><span class="cm-small">コメント接続中</span><button type="button" class="cm-auto" data-action="auto" aria-pressed="${s.auto}">自動スクロール ${s.auto?'ON':'OFF'}</button></div>`;
+  const feed = (s, short=false) => `${short?'':auto(s)}<div class="cm-feed">${sample.map(c=>`<div class="cm-comment"><div class="cm-comment-meta"><span class="cm-service">${esc(c.service)}</span><span class="cm-author">${esc(c.author)}</span></div><div class="cm-body">${esc(c.body)}</div></div>`).join('')}</div>`;
+  const meter = s => `<div class="cm-meter ${s.muted?'cm-muted-meter':''}" role="img" aria-label="送信音量メーター：${s.muted?'ミュート':'約60パーセント'}">${'<span></span>'.repeat(10)}</div>`;
+  const toggles = s => `<div class="cm-row">${button(s.hidden?'カメラに戻す':'映像を隠す','hide',s.hidden?'cm-soft':'',`${s.sending?'':'disabled'} aria-pressed="${s.hidden}"`)}${button(s.muted?'ミュート解除':'マイクミュート','mute',s.muted?'cm-soft':'',`${s.sending?'':'disabled'} aria-pressed="${s.muted}"`)}</div>`;
+  const obs = s => `<div class="cm-obs"><span class="cm-obs-text"><span class="cm-dot"></span>OBS配信 ${s.obs?'中':'停止中'}</span>${button(s.obs?'OBS配信を終了':'OBS配信を開始','obs','cm-button-small')}</div>`;
+  const send = s => button(s.sending?'映像・音声の送信を停止':'OBSに映像・音声を送信',s.sending?'stop-send':'start-send',s.sending?'cm-danger':'cm-primary');
+  const safety = s => `<div class="cm-safety">${toggles(s)}${obs(s)}<div class="cm-spacer"></div>${send(s)}</div>`;
+  const metrics = s => `<div class="cm-metrics"><div><span>実送信速度</span><b>${s.sending?'2.42':'—'} <small style="font-size:11px">Mbps</small></b></div><div><span>SRT往復時間</span><b>${s.sending?'42':'—'} <small style="font-size:11px">ms</small></b></div></div>`;
+  const preview = s => !s.sending ? `<div class="cm-preview-image cm-preview-hidden"><b>映像・マイク送信 停止中</b><span>送信開始は明示操作で</span></div>` : !s.preview ? `<div class="cm-preview-image cm-preview-hidden"><b>プレビューを閉じています</b><span>配信映像は継続</span></div>` : s.hidden ? `<div class="cm-preview-image cm-preview-hidden"><b>カメラ停止中</b><span>代替映像を送信 · マイク${s.muted?'ミュート':'送信中'}</span></div>` : `<div class="cm-preview-image" role="img" aria-label="全案共通の架空の川沿いのカメラプレビュー"><div class="cm-preview-top"><span>背面カメラ</span><span>720p / 30fps</span></div><span class="cm-preview-caption">架空のプレビュー</span></div>`;
+  const outdoor = s => `${preview(s)}<div class="cm-spacer"></div><div class="cm-row">${button(s.preview?'プレビューを閉じる':'プレビューを表示','preview','cm-button-small')}${button('通信・診断','diagnostics','cm-button-small')}</div><p class="cm-live-caption">プレビュー表示だけの切替。配信映像は継続。</p>${metrics(s)}<div class="cm-setting-row"><b>映像状態</b><span>${s.sending?(s.hidden?'手動非表示':'通常動画'):'停止中'}</span></div><div class="cm-setting-row"><b>配信マイク</b><span>${s.muted?'手動ミュート':'内蔵マイク / '+s.volume+'%'}</span></div>${meter(s)}<p class="cm-small">PC受信確認：${s.sending?'進行中':'送信待ち'}<br>OBSでの表示・音声はOBS側で確認します。</p>${button('カメラ・マイク・送信品質','nav-settings','cm-soft')}`;
+  const connection = s => `<div class="cm-connection-hero"><small>登録先PC</small><b>配信PC</b><small>現在の経路：${s.route}</small></div><div class="cm-section-title">機能ごとの登録</div><div class="cm-registration"><div><span>コメント・読み上げ</span><b>登録済み</b></div><div><span>映像・配信マイク</span><b>登録済み</b></div><div><span>OBS操作</span><b>登録済み</b></div></div><p class="cm-small">登録済みは接続成功とは別の状態です。</p><div class="cm-section-title">使うネットワーク</div><div class="cm-network-list">${['LAN','Tailscale','直接接続'].map(r=>button(`<span>${r}</span><small>${r==='直接接続'?'未登録':r===s.route?'選択中':'登録済み'}</small>`,'route','cm-network',`data-route="${r}" aria-pressed="${r===s.route}" ${s.sending||r==='直接接続'?'disabled':''}`)).join('')}</div>${s.sending?'<p class="cm-small">送信中は経路変更・QR登録ができません。<br>映像・音声の送信を停止してから操作します。</p>':'<p class="cm-small">登録済みの経路だけを明示的に選びます。</p>'}${button('PCのQRを読み取る','qr','cm-primary',s.sending?'disabled':'')}<p class="cm-small">PCの「スマホ連携」でネットワークを選択。<br>登録だけでは送信・OBS配信・読み上げを開始しません。</p>`;
+  const settings = s => `<div class="cm-section-title">スマホ連携</div>${button('スマホ連携を開く','nav-connection','cm-soft')}<div class="cm-section-title" style="margin-top:18px">映像・カメラ</div><label class="cm-setting-label">カメラ</label><select aria-label="カメラ"><option>背面カメラ</option><option>前面カメラ</option></select><label class="cm-setting-label">映像の向き ${s.sending?'· 送信中は変更不可':''}</label><select aria-label="映像の向き" ${s.sending?'disabled':''}><option>横向き</option><option>縦向き</option></select><div class="cm-setting-row"><b>診断用の映像時刻表示</b><span>OFF</span></div><div class="cm-section-title" style="margin-top:18px">配信マイク</div><select aria-label="配信マイク"><option>内蔵マイク / 本体</option></select><label class="cm-setting-label">送信音量 <b data-volume-label>${s.volume}%</b></label><input type="range" min="0" max="200" value="${s.volume}" data-input="volume" aria-label="配信マイクの送信音量">${meter(s)}<p class="cm-small">読み上げと配信マイクは別の音声です。<br>イヤホンの使用をおすすめします。</p><div class="cm-section-title" style="margin-top:18px">カメラ調整</div><div class="cm-setting-row"><b>ズーム</b><span>1.0×</span></div><div class="cm-setting-row"><b>露出補正</b><span>0</span></div><div class="cm-setting-row"><b>ライト</b><span>OFF</span></div><div class="cm-section-title" style="margin-top:18px">送信品質 ${s.sending?'· 送信停止後に変更':''}</div><label class="cm-setting-label">品質プリセット</label><select aria-label="品質プリセット" ${s.sending?'disabled':''}><option>標準 · H.264 / 720p / 30fps</option></select><div class="cm-setting-row"><b>ビットレート</b><span>自動 · 0.5〜2.5 Mbps</span></div><div class="cm-setting-row"><b>弱回線対策</b><span>ON</span></div><div class="cm-setting-row"><b>SRT遅延バッファ</b><span>1,200 ms</span></div><p class="cm-small">設定画面の移動・開閉では配信を止めません。</p>`;
+  const pageContent = (screen,s) => screen==='comments'?audio(s)+feed(s):screen==='outdoor'?outdoor(s):screen==='connection'?connection(s):settings(s);
+  const top = (brand='きゃすメイト',extra=true) => `<header class="cm-top"><span class="cm-brand">${brand}</span>${extra?'<button type="button" class="cm-icon-button" data-action="nav-settings" aria-label="設定を開く">⚙</button>':''}</header>`;
+  const menu = (left='画面と操作',right='') => `<div class="cm-bottom-menu">${button(left,'menu','cm-primary')}${right?button(right,'controls','cm-soft'):''}</div>`;
+  function renderVariant(i,screen,s) {
+    if(i===0) return `${top()}${status(s)}<div class="cm-scroll cm-pad"><div class="cm-heading"><h4>${screens[screen]}</h4><span class="cm-pill">${s.route}</span></div>${pageContent(screen,s)}</div>${safety(s)}${nav(screen)}`;
+    if(i===1) return `${top('CASMATE / CONTROL')}${status(s)}${nav(screen)}<div class="cm-scroll cm-pad">${screen==='comments'?`<div class="cm-heading"><h4>コメント</h4><span class="cm-pill">${s.route}</span></div>${metrics(s)}${audio(s)}${feed(s)}`:pageContent(screen,s)}</div>${safety(s)}`;
+    if(i===2) return `<header class="cm-top"><div style="flex:1"><div class="cm-kicker">きゃすメイト</div><div class="cm-title">${screens[screen]}</div></div><span class="cm-pill">${s.route}</span></header>${status(s)}<div class="cm-scroll cm-pad">${screen==='comments'?feed(s):pageContent(screen,s)}</div><div class="cm-safety">${audio(s)}</div>${menu()}`;
+    if(i===3) {
+      const steps = `<nav class="cm-step-tabs" aria-label="配信の工程">${[['connection','1','連携'],['outdoor','2','映像・マイク'],['settings','⚙','調整']].map(([key,n,label])=>`<button type="button" data-action="nav" data-screen="${key}" ${key===screen?'aria-current="page"':''}><span>${n}</span>${label}</button>`).join('')}<button type="button" data-action="obs-panel"><span>3</span>OBS配信</button></nav>`;
+      const tasks = `<div class="cm-task"><span class="cm-task-number">1</span><div><h5>PCと連携</h5><span class="cm-small">配信PC / ${s.route} · 登録済み</span>${button('登録と経路を確認','nav-connection','cm-soft')}</div></div><div class="cm-task"><span class="cm-task-number">2</span><div><h5>映像・マイクを送る</h5><span class="cm-small">OBSへの送信 ${s.sending?'中':'停止中'}</span>${send(s)}</div></div><div class="cm-task"><span class="cm-task-number">3</span><div><h5>OBSで配信する</h5><span class="cm-small">映像送信とは別の操作</span>${obs(s)}</div></div>`;
+      return `${top('配信の準備と操作',false)}${steps}${status(s)}<div class="cm-scroll cm-pad">${screen==='comments'?`<div class="cm-heading"><h4>コメント</h4></div>${audio(s)}${feed(s)}`:screen==='outdoor'?`${preview(s)}${metrics(s)}${tasks}${button('通信・診断','diagnostics','cm-soft')}`:pageContent(screen,s)}</div><div class="cm-safety">${toggles(s)}</div><div class="cm-bottom-menu">${button('コメント','nav-comments',screen==='comments'?'cm-primary':'')}${button('配信の操作','nav-outdoor',screen==='outdoor'?'cm-primary':'')}${button('安全操作','controls','cm-soft')}</div>`;
+    }
+    if(i===4) {
+      const combined = screen==='comments'?`<div class="cm-split-camera"><div class="cm-split-preview">${preview(s)}</div><div><b style="font-size:12px">映像・マイク ${s.sending?'送信中':'停止中'}</b><div class="cm-small">${s.sending?'2.42 Mbps':'— Mbps'}</div>${button('外配信を広く','nav-outdoor','cm-button-small cm-soft')}</div></div><div class="cm-split-title"><span>コメント</span>${button(s.speech?'読み上げを停止':'読み上げを聞く','speech','cm-button-small cm-soft')}</div><div class="cm-pad">${feed(s)}</div>`:`${preview(s)}<div class="cm-compact-speed"><b>実送信 ${s.sending?'2.42':'—'} Mbps</b><span>SRT往復 ${s.sending?'42':'—'} ms</span></div><div class="cm-pad" style="padding-top:0"><div class="cm-row">${button(s.preview?'プレビューを閉じる':'プレビューを表示','preview','cm-button-small')}${button('通信・診断','diagnostics','cm-button-small')}</div></div><div class="cm-split-title"><span>コメント</span>${button('コメントを広く','nav-comments','cm-button-small cm-soft')}</div><div class="cm-mini-feed">${feed(s,true)}</div>`;
+      return `${top('映像とコメント')}${status(s)}<div class="cm-scroll">${screen==='comments'||screen==='outdoor'?combined:`<div class="cm-pad"><div class="cm-heading"><h4>${screens[screen]}</h4></div>${pageContent(screen,s)}</div>`}</div>${safety(s)}${nav(screen)}`;
+    }
+    if(i===5) return `${top('きゃすメイト',false)}${status(s)}<div class="cm-scroll cm-pad"><div class="cm-heading"><h4>${screens[screen]}</h4><span class="cm-pill">${s.route}</span></div>${screen==='comments'?feed(s):pageContent(screen,s)}</div><div class="cm-thumb-zone">${toggles(s)}<div class="cm-row">${button(s.speech?'読み上げを停止':'読み上げを聞く','speech','cm-primary')}${button('操作 · OBS / 送信','controls','cm-soft')}</div>${nav(screen)}</div>`;
+    if(i===6) return `<header class="cm-top"><div><div class="cm-kicker">きゃすメイト / ${s.route}</div><div class="cm-title">${screens[screen]}</div></div></header>${status(s)}<div class="cm-scroll cm-pad">${screen==='comments'?`${audio(s)}${feed(s)}`:pageContent(screen,s)}</div><div class="cm-safety"><div class="cm-small">映像 ${s.hidden?'非表示':'表示'} · マイク ${s.muted?'ミュート':'送信中'}</div></div>${menu('ページ','操作')}`;
+    return `${top('きゃすメイト',false)}${status(s)}<div class="cm-scroll cm-pad"><div class="cm-module-label">${screen==='comments'?'READ / LISTEN':screen==='outdoor'?'CAMERA / MIC':screen==='connection'?'CONNECT':'ADJUST'}</div><div class="cm-heading"><h4>${screens[screen]}</h4><span class="cm-pill">${s.route}</span></div>${screen==='outdoor'?`<div class="cm-panel"><div class="cm-module-label">映像・マイク</div>${preview(s)}${metrics(s)}${toggles(s)}<div class="cm-spacer"></div>${send(s)}</div><div class="cm-panel"><div class="cm-module-label">OBS配信</div>${obs(s)}</div>${button('通信・診断','diagnostics')}`:pageContent(screen,s)}</div>${screen==='outdoor'?'<div class="cm-safety"><div class="cm-small">映像送信とOBS配信は別々に操作します。</div></div>':safety(s)}${nav(screen,true)}`;
+  }
+  function sheet(s) {
+    if(!s.sheet) return '';
+    const close = `<button type="button" class="cm-button cm-button-small" data-action="close-sheet" aria-label="閉じる">×</button>`;
+    let title='', content='';
+    if(s.sheet==='menu') {
+      title='画面と操作';
+      content=`<div class="cm-menu-grid">${Object.entries(screens).map(([key,label])=>button(label,'nav','',`data-screen="${key}"`)).join('')}</div><div class="cm-spacer"></div>${toggles(s)}${obs(s)}<div class="cm-spacer"></div>${send(s)}`;
+    } else if(s.sheet==='controls'||s.sheet==='obs-panel') {
+      title=s.sheet==='obs-panel'?'OBS配信':'配信中の操作';
+      content=`${status(s)}<div class="cm-spacer"></div>${toggles(s)}${obs(s)}<p class="cm-small">OBS配信は、映像・マイクの送信と別に操作します。</p>${send(s)}`;
+    } else if(s.sheet==='stop-send') {
+      title='映像・音声の送信を停止？';
+      content=`<p>この端末のカメラと配信マイクから、PCへの送信を停止します。</p><div class="cm-panel"><b>続くもの</b><p style="margin:5px 0 0">コメント・読み上げ・OBS配信</p></div>${button('映像・音声の送信を停止','confirm-send','cm-danger')}<div class="cm-spacer"></div>${button('送信を続ける','close-sheet')}`;
+    } else if(s.sheet==='obs') {
+      title=`OBS配信を${s.obs?'終了':'開始'}しますか？`;
+      content=`<div class="cm-setting-row"><b>対象PC</b><span>配信PC</span></div><div class="cm-setting-row"><b>現在のOBS状態</b><span>${s.obs?'配信中':'停止中'}</span></div><p>${s.obs?'映像・マイクの送信、コメント・読み上げは継続します。':'映像・マイクの送信と読み上げは開始しません。'}</p><p class="cm-small" role="status">${s.expired?'確認期限が切れました。閉じてもう一度操作してください。':'確認は10秒以内。見本の状態だけが変わります。'}</p>${button(`確認してOBS配信を${s.obs?'終了':'開始'}`,'confirm-obs',s.obs?'cm-danger':'cm-primary',s.expired?'disabled':'')}<div class="cm-spacer"></div>${button('キャンセル','close-sheet')}`;
+    } else if(s.sheet==='qr') {
+      title='PCのQRを読み取る';
+      content='<div class="cm-connection-hero"><b>▦</b><small>QR読取画面の見本</small></div><p>1. PCの「スマホ連携」を開く<br>2. 利用するネットワークを選ぶ<br>3. PCに表示された共通QRを読む</p><p class="cm-small">この見本ではカメラを起動しません。<br>登録後も各機能は個別に開始します。</p>'+button('閉じる','close-sheet','cm-primary');
+    } else if(s.sheet==='diagnostics') {
+      title='通信・診断';
+      const current=s.sending?(s.hidden?'手動非表示':'通常動画'):'停止中';
+      const text = s.diagnostic==='概要'?`${metrics(s)}<div class="cm-setting-row"><b>映像状態</b><span>${current}</span></div><div class="cm-setting-row"><b>品質</b><span>H.264 / 720p / 30fps</span></div><p class="cm-small">PC受信確認：${s.sending?'進行中':'送信待ち'}<br>送信側の確認はOBSでの表示成功を保証しません。</p>`:s.diagnostic==='自動調整'?`<div class="cm-setting-row"><b>制御</b><span>${s.sending?'自動':'停止中'}</span></div><div class="cm-setting-row"><b>受付済み映像目標</b><span>${s.sending?'2.50 Mbps':'—'}</span></div><div class="cm-setting-row"><b>弱回線対策</b><span>ON</span></div><p class="cm-small">映像状態：${current}。映像目標と実送信速度は別の値です。</p>`:s.diagnostic==='通信'?`<div class="cm-setting-row"><b>SRT往復時間</b><span>${s.sending?'42 ms':'—'}</span></div><div class="cm-setting-row"><b>送信待ち</b><span>${s.sending?'18 ms':'—'}</span></div><div class="cm-setting-row"><b>PC受信確認</b><span>${s.sending?'進行中':'送信待ち'}</span></div><div class="cm-setting-row"><b>音声破棄</b><span>${s.sending?'0':'—'}</span></div>`:'<p>数値履歴の見本（過去の値）</p><div class="cm-setting-row"><b>実送信速度</b><span>2.38 → 2.42 Mbps</span></div><div class="cm-setting-row"><b>SRT往復時間</b><span>40 → 42 ms</span></div><p class="cm-small">映像・音声・コメントは記録しません。</p>'+button('数値診断を書き出す（見本）','export','cm-soft');
+      content=`<div class="cm-diagnostic-tabs">${['概要','自動調整','通信','履歴'].map(t=>button(t,'diagnostic-tab',s.diagnostic===t?'cm-primary':'',`data-tab="${t}"`)).join('')}</div>${text}<p class="cm-small">数値は全案共通の架空サンプルです。</p>`;
+    } else if(s.sheet==='export') {
+      title='数値診断の書き出し'; content='<p>書き出し操作の位置を確認する見本です。</p><p class="cm-small">実データ・診断ファイルは生成しません。</p>'+button('閉じる','close-sheet','cm-primary');
+    }
+    return `<div class="cm-sheet-backdrop"><section class="cm-sheet" role="dialog" aria-modal="true" aria-label="${title}"><div class="cm-heading"><h4>${title}</h4>${close}</div>${content}</section></div>`;
+  }
+  function phone(i,screen,s,detail=false) {
+    return `<div class="cm-phone cm-v${i}" ${detail?'data-detail-phone':''} data-design-index="${i}" data-screen="${screen}"><div class="cm-os"><span>14:32</span><span aria-label="通信とバッテリー">▂▄▆  ▰</span></div><div class="cm-app" ${s.sheet?'inert':''}>${renderVariant(i,screen,s)}</div><div class="cm-android-bar"></div>${sheet(s)}</div>`;
+  }
+  const shellButton = (key,label,action='screen') => `<button type="button" class="cx-shell-button" data-shell="${action}" data-screen="${key}" aria-pressed="${state.screen===key}">${label}</button>`;
+  const remember = () => window.openai?.setWidgetState?.({modelContent:{previewDesign:state.expanded?`${state.selectedDesign+1} ${designs[state.selectedDesign].name}`:null,previewScreen:screens[state.screen]},privateContent:{selectedDesign:state.selectedDesign,screen:state.screen}})?.catch?.(()=>{});
+  function fitPreviews() {
+    root.querySelectorAll('.cx-preview').forEach(el=>el.style.setProperty('--preview-scale',String(el.clientWidth/360)));
+  }
+  function renderDetail() {
+    const el=root.querySelector('.cx-detail'); el.hidden=!state.expanded;
+    if(!state.expanded) { el.innerHTML=''; return; }
+    const i=state.selectedDesign,d=designs[i],s=state.phones[i];
+    el.innerHTML=`<div class="cx-detail-top"><h3>${String(i+1).padStart(2,'0')} ${d.name}</h3><button type="button" class="cx-shell-button" data-shell="previous" aria-label="前の案">←</button><button type="button" class="cx-shell-button" data-shell="next" aria-label="次の案">→</button><button type="button" class="cx-shell-button" data-shell="collapse">一覧へ</button></div><div class="cx-detail-body"><div class="cx-device-wrap">${phone(i,state.screen,s,true)}</div><div class="cx-detail-notes"><h4>${d.feature}</h4><p>${d.detail}</p><div class="cx-detail-screens" aria-label="拡大する画面">${Object.entries(screens).map(([k,v])=>shellButton(k,v)).join('')}</div><dl><dt>使いやすさの狙い</dt><dd>${d.aim}</dd><dt>操作の入口</dt><dd>${d.flow}</dd><dt>比較のポイント</dt><dd>${d.trade}</dd><dt>操作を試す</dt><dd>拡大画面のボタンで、画面移動、読み上げ、映像非表示、ミュート、確認付き停止を試せます。設定はスクロールして確認できます。</dd></dl><p class="cx-sample" style="margin-top:20px">全案共通：4画面＋通信診断・確認画面<br>状態の変更はこの見本の中だけです。</p></div></div>`;
+    if(s.sheet) requestAnimationFrame(()=>el.querySelector('.cm-sheet button')?.focus({preventScroll:true}));
+  }
+  function render() {
+    root.querySelector('.cx-screen-picker').innerHTML=Object.entries(screens).map(([k,v])=>shellButton(k,v)).join('');
+    root.querySelector('.cx-gallery').innerHTML=designs.map((d,i)=>`<article class="cx-concept" data-design-index="${i}"><div class="cx-concept-head"><span class="cx-number">${String(i+1).padStart(2,'0')}</span><h3>${d.name}</h3></div><div class="cx-preview"><div aria-hidden="true">${phone(i,state.screen,initial())}</div><button type="button" class="cx-preview-hit" data-shell="expand" data-index="${i}" aria-label="${i+1} ${d.name}を拡大"></button></div><button type="button" class="cx-preview-button" data-shell="expand" data-index="${i}"><span class="cx-zoom">拡大して確認 <span aria-hidden="true">↗</span></span></button><p><b>特徴</b> ${d.feature}</p><p><b>狙い</b> ${d.aim}</p></article>`).join('');
+    root.querySelectorAll('.cx-preview .cm-phone').forEach(el=>{el.inert=true;});
+    renderDetail(); fitPreviews();
+  }
+  function cancelConfirm() { if(confirmTimer) clearTimeout(confirmTimer); confirmTimer=null; const s=state.phones[state.selectedDesign]; if(s.sheet==='obs') { s.sheet=null; s.confirmExpiry=0; s.expired=false; } }
+  function openDesign(index) { if(!Number.isInteger(index)||index<0||index>=8) return; cancelConfirm(); state.selectedDesign=index; state.expanded=true; state.phones[index].sheet=null; renderDetail(); remember(); }
+  function setScreen(screen) { if(!screens[screen]) return; cancelConfirm(); state.screen=screen; state.phones[state.selectedDesign].sheet=null; render(); remember(); }
+  function perform(action,target) {
+    const s=state.phones[state.selectedDesign];
+    if(action.startsWith('nav-')) { setScreen(action.slice(4)); return; }
+    if(action==='nav') { setScreen(target.dataset.screen); return; }
+    if(action==='speech') s.speech=!s.speech;
+    if(action==='auto') s.auto=!s.auto;
+    if(action==='hide'&&s.sending) s.hidden=!s.hidden;
+    if(action==='mute'&&s.sending) s.muted=!s.muted;
+    if(action==='preview') s.preview=!s.preview;
+    if(['menu','controls','obs-panel','stop-send','qr','diagnostics'].includes(action)) s.sheet=action;
+    if(action==='start-send') { s.sending=true; s.hidden=false; s.muted=false; s.sheet=null; }
+    if(action==='confirm-send'&&s.sheet==='stop-send') { s.sending=false; s.sheet=null; }
+    if(action==='route'&&!s.sending&&target.dataset.route!=='直接接続') s.route=target.dataset.route;
+    if(action==='close-sheet') { cancelConfirm(); s.sheet=null; }
+    if(action==='obs') {
+      s.sheet='obs'; s.expired=false; s.confirmExpiry=Date.now()+10000;
+      if(confirmTimer) clearTimeout(confirmTimer);
+      confirmTimer=setTimeout(()=>{ if(s.sheet==='obs') { s.expired=true; renderDetail(); } },10000);
+    }
+    if(action==='confirm-obs'&&s.sheet==='obs'&&!s.expired&&Date.now()<s.confirmExpiry) { s.obs=!s.obs; cancelConfirm(); s.sheet=null; }
+    if(action==='diagnostic-tab') s.diagnostic=target.dataset.tab;
+    if(action==='export') s.sheet='export';
+    renderDetail(); remember();
+  }
+  root.addEventListener('click',event=>{
+    const shell=event.target.closest('[data-shell]');
+    if(shell) {
+      const action=shell.dataset.shell;
+      if(action==='screen') setScreen(shell.dataset.screen);
+      if(action==='expand') { openDesign(Number(shell.dataset.index)); root.querySelector('.cx-detail').scrollIntoView({block:'start',behavior:'auto'}); }
+      if(action==='previous'||action==='next') openDesign((state.selectedDesign+(action==='next'?1:7))%8);
+      if(action==='collapse') { cancelConfirm(); state.expanded=false; renderDetail(); remember(); root.querySelector('.cx-gallery').scrollIntoView({block:'start',behavior:'auto'}); }
+      return;
+    }
+    const target=event.target.closest('[data-action]');
+    if(target&&target.closest('[data-detail-phone]')&&!target.disabled) perform(target.dataset.action,target);
+  });
+  root.addEventListener('input',event=>{
+    if(event.target.dataset.input==='volume'&&event.target.closest('[data-detail-phone]')) { const s=state.phones[state.selectedDesign]; s.volume=Number(event.target.value); root.querySelector('[data-detail-phone] [data-volume-label]').textContent=`${s.volume}%`; }
+  });
+  root.addEventListener('keydown',event=>{
+    const dialog=root.querySelector('[data-detail-phone] [role=dialog]');
+    if(!dialog) return;
+    if(event.key==='Escape') { event.preventDefault(); cancelConfirm(); state.phones[state.selectedDesign].sheet=null; renderDetail(); }
+    if(event.key==='Tab') { const fields=[...dialog.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled)')]; const first=fields[0],last=fields[fields.length-1]; if(event.shiftKey&&document.activeElement===first) { event.preventDefault(); last?.focus(); } else if(!event.shiftKey&&document.activeElement===last) { event.preventDefault(); first?.focus(); } }
+  });
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden) { cancelConfirm(); renderDetail(); } });
+  window.addEventListener('openai:set_globals',event=>{ const restored=event.detail?.globals?.widgetState?.privateContent; if(!restored) return; if(Number.isInteger(restored.selectedDesign)&&restored.selectedDesign>=0&&restored.selectedDesign<8) state.selectedDesign=restored.selectedDesign; if(screens[restored.screen]) state.screen=restored.screen; render(); });
+  if(globalThis.ResizeObserver) new ResizeObserver(fitPreviews).observe(root);
+  window.casmateEight={state,designs,sample,render,openDesign,setScreen};
+  render();
+})();
+</script>
+</body>
+</html>

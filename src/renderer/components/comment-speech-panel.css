@@ -1,0 +1,59 @@
+.management-shell .panel.comment-speech-panel { padding:0; border:0; background:transparent; }
+.comment-speech-panel { color:var(--studio-text, #e2ecef); overflow-anchor:none; }
+/* Filter changes can make Chromium's scroll anchoring jump in this long editor. */
+.comment-speech-panel button.secondary:hover { filter:none; background:var(--studio-panel, #30334f); }
+.comment-speech-panel .card-summary,.comment-speech-panel .card-details { gap:16px; }
+.comment-speech-panel .card-warning:has(> :empty) { display:none; }
+.comment-speech-panel p { margin:0; }
+.comment-speech-panel .speech-runtime,.comment-speech-panel .speech-section { display:grid; gap:16px; padding:20px; border:1px solid var(--studio-line, #3c5360); border-radius:10px; background:var(--studio-surface, #1c2b35); min-width:0; align-content:start; }
+.comment-speech-panel .speech-runtime { gap:8px; padding:15px 18px; }
+.comment-speech-panel .speech-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; min-width:0; }
+.comment-speech-panel h3 { font-size:var(--management-font-heading, 17px); font-weight:500; line-height:1.6; margin:0; }
+.comment-speech-panel .speech-runtime h3 { font-size:var(--management-font-heading, 14px); }
+.comment-speech-panel .speech-help { color:var(--studio-muted, #afc2cc); font-size:var(--management-font-secondary, 12px); line-height:1.65; overflow-wrap:anywhere; }
+.comment-speech-panel .speech-engine-state { color:var(--studio-muted, #acd6c1); font-size:var(--management-font-secondary, 12px); }
+.comment-speech-panel .speech-runtime .speech-engine-state { display:grid; min-width:0; max-width:100%; }
+.comment-speech-panel .speech-runtime .speech-engine-state::before { content:'VOICEVOX · 準備完了'; visibility:hidden; grid-area:1/1; }
+.comment-speech-panel .speech-runtime .speech-engine-state>span { grid-area:1/1; }
+.comment-speech-panel .speech-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.comment-speech-panel label { color:var(--studio-text, #e2ecef); font-size:var(--management-font-body, 14px); gap:7px; line-height:1.6; min-width:0; }
+.comment-speech-panel input,.comment-speech-panel select { font-size:var(--management-font-body, 14px); }
+.comment-speech-panel .speech-mixer { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+.comment-speech-panel .speech-channel { display:grid; gap:14px; justify-items:center; align-content:start; padding:18px 12px; background:var(--studio-surface, #14232d); border-radius:8px; min-width:0; }
+.comment-speech-panel .speech-channel-value { color:var(--studio-muted, #acd6c1); font-size:var(--management-font-heading, 22px); font-variant-numeric:tabular-nums; }
+.management-shell .comment-speech-panel input[type=range],.comment-speech-panel input[type=range] { writing-mode:vertical-lr; direction:rtl; width:32px; height:150px; padding:0; margin:6px 0; accent-color:var(--studio-accent, #acd6c1); background:transparent; border:0; border-radius:0; cursor:pointer; box-shadow:none; }
+.comment-speech-panel .speech-number-unit { display:flex; align-items:center; gap:8px; min-width:0; max-width:100%; }
+.comment-speech-panel .speech-channel input[type=number] { padding:6px; max-width:100px; text-align:center; font-variant-numeric:tabular-nums; }
+.comment-speech-panel .speech-length-field { display:grid; gap:7px; min-width:0; }
+.comment-speech-panel .speech-length-field input { max-width:110px; }
+.comment-speech-panel .speech-preview-sample { display:grid; gap:8px; padding:14px; border-radius:8px; background:var(--studio-surface, #14232d); }
+.comment-speech-panel .speech-preview-button { width:10em; max-width:100%; }
+.comment-speech-panel .speech-preview-guidance { display:grid; }
+.comment-speech-panel .speech-preview-guidance::before { content:'話者一覧を取得できません。「話者一覧を更新」を試してください。'; visibility:hidden; grid-area:1/1; }
+.comment-speech-panel .speech-preview-guidance>span { grid-area:1/1; min-width:0; }
+.comment-speech-panel .speech-engine-overview,.comment-speech-panel .speech-engine-file { display:grid; gap:8px; min-width:0; }
+.comment-speech-panel .speech-engine-overview>.speech-engine-state { display:grid; }
+.comment-speech-panel .speech-engine-overview>.speech-engine-state::before { content:'エンジン：準備完了'; visibility:hidden; grid-area:1/1; }
+.comment-speech-panel .speech-engine-overview>.speech-engine-state>span { grid-area:1/1; min-width:0; }
+.comment-speech-panel .speech-engine-guidance { display:grid; }
+.comment-speech-panel .speech-engine-guidance::before { content:'読み上げをオンにすると自動起動します。'; visibility:hidden; grid-area:1/1; }
+.comment-speech-panel .speech-engine-guidance>span { grid-area:1/1; min-width:0; }
+.comment-speech-panel .speech-engine-target { padding:8px 12px; border-left:3px solid var(--studio-accent, #acd6c1); background:var(--studio-soft); min-width:0; }
+.comment-speech-panel .speech-engine-target code { display:block; margin:4px 0; color:var(--studio-text, #e2ecef); font-size:var(--management-font-body, 14px); font-weight:700; white-space:normal; overflow-wrap:anywhere; }
+.comment-speech-panel .speech-engine-select { display:inline-grid; max-width:100%; }
+.comment-speech-panel .speech-engine-select::before { content:'VOICEVOXの起動ファイルを指定'; visibility:hidden; grid-area:1/1; }
+.comment-speech-panel .speech-engine-select>span { grid-area:1/1; }
+.comment-speech-panel .speech-preview-button[aria-disabled=true] { opacity:.6; cursor:default; }
+.comment-speech-panel .speech-lower-sections { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; align-items:start; }
+.comment-speech-panel .speech-option { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; font-size:var(--management-font-body, 14px); }
+.comment-speech-panel hr { width:100%; border:0; border-top:1px solid var(--studio-line, #3c5360); margin:0; }
+.comment-speech-panel details { border-top:1px solid var(--studio-line, #3c5360); padding-top:12px; }
+.comment-speech-panel summary { cursor:pointer; padding:3px 0; min-height:34px; }
+.comment-speech-panel details p { margin-top:8px; }
+.comment-speech-panel .field-error { font-size:var(--management-font-secondary, 12px); overflow-wrap:anywhere; }
+.comment-speech-panel a { font-size:var(--management-font-secondary, 12px); color:var(--studio-muted, #acd6c1); }
+.comment-speech-panel input:focus-visible,.comment-speech-panel select:focus-visible,.comment-speech-panel summary:focus-visible { outline:2px solid var(--studio-accent, #bfe6db); outline-offset:3px; }
+@media(max-width:720px) { .comment-speech-panel .speech-lower-sections { grid-template-columns:1fr; }.comment-speech-panel .speech-section { padding:16px; } }
+@media(max-width:480px) { .comment-speech-panel .speech-mixer { grid-template-columns:repeat(2,minmax(0,1fr)); }.comment-speech-panel .speech-fields { grid-template-columns:1fr; }.comment-speech-panel .speech-runtime { padding:13px; }.comment-speech-panel input[type=number],.comment-speech-panel select { font-size:var(--management-font-body, 16px); } }
+.comment-speech-panel details.speech-engine-file { border:0; padding:0; display:block; }
+.comment-speech-panel .speech-engine-file-content { display:grid; gap:8px; min-width:0; }

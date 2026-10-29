@@ -1,0 +1,47 @@
+.initial-setup { max-width: 960px; margin-inline: auto; width: 100%; color: var(--studio-text); }
+.initial-setup .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.setup-title-row { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+.setup-title-row h1 { margin: 5px 0 0; font-size: 1.45em; line-height: 1.4; }
+.setup-eyebrow { color: var(--studio-accent); font-size: .85em; font-weight: 700; }
+.setup-progress { color: var(--studio-muted); margin: 14px 0 22px; }
+.setup-welcome, .setup-guide { border: 1px solid var(--studio-line); border-radius: 16px; background: var(--studio-surface); padding: 22px; line-height: 1.8; }
+.setup-welcome h2, .setup-guide h2 { margin-top: 0; font-size: 1.15em; }
+.setup-welcome-mark { display: block; font-size: 36px; color: var(--studio-accent); }
+.initial-setup ol { padding-left: 1.6em; }
+.initial-setup li + li { margin-top: 8px; }
+.initial-setup a { color: var(--studio-accent); text-underline-offset: 3px; }
+.setup-feature-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border: 0; padding: 0; gap: 12px; margin: 20px 0; }
+.setup-feature { display: flex; gap: 12px; align-items: start; border: 1px solid var(--studio-line); border-radius: 12px; padding: 18px; cursor: pointer; background: var(--studio-surface); }
+.setup-feature[data-selected=true] { border-color: var(--studio-accent); background: color-mix(in srgb, var(--studio-accent) 10%, var(--studio-surface)); }
+.setup-feature input { flex: 0 0 auto; width: 18px; height: 18px; padding: 0; margin: calc((1lh - 18px) / 2) 0 0; }
+.setup-feature strong, .setup-feature small { display: block; }
+.setup-feature small { color: var(--studio-muted); margin-top: 7px; line-height: 1.65; }
+.setup-phone-uses { display: grid; gap: 12px; border: 1px solid var(--studio-line); border-radius: 12px; padding: 16px; }
+.setup-phone-uses label { display: flex; align-items: start; gap: 10px; }
+.setup-phone-uses input { width: 18px; height: 18px; padding: 0; margin: calc((1lh - 18px) / 2) 0 0; }
+.setup-plan { line-height: 1.8; color: var(--studio-muted); }
+.setup-current-status { height: 5.5em; overflow: auto; padding-top: 10px; margin-bottom: 0; border-top: 1px solid var(--studio-line); }
+.setup-detail-link { display: flex; justify-content: end; margin-top: 14px; }
+.setup-record-warning { min-height: 1.7em; color: var(--studio-error); }
+.setup-footer { padding-block: 18px; border-top: 1px solid var(--studio-line); margin-top: 20px; }
+.setup-save-help { height: 4.5em; overflow: auto; color: var(--studio-muted); line-height: 1.5; }
+.setup-confirm { margin-bottom: 16px; width: 100%; min-height: 46px; }
+.setup-footer-actions { display: flex; gap: 10px; justify-content: end; flex-wrap: wrap; }
+.setup-footer-actions button { min-width: 100px; min-height: 44px; }
+.management-shell .setup-footer-actions button:not(.secondary) { background: var(--studio-accent); color: var(--studio-accent-text); }
+.setup-result-list, .setup-displays { display: grid; gap: 12px; }
+.setup-result, .setup-display-row { border: 1px solid var(--studio-line); border-radius: 12px; padding: 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.setup-result span { flex: 1; color: var(--studio-muted); }
+.setup-display-row details { flex-basis: 100%; }
+.setup-display-row input { width: 100%; }
+.management-initial-setup .settings-card { max-width: 960px; margin-inline: auto; width: 100%; }
+.management-initial-setup .settings-card > .panel-heading { display: none; }
+.management-initial-setup .acquisition-toolbar, .management-initial-setup .acquisition-auto, .management-initial-setup .acquisition-interval, .management-initial-setup .acquisition-reconnect { display: none; }
+.management-initial-setup .speech-channels, .management-initial-setup .speech-lower-sections > section:first-child { display: none; }
+.management-initial-setup .speech-mixer { display: none; }
+.management-initial-setup .ai-service-recovery { display: none; }
+.management-initial-setup .recognition-history, .management-initial-setup .recognition-recordings { display: none; }
+.management-initial-setup .oc-tabs { display: none; }
+.management-initial-setup .overlay-switch-row, .management-initial-setup .overlay-color-input, .management-initial-setup .overlay-disclosure { display: none; }
+@media(max-width: 700px) { .setup-feature-grid { grid-template-columns: 1fr; } .setup-title-row { flex-wrap: wrap; } .setup-welcome, .setup-guide { padding: 16px; } .setup-footer-actions button { flex: 1; } }
+.setup-confirm[aria-disabled=true] { opacity:.45; cursor:default; }

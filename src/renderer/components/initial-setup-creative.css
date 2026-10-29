@@ -1,0 +1,50 @@
+.setup-workspace .ai-settings,.setup-workspace .text-effects-panel,.setup-workspace .settings-card:has(.setup-character){padding:0;border:0;background:transparent}
+.setup-workspace .ai-settings>.panel-heading,.setup-workspace .ai-settings>.card-summary,.setup-workspace .text-effects-panel>.panel-heading,.setup-workspace .settings-card:has(.setup-character)>.panel-heading,.setup-workspace .settings-card:has(.setup-character)>.card-summary,.setup-workspace .character-normal-controls{display:none}
+.setup-workspace .ai-settings>.card-details,.setup-creative-panel{display:flex;flex-direction:column;gap:16px}
+.setup-workspace .ai-settings>.card-details>[hidden]{display:none}
+.setup-ai-step[data-ai-step=connections]{order:1}.setup-ai-step[data-ai-step=personas]{order:2}.setup-ai-step[data-ai-step=participants]{order:3}.setup-ai-final{order:4}
+.setup-workspace .ai-settings .ai-section{padding:0;border:0;background:transparent;margin:0}
+.setup-workspace .ai-settings .ai-section-heading>h3{font-size:1em;margin:0 0 10px}
+.setup-workspace .ai-settings .ai-service-list,.setup-workspace .ai-settings .ai-persona-layout{grid-template-columns:minmax(0,1fr)}
+.setup-workspace .ai-settings .ai-credential-row{display:flex;flex-direction:column;align-items:stretch;gap:12px}
+.setup-workspace .ai-settings .ai-credential-row button{align-self:start}
+.setup-workspace .ai-settings .ai-persona-editor{margin-top:14px;min-width:0}
+.setup-workspace .ai-settings .ai-service-recovery{display:none}
+.setup-workspace .ai-settings .ai-service-status{height:4.8em}
+.setup-workspace .ai-settings .ai-service-list+.ai-section{margin-top:18px}
+.setup-workspace .ai-settings .ai-fields{grid-template-columns:minmax(0,1fr)}
+.setup-creative-panel label{display:grid;gap:9px;font-weight:600;margin-block:12px}
+.setup-creative-panel label>input,.setup-creative-panel label>select{width:100%;min-width:0}
+.setup-creative-panel small{display:block;margin-top:10px;line-height:1.8;color:var(--studio-muted)}
+.setup-inline-note{border-left:3px solid var(--studio-accent);padding:10px 12px;background:var(--studio-soft);font-size:var(--management-font-secondary);line-height:1.9}
+.setup-creative-status{height:5.4em;overflow:auto;font-size:var(--management-font-secondary);line-height:1.8;margin-top:14px}
+.setup-creative-panel .setup-step-card button,.setup-ai-step button,.setup-ai-final button{max-width:100%;white-space:normal}
+.setup-creative-panel .setup-primary{display:inline-grid;grid-template-columns:minmax(0,1fr);min-height:48px}
+.setup-creative-panel .setup-primary>span{grid-area:1/1;align-self:center}
+.setup-creative-panel .setup-primary:has(>span)::before{content:'口パクを試す（このプレビューのみ・2秒）';grid-area:1/1;visibility:hidden}
+.text-effects-panel.setup-creative-panel .setup-primary:has(>span)::before{content:'選択ルールをOBSへテスト送信'}
+.setup-effects-fields{border:0;padding:0;margin:0;min-width:0}
+.setup-effects-fields .effects-fields{grid-template-columns:minmax(0,1fr)}
+.setup-effects-fields .effects-field-hint{height:4.8em}
+.setup-workspace .setup-character .asset-upload-control{min-width:0}
+.setup-optional{display:inline-block;background:var(--studio-soft);color:var(--studio-accent);padding:4px 9px;border-radius:5px;font-size:var(--management-font-secondary)}
+.setup-asset-summary{height:5.4em;overflow:auto;overflow-wrap:anywhere;font-size:var(--management-font-secondary);line-height:1.8;margin-top:12px;color:var(--studio-muted)}
+.setup-asset-summary>span{display:block}
+.setup-creative-preview{height:240px;overflow:auto;background:var(--studio-input);border:1px solid var(--studio-line);border-radius:12px;padding:15px;margin-top:18px;overflow-wrap:anywhere}
+.setup-creative-preview>small{display:block;font-size:var(--management-font-secondary);color:var(--studio-muted);line-height:1.8}
+.setup-ai-example{display:flex;flex-direction:column;justify-content:space-between}.setup-ai-example>p{border-radius:9px;background:var(--studio-panel);padding:14px;line-height:1.8;max-height:150px;overflow:auto}.setup-ai-example strong{color:var(--studio-accent)}
+.setup-effects-example>div{font-size:32px;min-height:90px;display:flex;align-items:center;justify-content:center;line-height:1.8}.setup-effects-example>p{font-size:var(--management-font-secondary);margin-block:8px;max-height:3.6em;overflow:auto}
+.setup-character-preview{height:300px;display:flex;flex-direction:column}.setup-character-preview>.character-image,.setup-character-preview>span{flex:1;min-height:0}.setup-character-preview img{max-height:220px;object-fit:contain}
+.setup-creative-panel [aria-disabled=true]{opacity:.45;cursor:default}
+@media(max-width:760px){.setup-creative-preview{height:190px}.setup-character-preview{height:230px}.setup-character-preview img{max-height:150px}.setup-creative-review .setup-device-states{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 15px}.setup-workspace .setup-creative-panel .setup-step-card,.setup-workspace .setup-ai-step,.setup-workspace .setup-ai-final{padding:17px}}
+@media(max-width:430px){.setup-creative-review .setup-device-states{grid-template-columns:minmax(0,1fr)}.setup-workspace .setup-number{border-radius:50%}.setup-creative-panel .button-row{flex-wrap:wrap}}
+
+.setup-workspace .settings-card:has(.setup-character)>.card-warning{display:none}.setup-character .asset-drop-zone{max-width:100%;display:flex;flex-direction:column;gap:8px;padding:16px;border:1px dashed var(--studio-line);border-radius:9px}.setup-character .asset-drop-zone label{margin:0;cursor:pointer;color:var(--studio-accent)}.setup-character .asset-drop-zone.disabled{opacity:.45}.setup-character .asset-drop-zone>span{font-size:var(--management-font-secondary);color:var(--studio-muted)}
+
+.setup-character .asset-drop-zone .upload-button{display:none}.setup-asset-picker>.setup-primary{margin-top:6px}.setup-character .asset-drop-zone{margin-top:10px;padding:12px;text-align:center}
+
+.setup-character-empty{text-align:center;display:flex;flex-direction:column;justify-content:center;flex:1;color:var(--studio-muted);font-size:var(--management-font-secondary);line-height:1.9}.setup-character-empty>span{display:block;font-size:38px;margin-bottom:16px}
+
+.setup-creative-panel .setup-number,.setup-ai-step .setup-number,.setup-ai-final .setup-number{border-radius:50%}.setup-workspace .setup-ai-step .ai-credential-row>button{background:var(--studio-accent);border-color:var(--studio-accent);color:var(--studio-accent-text)}.setup-ai-preparation{height:12em;overflow:auto;border:1px solid var(--studio-line);border-radius:9px;padding:12px;margin-block:14px;font-size:var(--management-font-secondary);line-height:1.8}.setup-ai-preparation ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}.setup-ai-preparation li{display:grid;grid-template-columns:minmax(0,1fr);gap:3px;overflow-wrap:anywhere}.setup-ai-preparation strong{font-weight:400;color:var(--studio-muted)}
+
+.setup-ai-step button[aria-disabled=true]{opacity:.45;cursor:default}

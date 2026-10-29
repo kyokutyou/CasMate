@@ -1,0 +1,279 @@
+<!-- Throwaway UI exploration: three comment-acquisition editors in the existing home/settings shell.
+     Memory-only simulated settings and connection states. No backend, external communication or persistence. -->
+<style>
+#acquisition-designs{--ca-bg:light-dark(#f1f5f3,#152129);--ca-panel:light-dark(#fff,#1c2b35);--ca-header:light-dark(#f9fbfa,#18262f);--ca-raised:light-dark(#e8efeb,#293d46);--ca-line:light-dark(#cfdbd5,#3a4f5b);--ca-text:light-dark(#213d33,#e0eaee);--ca-muted:light-dark(#536d62,#a8bdc6);--ca-accent:light-dark(#276c50,#a9d7c1);--ca-on:light-dark(#fff,#173b2c);--ca-ok-bg:light-dark(#e2f2e9,#29463e);--ca-warn:light-dark(#80551b,#f1cb87);--ca-error:light-dark(#a33743,#ffadb8);--ca-input:light-dark(#f8faf9,#14232d);font:14px/1.55 'Segoe UI','Yu Gothic UI',Meiryo,sans-serif;color:var(--ca-text);overflow-wrap:anywhere;position:relative}
+#acquisition-designs *{box-sizing:border-box}
+#acquisition-designs [hidden]{display:none!important}
+#acquisition-designs button,#acquisition-designs input,#acquisition-designs select{font:inherit;color:inherit}
+#acquisition-designs button{min-height:36px;border:1px solid var(--ca-line);border-radius:7px;background:var(--ca-raised);padding:7px 12px;cursor:pointer;font-weight:500}
+#acquisition-designs button:hover{filter:brightness(1.08)}
+#acquisition-designs button:disabled{opacity:.5;cursor:not-allowed}
+#acquisition-designs h1,#acquisition-designs h2,#acquisition-designs h3,#acquisition-designs p{margin:0}
+#acquisition-designs h1{font-size:23px;font-weight:500;letter-spacing:.015em}
+#acquisition-designs h2{font-size:17px;font-weight:500}
+#acquisition-designs h3{font-size:15px;font-weight:500}
+#acquisition-designs strong{font-weight:500}
+#acquisition-designs small,.ca-small{font-size:12px}
+#acquisition-designs .ca-muted{color:var(--ca-muted)}
+#acquisition-designs .ca-primary{background:var(--ca-accent);color:var(--ca-on);border-color:transparent}
+#acquisition-designs .ca-quiet{background:transparent;border-color:transparent;color:var(--ca-accent)}
+#acquisition-designs .ca-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+#acquisition-designs .ca-between{justify-content:space-between}
+#acquisition-designs .ca-stack{display:grid;gap:18px;min-width:0}
+#acquisition-designs .ca-window{background:var(--ca-bg);border:1px solid var(--ca-line);border-radius:12px;overflow:hidden}
+#acquisition-designs .ca-header{height:72px;position:relative;padding:0 24px;display:flex;align-items:center;justify-content:space-between;background:var(--ca-header);border-bottom:1px solid var(--ca-line)}
+#acquisition-designs .ca-brand{display:flex;align-items:center;gap:9px;white-space:nowrap;font-size:16px}
+#acquisition-designs .ca-logo{width:29px;height:29px;border-radius:8px;background:var(--ca-accent);color:var(--ca-on);display:grid;place-items:center;font-size:20px}
+#acquisition-designs .ca-server{font-size:12px;color:var(--ca-muted)}
+#acquisition-designs .ca-toast{position:absolute;top:18px;left:50%;transform:translateX(-50%);width:280px;max-width:calc(100% - 340px);height:36px;padding:0 12px;display:flex;align-items:center;gap:8px;background:var(--ca-ok-bg);border:1px solid var(--ca-line);border-radius:8px;font-size:12px;pointer-events:none;z-index:4}
+#acquisition-designs .ca-toast span:last-child{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+#acquisition-designs .ca-nav{height:43px;display:flex;align-items:stretch;gap:22px;padding:0 24px;border-bottom:1px solid var(--ca-line);background:var(--ca-header)}
+#acquisition-designs .ca-nav button{background:transparent;border:0;border-radius:0;padding:0 3px;font-size:13px;color:var(--ca-muted)}
+#acquisition-designs .ca-nav button[aria-current=page]{border-bottom:2px solid var(--ca-accent);color:var(--ca-accent)}
+#acquisition-designs .ca-nav .ca-warnings{margin-left:auto;min-width:110px;color:var(--ca-warn)}
+#acquisition-designs .ca-content{padding:22px 26px 28px;min-width:0}
+#acquisition-designs .ca-heading{display:grid;gap:5px;margin-bottom:22px}
+#acquisition-designs .ca-back{justify-self:start;padding:0;min-height:26px;font-size:12px;margin-bottom:8px}
+#acquisition-designs .ca-heading p{color:var(--ca-muted);font-size:13px}
+#acquisition-designs .ca-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+#acquisition-designs .ca-toolbar button{font-size:12px}
+#acquisition-designs .ca-counter{font-size:12px;color:var(--ca-muted);min-width:100px}
+#acquisition-designs .ca-sources{border:1px solid var(--ca-line);border-radius:10px;background:var(--ca-panel);overflow:hidden}
+#acquisition-designs .ca-source-row{display:grid;grid-template-columns:150px minmax(0,1fr) 70px;gap:18px;padding:21px 20px}
+#acquisition-designs .ca-source-row+.ca-source-row{border-top:1px solid var(--ca-line)}
+#acquisition-designs .ca-source-id{display:flex;align-items:center;gap:10px;min-width:0}
+#acquisition-designs .ca-source-side{display:grid;align-content:start;gap:8px}
+#acquisition-designs .ca-mark{width:30px;height:30px;flex:none;border-radius:8px;display:grid;place-items:center;background:var(--ca-raised);color:var(--ca-muted);font-size:12px;font-weight:500}
+#acquisition-designs .ca-mark.youtube{color:light-dark(#b7474a,#f5a3a6)}
+#acquisition-designs .ca-mark.twitch{color:light-dark(#7144a5,#c3a5ef)}
+#acquisition-designs .ca-mark.shitaraba{color:var(--ca-accent)}
+#acquisition-designs .ca-fields{display:grid;gap:7px;min-width:0;align-content:start}
+#acquisition-designs .ca-field{display:grid;gap:6px;font-size:12px;color:var(--ca-muted);min-width:0}
+#acquisition-designs input[type=text],#acquisition-designs input[type=number],#acquisition-designs select{width:100%;min-width:0;background:var(--ca-input);border:1px solid var(--ca-line);border-radius:7px;padding:9px 11px;color:var(--ca-text)}
+#acquisition-designs input[aria-invalid=true]{border-color:var(--ca-error)}
+#acquisition-designs .ca-help{height:40px;line-height:20px;font-size:12px;color:var(--ca-muted);overflow:auto;scrollbar-gutter:stable;margin:0}
+#acquisition-designs .ca-help.ca-invalid{color:var(--ca-error)}
+#acquisition-designs .ca-switch{display:flex;align-items:center;gap:8px;cursor:pointer;min-height:36px;white-space:nowrap;justify-content:flex-end;font-size:12px;color:var(--ca-muted)}
+#acquisition-designs .ca-switch input{appearance:none;position:relative;width:28px;height:12px;padding:0;margin:3px;border:0;border-radius:20px;background:light-dark(#9bafa5,#526c7c);flex:none;cursor:pointer}
+#acquisition-designs .ca-switch input::after{content:'';position:absolute;top:-2px;left:0;width:16px;height:16px;border-radius:50%;background:light-dark(#526f61,#91a9b9)}
+#acquisition-designs .ca-switch input:checked{background:light-dark(#82b69b,#518b73)}
+#acquisition-designs .ca-switch input:checked::after{transform:translateX(12px);background:var(--ca-accent)}
+#acquisition-designs .ca-switch input:disabled{opacity:.45;cursor:wait}
+#acquisition-designs .ca-status{font-size:12px;white-space:nowrap;color:var(--ca-muted);min-height:20px;display:inline-flex;align-items:center;gap:6px}
+#acquisition-designs .ca-status::before{content:'○';font-size:12px}
+#acquisition-designs .ca-status[data-state=connected]{color:var(--ca-accent)}
+#acquisition-designs .ca-status[data-state=connected]::before{content:'✓'}
+#acquisition-designs .ca-status[data-state=waiting],#acquisition-designs .ca-status[data-state=reconnecting],#acquisition-designs .ca-status[data-state=connecting]{color:var(--ca-warn)}
+#acquisition-designs .ca-status[data-state=waiting]::before,#acquisition-designs .ca-status[data-state=connecting]::before,#acquisition-designs .ca-status[data-state=reconnecting]::before{content:'◷'}
+#acquisition-designs .ca-status[data-state=error]{color:var(--ca-error)}
+#acquisition-designs .ca-status[data-state=error]::before{content:'!'}
+#acquisition-designs .ca-retry{font-size:12px;min-width:94px;align-self:start}
+#acquisition-designs .ca-interval{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--ca-muted);flex-wrap:wrap}
+#acquisition-designs .ca-interval input{width:68px;padding:5px 8px}
+#acquisition-designs .ca-auto{padding:18px 2px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+#acquisition-designs .ca-auto p{font-size:12px;color:var(--ca-muted);margin-top:4px}
+#acquisition-designs .ca-footnote{font-size:12px;color:var(--ca-muted);padding-top:14px;border-top:1px solid var(--ca-line)}
+#acquisition-designs .ca-workspace{display:grid;grid-template-columns:210px minmax(0,1fr);border:1px solid var(--ca-line);border-radius:10px;overflow:hidden;background:var(--ca-panel);min-height:340px}
+#acquisition-designs .ca-selector{background:var(--ca-header);border-right:1px solid var(--ca-line);padding:10px;display:flex;flex-direction:column;gap:6px}
+#acquisition-designs .ca-selector button{text-align:left;display:grid;gap:10px;padding:14px 12px;background:transparent;border-color:transparent}
+#acquisition-designs .ca-selector button[aria-pressed=true]{background:var(--ca-raised);border-color:var(--ca-line);box-shadow:inset 3px 0 var(--ca-accent)}
+#acquisition-designs .ca-selector .ca-status{padding-left:40px}
+#acquisition-designs .ca-detail{padding:24px;display:grid;align-content:start;gap:22px;min-width:0}
+#acquisition-designs .ca-detail-title{display:flex;justify-content:space-between;align-items:center;gap:12px}
+#acquisition-designs .ca-detail-title .ca-mark{width:36px;height:36px}
+#acquisition-designs .ca-detail .ca-help{height:60px}
+#acquisition-designs .ca-detail-status{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:14px;border-top:1px solid var(--ca-line)}
+#acquisition-designs .ca-detail-hint{font-size:12px;color:var(--ca-muted)}
+#acquisition-designs .ca-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:22px}
+#acquisition-designs .ca-steps button{display:flex;gap:10px;align-items:center;text-align:left;background:transparent;padding:12px 0;border:0;border-bottom:2px solid var(--ca-line);border-radius:0}
+#acquisition-designs .ca-steps button[aria-current=step]{border-color:var(--ca-accent);color:var(--ca-accent)}
+#acquisition-designs .ca-step-number{width:26px;height:26px;border:1px solid var(--ca-line);border-radius:50%;display:grid;place-items:center;flex:none;font-size:12px}
+#acquisition-designs .ca-step-body{background:var(--ca-panel);border:1px solid var(--ca-line);border-radius:10px;padding:24px;display:grid;gap:20px;min-height:270px}
+#acquisition-designs .ca-step-fields{display:grid;grid-template-columns:135px minmax(0,1fr);gap:20px;align-items:start}
+#acquisition-designs .ca-step-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:18px}
+#acquisition-designs .ca-step-footer button{min-width:92px}
+#acquisition-designs .ca-step-connection{display:grid;grid-template-columns:minmax(100px,1fr) 120px 70px;gap:12px;padding:13px 0;align-items:center}
+#acquisition-designs .ca-step-connection+.ca-step-connection{border-top:1px solid var(--ca-line)}
+#acquisition-designs .ca-summary-target{color:var(--ca-muted);font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:5px}
+#acquisition-designs .ca-summary-status{display:grid;gap:7px;justify-items:start}
+#acquisition-designs .ca-home-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#acquisition-designs .ca-home-card{padding:18px;border:1px solid var(--ca-line);border-radius:10px;background:var(--ca-panel);display:grid;gap:14px;min-width:0}
+#acquisition-designs .ca-home-card button{text-align:left;padding:0}
+#acquisition-designs .ca-entry{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px;text-align:left;width:100%;background:var(--ca-panel)}
+#acquisition-designs .ca-entry small{display:block;color:var(--ca-muted);margin-top:4px}
+#acquisition-designs .ca-comparison{padding:18px 0 12px;display:grid;gap:12px}
+#acquisition-designs .ca-switcher{display:flex;align-items:center;justify-content:center;gap:5px;padding:6px;border:1px solid var(--ca-line);border-radius:12px;background:var(--ca-header);width:max-content;max-width:100%;margin:auto;box-shadow:0 7px 20px #0002}
+#acquisition-designs .ca-switcher button{background:transparent;border-color:transparent;font-size:12px;padding:8px 12px}
+#acquisition-designs .ca-switcher button[aria-pressed=true]{background:var(--ca-accent);color:var(--ca-on)}
+#acquisition-designs .ca-comparison-caption{text-align:center;font-size:12px;color:var(--ca-muted);min-height:38px}
+#acquisition-designs .ca-test-tools{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--ca-muted)}
+#acquisition-designs .ca-test-tools label{display:flex;align-items:center;gap:8px}
+#acquisition-designs .ca-test-tools select{width:auto;font-size:12px;padding:5px 8px;max-width:200px}
+#acquisition-designs .ca-inspector{font-size:12px;color:var(--ca-muted);margin-top:12px}
+#acquisition-designs .ca-inspector summary{cursor:pointer;min-height:32px}
+#acquisition-designs .ca-inspector pre{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--ca-panel);padding:12px;border-radius:8px;margin:0}
+#acquisition-designs dialog{color:var(--ca-text);background:var(--ca-panel);border:1px solid var(--ca-line);border-radius:12px;padding:22px;width:500px;max-width:calc(100% - 24px)}
+#acquisition-designs dialog::backdrop{background:#081219aa}
+#acquisition-designs .ca-warning-item{display:grid;gap:8px;padding:16px 0;border-bottom:1px solid var(--ca-line)}
+#acquisition-designs .ca-warning-item:last-child{border-bottom:0}
+@media(max-width:760px){#acquisition-designs .ca-source-row{grid-template-columns:130px minmax(0,1fr) 65px;gap:12px;padding:18px 14px}#acquisition-designs .ca-workspace{grid-template-columns:170px minmax(0,1fr)}#acquisition-designs .ca-detail{padding:20px}#acquisition-designs .ca-content{padding:18px}}
+@media(max-width:640px){#acquisition-designs .ca-brand strong,#acquisition-designs .ca-server span{display:none}#acquisition-designs .ca-header{padding:0 16px}#acquisition-designs .ca-toast{max-width:calc(100% - 112px)}#acquisition-designs .ca-source-row{grid-template-columns:minmax(0,1fr) 65px;gap:12px}#acquisition-designs .ca-source-side{grid-column:1;grid-row:1;display:flex;align-items:center;gap:14px;flex-wrap:wrap}#acquisition-designs .ca-source-row>.ca-switch{grid-column:2;grid-row:1}#acquisition-designs .ca-source-row>.ca-fields{grid-column:1/-1;grid-row:2}#acquisition-designs .ca-source-side .ca-retry{display:none}#acquisition-designs .ca-fields .ca-mobile-retry{display:inline-flex!important;justify-self:start}#acquisition-designs .ca-workspace{grid-template-columns:1fr}#acquisition-designs .ca-selector{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-right:0;border-bottom:1px solid var(--ca-line);padding:8px;gap:4px}#acquisition-designs .ca-selector button{padding:8px 6px;gap:7px}#acquisition-designs .ca-selector .ca-source-id{gap:5px;flex-wrap:wrap}#acquisition-designs .ca-selector .ca-mark{display:none}#acquisition-designs .ca-selector .ca-status{padding-left:0;font-size:11px}#acquisition-designs .ca-selector button[aria-pressed=true]{box-shadow:inset 0 -2px var(--ca-accent)}#acquisition-designs .ca-step-fields{grid-template-columns:1fr;gap:9px}#acquisition-designs .ca-step-body{padding:18px}#acquisition-designs .ca-home-grid{gap:7px}#acquisition-designs .ca-home-card{padding:12px 9px}#acquisition-designs .ca-home-card .ca-source-id{gap:5px}#acquisition-designs .ca-home-card .ca-mark{display:none}}
+@media(max-width:420px){#acquisition-designs .ca-content{padding:16px 12px}#acquisition-designs .ca-nav{padding:0 14px;gap:16px}#acquisition-designs .ca-nav .ca-warnings{min-width:94px}#acquisition-designs .ca-switcher{gap:0;padding:4px;width:100%}#acquisition-designs .ca-switcher button{padding:8px 7px}#acquisition-designs .ca-switcher .ca-design-name{display:none}#acquisition-designs .ca-steps{gap:8px}#acquisition-designs .ca-steps button{font-size:12px;gap:5px;flex-direction:column;align-items:flex-start}#acquisition-designs .ca-step-connection{grid-template-columns:minmax(0,1fr) 70px}#acquisition-designs .ca-step-connection>.ca-summary-status{grid-column:1;grid-row:auto}#acquisition-designs .ca-step-connection>.ca-switch{grid-column:2;grid-row:1/3}#acquisition-designs .ca-detail-title .ca-mark{display:none}#acquisition-designs .ca-detail{padding:16px}#acquisition-designs .ca-home-grid{grid-template-columns:1fr}#acquisition-designs .ca-toolbar .ca-row{gap:7px}}
+@media(pointer:coarse){#acquisition-designs button,#acquisition-designs .ca-switch{min-height:44px}#acquisition-designs input[type=text],#acquisition-designs input[type=number]{font-size:16px}}
+</style>
+<div id="acquisition-designs" aria-label="コメント取得のUI比較">
+  <div class="ca-window">
+    <header class="ca-header">
+      <div class="ca-brand"><span class="ca-logo" aria-hidden="true">き</span><strong>きゃすメイト</strong></div>
+      <div id="ca-toast" class="ca-toast" role="status" hidden><span aria-hidden="true">✓</span><span id="ca-toast-text"></span></div>
+      <div class="ca-server" aria-label="ローカル接続済み（見本）">✓ <span>ローカル接続済み</span></div>
+    </header>
+    <nav class="ca-nav" aria-label="メイン"><button data-page="home">ホーム</button><button data-page="settings">設定</button><button class="ca-warnings" data-action="warnings">⚠ 要確認 <span id="ca-warning-count">0</span>件</button></nav>
+    <main id="ca-content" class="ca-content"></main>
+  </div>
+  <section class="ca-comparison" aria-label="見本の比較操作">
+    <div class="ca-switcher"><button data-cycle="-1" aria-label="前の案">←</button><button data-variant="A">A <span class="ca-design-name">接続リスト</span></button><button data-variant="B">B <span class="ca-design-name">ソース別</span></button><button data-variant="C">C <span class="ca-design-name">順番に準備</span></button><button data-cycle="1" aria-label="次の案">→</button></div>
+    <p id="ca-comparison-caption" class="ca-comparison-caption"></p>
+    <div class="ca-test-tools"><span>操作できる見本・実際の接続／保存は行いません</span><label>状態の見本<select id="ca-scenario"><option value="normal">通常（接続・待機・停止）</option><option value="empty">初めての設定</option><option value="connecting">接続中</option><option value="reconnecting">通信断・自動再接続</option><option value="error">入力エラー</option><option value="save-error">保存失敗</option></select></label></div>
+  </section>
+  <details class="ca-inspector"><summary>見本の状態を確認</summary><pre id="ca-payload"></pre></details>
+  <dialog id="ca-warning-dialog" aria-labelledby="ca-warning-title"><div class="ca-row ca-between"><h2 id="ca-warning-title">要確認</h2><button data-action="close-warnings" autofocus>閉じる</button></div><div id="ca-warning-list"></div></dialog>
+</div>
+<script>
+(() => {
+  const root = document.getElementById('acquisition-designs');
+  const q = selector => root.querySelector(selector);
+  const qa = selector => [...root.querySelectorAll(selector)];
+  const keys = ['youtube', 'twitch', 'shitaraba'];
+  const names = { youtube: 'YouTube Live', twitch: 'Twitch', shitaraba: 'したらば' };
+  const shortNames = { youtube: 'YouTube', twitch: 'Twitch', shitaraba: 'したらば' };
+  const labels = { stopped: '停止中', connecting: '接続中', waiting: '配信待ち', connected: '接続済み', reconnecting: '再接続中', error: '要確認' };
+  const hints = { youtube: '配信URL・Live ID・@ハンドルに対応。ハンドルなら配信開始を待てます。', twitch: 'チャンネル名またはURL。配信中かどうかに関わらず接続します。', shitaraba: '掲示板トップではなく、コメントを取得するスレッドのURLを入力。' };
+  const placeholders = { youtube: 'https://www.youtube.com/@your_channel', twitch: 'チャンネル名 または https://www.twitch.tv/...', shitaraba: 'https://jbbs.shitaraba.net/bbs/read.cgi/カテゴリ/掲示板ID/スレッドID/' };
+  const captions = { A: 'A｜接続リスト　3つの接続先と状態を一度に確認。普段の配信準備におすすめ。', B: 'B｜ソース別ワークスペース　一覧から選び、1つの接続先に集中。説明を読みながら設定。', C: 'C｜順番に準備　接続先 → 自動接続 → 接続確認。初めての設定で迷いにくい構成。' };
+  const fresh = () => ({ youtube: { target: '@casmate_live', savedTarget: '@casmate_live', enabled: true, status: 'waiting', error: '', updated: '12:30:00' }, twitch: { target: 'casmate_live', savedTarget: 'casmate_live', enabled: true, status: 'connected', error: '', updated: '12:30:00' }, shitaraba: { target: 'https://jbbs.shitaraba.net/bbs/read.cgi/internet/12345/1700000000/', savedTarget: 'https://jbbs.shitaraba.net/bbs/read.cgi/internet/12345/1700000000/', enabled: false, status: 'stopped', error: '', updated: '12:30:00' } });
+  let initialVariant = 'A';
+  try { initialVariant = new URL(location.href).searchParams.get('variant') || 'A'; } catch { /* inline hosts may not expose navigation */ }
+  const state = { variant: ['A', 'B', 'C'].includes(initialVariant) ? initialVariant : 'A', page: 'editor', origin: 'settings', selected: 'youtube', step: 0, autoConnect: false, interval: '5', savedInterval: 5, intervalError: '', sources: fresh(), scenario: 'normal', saveFailure: false, savePending: false };
+  const pending = {};
+  let saveTimer;
+  let toastTimer;
+  const escape = value => String(value).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const active = key => state.sources[key].status !== 'stopped' && (state.sources[key].status !== 'error' || state.sources[key].enabled);
+  const busy = key => Boolean(pending[key]);
+  const status = key => `<span class="ca-status" data-status="${key}" data-state="${state.sources[key].status}">${labels[state.sources[key].status]}</span>`;
+  const mark = key => `<span class="ca-mark ${key}" aria-hidden="true">${{youtube:'▶',twitch:'Tw',shitaraba:'板'}[key]}</span>`;
+  const identity = (key, short = false) => `<span class="ca-source-id">${mark(key)}<span>${short ? shortNames[key] : names[key]}</span></span>`;
+  const toggle = key => `<label class="ca-switch"><input type="checkbox" role="switch" data-toggle="${key}" aria-label="${names[key]}のコメント取得" ${active(key) ? 'checked' : ''}><span data-switch-label="${key}">${active(key) ? 'オン' : 'オフ'}</span></label>`;
+  const retry = (key, extra = '') => `<button class="ca-retry ${extra}" data-retry="${key}" aria-label="${names[key]}を再接続">再接続</button>`;
+  function interval() { return `<label class="ca-interval">取得間隔 <input id="ca-interval" type="number" min="3" max="60" step="1" value="${escape(state.interval)}" aria-describedby="ca-interval-help">秒 <span id="ca-interval-help">3〜60秒</span></label>`; }
+  function field(key) { return `<div class="ca-fields"><label class="ca-field" for="ca-target-${key}">${key === 'youtube' ? 'YouTube接続先' : key === 'twitch' ? 'Twitchチャンネル名' : 'したらばスレッドURL'}<input id="ca-target-${key}" type="text" data-target="${key}" value="${escape(state.sources[key].target)}" placeholder="${placeholders[key]}" aria-describedby="ca-help-${key}" autocomplete="off" spellcheck="false"></label>${key === 'shitaraba' ? interval() : ''}<p id="ca-help-${key}" data-help="${key}" class="ca-help" aria-live="polite">${hints[key]}</p></div>`; }
+  function automatic() { return `<div class="ca-auto"><div><h3>アプリ起動時に自動接続</h3><p>有効なコメントソースに、次回の起動時から接続します。</p></div><label class="ca-switch"><input id="ca-auto" type="checkbox" role="switch" aria-label="アプリ起動時に自動接続" ${state.autoConnect ? 'checked' : ''}><span id="ca-auto-label">${state.autoConnect ? 'オン' : 'オフ'}</span></label></div>`; }
+  function toolbar() { return `<div class="ca-toolbar"><span class="ca-counter" data-counter></span><div class="ca-row"><button class="ca-primary" data-action="start-all">有効な接続を一括開始</button><button data-action="stop-all">すべて停止</button></div></div>`; }
+  function VariantA() { return `${toolbar()}<div class="ca-sources">${keys.map(key => `<article class="ca-source-row"><div class="ca-source-side">${identity(key)}${status(key)}${retry(key)}</div><div class="ca-fields">${field(key)}<span class="ca-mobile-retry" hidden>${retry(key)}</span></div>${toggle(key)}</article>`).join('')}</div>${automatic()}`; }
+  function VariantB() { const key = state.selected; return `${toolbar()}<div class="ca-workspace"><nav class="ca-selector" aria-label="編集するコメントソース">${keys.map(k => `<button data-source="${k}" aria-pressed="${k === key}">${identity(k, true)}${status(k)}</button>`).join('')}</nav><section class="ca-detail" aria-label="${names[key]}の設定"><div class="ca-detail-title"><h2>${identity(key)}</h2>${toggle(key)}</div>${field(key)}<div class="ca-detail-status">${status(key)}${retry(key)}</div><p class="ca-detail-hint">${key === 'youtube' ? '毎回同じチャンネルで配信するなら @ハンドルが便利です。' : key === 'twitch' ? 'ログイン不要で接続できます。過去のコメントは取得しません。' : '接続時の直近100レスもコメント一覧で確認できます。'}</p></section></div>${automatic()}`; }
+  function VariantC() { return `<nav class="ca-steps" aria-label="準備の手順">${['接続先を入力','自動接続を設定','接続を確認'].map((name, i) => `<button data-step="${i}" ${state.step === i ? 'aria-current="step"' : ''}><span class="ca-step-number">${i+1}</span>${name}</button>`).join('')}</nav><section class="ca-step-body">${state.step === 0 ? `<div><h2>使うコメントソースの接続先を入力</h2><p class="ca-muted ca-small">使わない接続先は空欄のままで進めます。</p></div>${keys.map(key => `<div class="ca-step-fields">${identity(key, true)}${field(key)}</div>`).join('')}` : state.step === 1 ? `<div><h2>次回からのひと手間を減らす</h2><p class="ca-muted ca-small">自動接続の対象は、接続確認でオンにしたコメントソースです。</p></div>${automatic()}<p class="ca-muted ca-small">オフにしておくと、アプリ起動後に手動で接続できます。<br>この項目だけをオンにしても、今すぐ接続は始まりません。</p>` : `<div><h2>使う接続をオンにする</h2><p class="ca-muted ca-small">スイッチで個別に開始・停止できます。</p></div><div>${keys.map(key => `<div class="ca-step-connection"><div>${identity(key, true)}<p class="ca-summary-target">${escape(state.sources[key].target || '接続先は未入力')}</p></div><div class="ca-summary-status">${status(key)}${retry(key)}</div>${toggle(key)}</div>`).join('')}</div>${toolbar()}<button class="ca-quiet" data-action="edit-inputs">接続先・取得間隔を見直す ←</button>`}</section><div class="ca-step-footer"><button data-step="${Math.max(0,state.step-1)}" ${state.step === 0 ? 'disabled' : ''}>戻る</button><span class="ca-muted ca-small">${state.step+1} / 3</span><button class="ca-primary" ${state.step < 2 ? `data-step="${state.step+1}"` : 'data-page="home"'}>${state.step < 2 ? '次へ →' : 'ホームへ'}</button></div>`; }
+  function render() {
+    if (state.page === 'editor') q('#ca-content').innerHTML = `<div class="ca-heading"><button class="ca-quiet ca-back" data-page="${state.origin}">← ${state.origin === 'home' ? 'ホーム' : '設定'}に戻る</button><h1>コメント取得</h1><p>配信先につないで、コメントをひとつに。</p></div>${({A:VariantA,B:VariantB,C:VariantC}[state.variant])()}<p class="ca-footnote">ログイン不要・各コメントソースにつき接続先は1件。接続前のコメントは一覧だけに表示します。</p>`;
+    else if (state.page === 'home') q('#ca-content').innerHTML = `<div class="ca-heading"><h1>ホーム</h1><p>コメント取得の状態と操作</p></div><div class="ca-toolbar"><h2>コメント取得</h2><button class="ca-quiet" data-action="open-editor">接続先を変更 →</button></div><div class="ca-home-grid">${keys.map(key => `<article class="ca-home-card"><button class="ca-quiet" data-edit="${key}">${identity(key,true)} →</button>${status(key)}${toggle(key)}</article>`).join('')}</div>`;
+    else q('#ca-content').innerHTML = `<div class="ca-heading"><h1>設定</h1><p>コメント</p></div><button class="ca-entry" data-action="open-editor"><span>コメント取得<small>接続先・取得間隔・自動接続・状態と復旧</small></span><span>→</span></button>`;
+    qa('[data-page]').forEach(el => el.setAttribute('aria-current', (el.dataset.page === (state.page === 'home' ? 'home' : 'settings')) ? 'page' : 'false'));
+    qa('[data-variant]').forEach(el => el.setAttribute('aria-pressed', String(el.dataset.variant === state.variant)));
+    q('#ca-comparison-caption').textContent = captions[state.variant];
+    sync();
+  }
+  function warnings() { const result = keys.filter(k => state.sources[k].error || ['error','reconnecting'].includes(state.sources[k].status)).map(key => ({key, text: state.sources[key].error || '接続が切れたため、自動で再接続しています。'})); if (state.saveFailure) result.unshift({key:'save',text:'設定を保存できませんでした。入力内容は保持しています。'}); if (state.intervalError) result.push({key:'interval',text:state.intervalError}); return result; }
+  function help(key) { const s = state.sources[key]; if (s.error) return s.error; if (key === 'shitaraba' && state.intervalError) return state.intervalError; if (s.status === 'waiting') return '配信開始を待っています。30秒ごとに確認します。'; if (s.status === 'reconnecting') return '通信が途切れました。自動で再接続しています。'; if (s.status === 'connecting') return '接続を確認しています…'; return hints[key]; }
+  function sync() {
+    qa('[data-status]').forEach(el => { const s = state.sources[el.dataset.status]; el.dataset.state = s.status; el.textContent = labels[s.status]; el.setAttribute('aria-label', `${names[el.dataset.status]}：${labels[s.status]}、最終更新 ${s.updated}`); });
+    qa('[data-toggle]').forEach(el => { el.checked = active(el.dataset.toggle); el.disabled = busy(el.dataset.toggle); });
+    qa('[data-switch-label]').forEach(el => { el.textContent = active(el.dataset.switchLabel) ? 'オン' : 'オフ'; });
+    qa('[data-help]').forEach(el => { const k = el.dataset.help; el.textContent = help(k); el.classList.toggle('ca-invalid', Boolean(state.sources[k].error || (k === 'shitaraba' && state.intervalError))); });
+    qa('[data-target]').forEach(el => { el.setAttribute('aria-invalid', String(Boolean(state.sources[el.dataset.target].error))); });
+    qa('[data-retry]').forEach(el => { const s = state.sources[el.dataset.retry]; el.disabled = busy(el.dataset.retry) || s.status === 'stopped' || !s.enabled; el.textContent = busy(el.dataset.retry) ? '接続中…' : '再接続'; });
+    qa('[data-counter]').forEach(el => { el.textContent = `${keys.filter(k => state.sources[k].status === 'connected').length} / 3 接続済み`; });
+    q('#ca-warning-count').textContent = warnings().length;
+    const auto = q('#ca-auto'); if (auto) { auto.checked = state.autoConnect; q('#ca-auto-label').textContent = state.autoConnect ? 'オン' : 'オフ'; }
+    q('#ca-payload').textContent = JSON.stringify(state, null, 2);
+    if (q('#ca-warning-dialog').open) renderWarnings();
+  }
+  function toast(message) { clearTimeout(toastTimer); q('#ca-toast-text').textContent = message; q('#ca-toast').hidden = false; q('#ca-toast').setAttribute('aria-label', message); q('#ca-toast').setAttribute('data-tooltip',message); toastTimer = setTimeout(() => { q('#ca-toast').hidden = true; }, 4000); }
+  function validate(key) {
+    const value = state.sources[key].target.trim();
+    if (!value) return '接続先を入力してください。';
+    if (key === 'youtube') { if (/^@[\w.\-\p{L}\p{N}]+$/u.test(value) || /^[\w-]{11}$/.test(value) || /^UC[\w-]{22}$/.test(value)) return ''; try { const u = new URL(value); if (['youtube.com','www.youtube.com','m.youtube.com'].includes(u.hostname) && (/^\/@[^/]+\/?$/.test(u.pathname) || /^\/channel\/UC[\w-]{22}\/?$/.test(u.pathname) || /^\/live\/[\w-]{11}\/?$/.test(u.pathname) || (u.pathname === '/watch' && /^[\w-]{11}$/.test(u.searchParams.get('v') || '')))) return ''; if (u.hostname === 'youtu.be' && /^\/[\w-]{11}\/?$/.test(u.pathname)) return ''; } catch { /* show field validation */ } return '配信URL・11文字のLive ID・@ハンドルを入力してください。'; }
+    if (key === 'twitch') { if (/^[a-zA-Z0-9_]{1,25}$/.test(value)) return ''; try { const u = new URL(value); if (['twitch.tv','www.twitch.tv'].includes(u.hostname) && /^\/[a-zA-Z0-9_]{1,25}\/?$/.test(u.pathname)) return ''; } catch { /* show field validation */ } return 'Twitchのチャンネル名またはチャンネルURLを入力してください。'; }
+    if (/^https?:\/\/jbbs\.shitaraba\.net\/bbs\/read\.cgi\/[a-zA-Z0-9_]+\/\d+\/\d+\/?(?:\?.*)?$/.test(value)) return '';
+    return 'jbbs.shitaraba.net のスレッドURLを入力してください。';
+  }
+  function setStatus(key, value) { state.sources[key].status = value; state.sources[key].updated = new Date().toLocaleTimeString('ja-JP'); }
+  function connect(key, enable = true) {
+    if (busy(key)) return;
+    const s = state.sources[key];
+    s.error = validate(key);
+    if (key === 'shitaraba' && state.intervalError) { sync(); return; }
+    if (s.error) { setStatus(key,'error'); sync(); return; }
+    if (state.saveFailure) { sync(); return; }
+    s.savedTarget = s.target.trim();
+    if (enable) s.enabled = true;
+    setStatus(key,'connecting');
+    pending[key] = setTimeout(() => { delete pending[key]; setStatus(key, key === 'youtube' && s.target.includes('@') ? 'waiting' : 'connected'); sync(); toast(`${shortNames[key]}：接続結果を更新しました（見本）。`); }, 650);
+    sync();
+  }
+  function stop(key, preserve) { clearTimeout(pending[key]); delete pending[key]; if (!preserve && state.saveFailure) return; if (!preserve) state.sources[key].enabled = false; state.sources[key].error = ''; setStatus(key,'stopped'); }
+  function saveDrafts() {
+    clearTimeout(saveTimer); state.savePending = false;
+    keys.forEach(key => { const s = state.sources[key]; s.error = s.target.trim() ? validate(key) : ''; if (!state.saveFailure && !s.error && s.savedTarget !== s.target) { s.savedTarget = s.target; if (active(key)) connect(key); } });
+    const n = Number(state.interval); state.intervalError = !state.interval.trim() || !Number.isInteger(n) || n < 3 || n > 60 ? '取得間隔は3〜60秒の整数で入力してください。' : '';
+    if (!state.saveFailure && !state.intervalError && n !== state.savedInterval) { state.savedInterval = n; if (active('shitaraba')) connect('shitaraba'); }
+    sync();
+    if (!state.saveFailure && !state.intervalError && !keys.some(k => state.sources[k].error)) toast('変更を反映しました（見本内のみ）。');
+  }
+  function renderWarnings() { const list = warnings(); q('#ca-warning-list').innerHTML = list.length ? list.map(w => `<div class="ca-warning-item"><strong>${w.key === 'save' ? '設定の保存' : w.key === 'interval' ? 'したらばの取得間隔' : names[w.key]}</strong><p class="ca-small ca-muted">${escape(w.text)}</p><button data-warning-target="${w.key}" class="ca-quiet">${w.key === 'save' ? '保存を再試行' : '該当する設定を開く →'}</button></div>`).join('') : '<p class="ca-muted">現在、要確認事項はありません。</p>'; }
+  function openEditor(key) { if (state.page !== 'editor') state.origin = state.page; state.page = 'editor'; if (key) { state.selected = key; state.step = 0; } render(); if (key) q(`#ca-target-${key}`)?.focus(); }
+  function variant(value) { state.variant = value; state.page = 'editor'; try { const url = new URL(location.href); url.searchParams.set('variant', value); history.replaceState(null,'',url); } catch { /* comparison remains local in inline hosts */ } render(); }
+  function scenario(value) {
+    clearTimeout(saveTimer); keys.forEach(k => { clearTimeout(pending[k]); delete pending[k]; });
+    state.sources = fresh(); state.scenario = value; state.saveFailure = value === 'save-error'; state.savePending = false; state.interval = '5'; state.savedInterval = 5; state.intervalError = ''; state.autoConnect = false;
+    if (value === 'empty') keys.forEach(k => Object.assign(state.sources[k],{target:'',savedTarget:'',enabled:false,status:'stopped'}));
+    if (value === 'connecting') keys.slice(0,2).forEach(k => setStatus(k,'connecting'));
+    if (value === 'reconnecting') setStatus('youtube','reconnecting');
+    if (value === 'error') Object.assign(state.sources.shitaraba,{target:'https://jbbs.shitaraba.net/',enabled:true,status:'error',error:'掲示板トップではなく、スレッドURLを入力してください。'});
+    render();
+  }
+  root.addEventListener('input', event => {
+    const el = event.target;
+    if (el.dataset.target) state.sources[el.dataset.target].target = el.value;
+    else if (el.id === 'ca-interval') state.interval = el.value;
+    else return;
+    clearTimeout(saveTimer); state.savePending = true; saveTimer = setTimeout(saveDrafts,500); sync();
+  });
+  root.addEventListener('change', event => {
+    const el = event.target;
+    if (el.dataset.toggle) { if (el.checked) connect(el.dataset.toggle); else { stop(el.dataset.toggle,false); sync(); if (!state.saveFailure) toast(`${shortNames[el.dataset.toggle]}を停止しました（見本）。`); } }
+    if (el.id === 'ca-auto') { if (!state.saveFailure) { state.autoConnect = el.checked; toast('自動接続の設定を変更しました（見本）。'); } sync(); }
+    if (el.id === 'ca-scenario') scenario(el.value);
+  });
+  root.addEventListener('click', event => {
+    const el = event.target.closest('button'); if (!el) return;
+    if (el.dataset.variant) variant(el.dataset.variant);
+    if (el.dataset.cycle) variant(['A','B','C'][( ['A','B','C'].indexOf(state.variant) + Number(el.dataset.cycle) + 3) % 3]);
+    if (el.dataset.page) { state.page = el.dataset.page; render(); }
+    if (el.dataset.source) { state.selected = el.dataset.source; render(); }
+    if (el.dataset.step !== undefined) { state.step = Number(el.dataset.step); render(); }
+    if (el.dataset.edit) openEditor(el.dataset.edit);
+    if (el.dataset.retry) connect(el.dataset.retry);
+    if (el.dataset.action === 'open-editor') openEditor();
+    if (el.dataset.action === 'edit-inputs') { state.step = 0; render(); }
+    if (el.dataset.action === 'start-all') { saveDrafts(); keys.filter(k => state.sources[k].enabled).forEach(k => connect(k)); }
+    if (el.dataset.action === 'stop-all') { keys.forEach(k => stop(k,true)); sync(); toast('すべて停止しました（見本）。'); }
+    if (el.dataset.action === 'warnings') { renderWarnings(); q('#ca-warning-dialog').showModal(); }
+    if (el.dataset.action === 'close-warnings') q('#ca-warning-dialog').close();
+    if (el.dataset.warningTarget) { q('#ca-warning-dialog').close(); const k = el.dataset.warningTarget; if (k === 'save') { state.saveFailure = false; saveDrafts(); } else openEditor(k === 'interval' ? 'shitaraba' : k); }
+  });
+  root.addEventListener('keydown', event => { if (!['ArrowLeft','ArrowRight'].includes(event.key) || event.target.closest('input,textarea,select,[contenteditable=true],dialog')) return; event.preventDefault(); variant(['A','B','C'][(['A','B','C'].indexOf(state.variant)+(event.key === 'ArrowRight' ? 1 : 2))%3]); });
+  q('#ca-warning-dialog').addEventListener('close', () => { if (document.activeElement === document.body || document.activeElement?.closest('dialog')) q('[data-action=warnings]').focus(); });
+  render();
+  if (globalThis.Tweak) { const controls = new globalThis.Tweak({container:root,onChange:() => variant(state.variant)}); controls.addSelect(state,'variant',{label:'画面構成',options:[{label:'A 接続リスト',value:'A'},{label:'B ソース別',value:'B'},{label:'C 順番に準備',value:'C'}]}); }
+})();
+</script>

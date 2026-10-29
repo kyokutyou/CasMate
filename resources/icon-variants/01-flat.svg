@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="きゃすメイト フラットアイコン案">
+  <path d="M691 688c20 75 77 132 171 160-46-55-65-113-59-174l-112 14Z" fill="#FF6FAE"/>
+  <rect x="128" y="160" width="768" height="584" rx="222" fill="#8667FF"/>
+  <g fill="#FFFFFF">
+    <rect x="342" y="369" width="86" height="166" rx="43"/>
+    <rect x="469" y="294" width="86" height="316" rx="43"/>
+    <rect x="596" y="342" width="86" height="220" rx="43"/>
+  </g>
+</svg>

@@ -1,0 +1,56 @@
+.management-shell .panel.acquisition-panel { padding:0; border:0; background:transparent; gap:0; }
+.acquisition-panel>.panel-heading,.acquisition-panel>.card-warning { display:none; }
+.acquisition-panel .card-details { gap:0; }
+.acquisition-panel .acquisition-toolbar { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:14px; }
+.acquisition-panel .acquisition-count { color:var(--studio-muted, #a8bdc6); font-size:var(--management-font-secondary, 12px); font-variant-numeric:tabular-nums; }
+.acquisition-panel .acquisition-actions { display:flex; flex-wrap:wrap; align-items:center; gap:12px; max-width:100%; }
+.acquisition-panel button:not(.slim-switch) { min-height:36px; border:1px solid var(--studio-line, #3a4f5b); border-radius:7px; padding:7px 12px; font-size:var(--management-font-body, 12px); font-weight:500; }
+.acquisition-panel .acquisition-actions button { flex:none; white-space:nowrap; }
+.acquisition-panel .acquisition-start-all { width:calc(8em + 26px); }
+.acquisition-panel .acquisition-stop-all { width:calc(5em + 26px); }
+.acquisition-panel button[aria-disabled=true] { opacity:.5; cursor:default; }
+.acquisition-panel .acquisition-list { border:1px solid var(--studio-line, #3a4f5b); border-radius:10px; background:var(--studio-surface, #1c2b35); overflow:hidden; }
+.acquisition-panel .acquisition-source { display:grid; grid-template-columns:150px minmax(0,1fr) 70px; grid-template-rows:30px 20px minmax(36px,auto); column-gap:18px; row-gap:8px; padding:21px 20px; min-width:0; }
+.acquisition-panel .acquisition-source+.acquisition-source { border-top:1px solid var(--studio-line, #3a4f5b); }
+.acquisition-panel .acquisition-identity { grid-column:1; grid-row:1; display:flex; align-items:center; gap:10px; min-width:0; }
+.acquisition-panel .acquisition-identity h3 { font-size:var(--management-font-heading, 14px); font-weight:500; margin:0; }
+.acquisition-panel .acquisition-mark { width:30px; height:30px; flex-shrink:0; display:grid; place-items:center; border-radius:8px; background:var(--studio-panel, #293d46); font-size:var(--management-font-secondary, 12px); color:var(--studio-muted, #a9d7c1); }
+.acquisition-panel .acquisition-mark-youtube { color:var(--studio-accent, #f5a3a6); }
+.acquisition-panel .acquisition-mark-twitch { color:var(--studio-accent, #c3a5ef); }
+.acquisition-panel .acquisition-status { grid-column:1; grid-row:2; display:flex; align-items:center; gap:6px; color:var(--studio-muted, #a8bdc6); font-size:var(--management-font-secondary, 12px); white-space:nowrap; height:20px; }
+.acquisition-panel .acquisition-status-connected { color:var(--studio-success, #a9d7c1); }
+.acquisition-panel .acquisition-status-connecting,.acquisition-panel .acquisition-status-waiting,.acquisition-panel .acquisition-status-reconnecting { color:var(--studio-warning, #f1cb87); }
+.acquisition-panel .acquisition-status-error { color:var(--studio-error, #ffadb8); }
+.acquisition-panel .acquisition-fields { grid-column:2; grid-row:1/4; display:grid; align-content:start; gap:7px; min-width:0; }
+.acquisition-panel .acquisition-fields label { font-size:var(--management-font-body, 12px); color:var(--studio-muted, #a8bdc6); }
+.acquisition-panel .acquisition-fields input { padding:9px 11px; font-size:var(--management-font-body, 14px); border-radius:7px; width:100%; min-width:0; }
+.acquisition-panel .acquisition-fields input[aria-invalid=true] { border-color:var(--studio-accent, #ffadb8); }
+.acquisition-panel .acquisition-interval { display:flex; align-items:center; flex-wrap:wrap; gap:9px; color:var(--studio-muted, #a8bdc6); font-size:var(--management-font-secondary, 12px); }
+.acquisition-panel .acquisition-interval input { width:68px; padding:5px 8px; }
+.management-shell .acquisition-panel .acquisition-message { margin:0; line-height:1.6; overflow-y:auto; scrollbar-gutter:stable; color:var(--studio-muted, #a8bdc6); font-size:var(--management-font-secondary, 12px); white-space:pre-wrap; overflow-wrap:anywhere; }
+.management-shell .acquisition-panel .acquisition-message.field-error { color:var(--studio-error, #ffadb8); }
+.acquisition-panel .acquisition-reconnect { grid-column:1; grid-row:3; align-self:start; width:94px; height:36px; }
+.acquisition-panel .acquisition-toggle { grid-column:3; grid-row:1/4; align-self:center; justify-self:end; }
+.acquisition-panel .acquisition-auto { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:18px 20px; border-top:1px solid var(--studio-line, #3a4f5b); background:var(--studio-panel, #293d46); }
+.acquisition-panel .acquisition-auto > div { min-width:0; }
+.acquisition-panel .acquisition-auto h3 { font-size:var(--management-font-body, 14px); font-weight:500; margin:0; overflow-wrap:anywhere; }
+.acquisition-panel .acquisition-auto p { margin:4px 0 0; color:var(--studio-muted, #a8bdc6); font-size:var(--management-font-secondary, 12px); }
+@media(max-width:760px) {
+  .acquisition-panel .acquisition-auto { padding-inline:14px; }
+  .acquisition-panel .acquisition-source { grid-template-columns:130px minmax(0,1fr) 65px; column-gap:12px; padding:18px 14px; }
+}
+@media(max-width:640px) {
+  .acquisition-panel .acquisition-source { grid-template-columns:minmax(0,1fr) 70px; grid-template-rows:auto 20px auto 36px; row-gap:9px; }
+  .acquisition-panel .acquisition-identity { grid-column:1; grid-row:1; }
+  .acquisition-panel .acquisition-status { grid-column:1; grid-row:2; }
+  .acquisition-panel .acquisition-toggle { grid-column:2; grid-row:1/3; }
+  .acquisition-panel .acquisition-fields { grid-column:1/-1; grid-row:3; }
+  .acquisition-panel .acquisition-reconnect { grid-column:1; grid-row:4; }
+}
+@media(max-width:420px) {
+  .acquisition-panel .acquisition-auto { padding-inline:12px; gap:12px; }
+  .acquisition-panel .acquisition-actions { gap:7px; }
+  .acquisition-panel .acquisition-source { padding:16px 12px; }
+}
+
+.acquisition-panel .acquisition-start-all { width:calc(9em + 26px); max-width:100%; height:3.2em; white-space:nowrap; line-height:1.3; }

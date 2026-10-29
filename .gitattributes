@@ -1,0 +1,3 @@
+src/shared/compatibility-policy.generated.ts text eol=lf
+android/app/src/main/java/jp/casmate/app/compatibility/CompatibilityPolicy.kt text eol=lf
+native/outdoor/patches/*.json text eol=lf

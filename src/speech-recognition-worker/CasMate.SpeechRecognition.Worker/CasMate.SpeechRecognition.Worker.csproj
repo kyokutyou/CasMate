@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <AssemblyName>CasMate.SpeechRecognition.Worker</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NAudio" Version="2.3.0" />
+    <PackageReference Include="org.k2fsa.sherpa.onnx" Version="1.13.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="CasMate.SpeechRecognition.Worker.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="../../../resources/licenses/Apache-2.0.txt" Link="licenses/Apache-2.0.txt" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../../resources/licenses/CC-BY-4.0.txt" Link="licenses/CC-BY-4.0.txt" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../../resources/licenses/NAudio-MIT.txt" Link="licenses/NAudio-MIT.txt" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../../resources/licenses/ONNX-Runtime-MIT.txt" Link="licenses/ONNX-Runtime-MIT.txt" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="../../../resources/licenses/Silero-VAD-MIT.txt" Link="licenses/Silero-VAD-MIT.txt" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="$(NetCoreRoot)LICENSE.txt" Link="licenses/Dotnet-MIT.txt" CopyToPublishDirectory="PreserveNewest" />
+    <Content Include="$(NetCoreRoot)ThirdPartyNotices.txt" Link="licenses/Dotnet-ThirdPartyNotices.txt" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

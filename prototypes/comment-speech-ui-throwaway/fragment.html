@@ -1,0 +1,262 @@
+<!-- Throwaway: five structurally different comment-speech editors; memory-only state, no backend. -->
+<style>
+#speech-designs{--cs-bg:light-dark(#f3f6f5,#14232d);--cs-panel:light-dark(#fff,#1c2b35);--cs-raised:light-dark(#eaf0ed,#263b45);--cs-line:light-dark(#cddbd4,#3c5360);--cs-text:light-dark(#203c34,#e2ecef);--cs-muted:light-dark(#536b62,#a5bbc5);--cs-accent:light-dark(#266a50,#acd6c1);--cs-on:light-dark(#fff,#173d2d);--cs-warn:light-dark(#785014,#f1cf90);font:14px/1.6 'Segoe UI','Yu Gothic UI',Meiryo,sans-serif;color:var(--cs-text);width:100%;overflow-wrap:anywhere}
+#speech-designs *{box-sizing:border-box}
+#speech-designs button,#speech-designs input,#speech-designs select{font:inherit;color:inherit}
+#speech-designs button{cursor:pointer;min-height:38px;border:1px solid var(--cs-line);border-radius:8px;padding:7px 13px;background:var(--cs-raised);text-align:center}
+#speech-designs button:hover{filter:brightness(1.08)}
+#speech-designs button:focus-visible,#speech-designs input:focus-visible,#speech-designs select:focus-visible,#speech-designs summary:focus-visible{outline:2px solid var(--cs-accent);outline-offset:3px}
+#speech-designs button:disabled{opacity:.5;cursor:not-allowed}
+#speech-designs .cs-primary{background:var(--cs-accent);color:var(--cs-on);border-color:transparent}
+#speech-designs .cs-quiet{background:transparent;border-color:transparent;padding-left:0;padding-right:0}
+#speech-designs h1,#speech-designs h2,#speech-designs h3,#speech-designs p{margin:0}
+#speech-designs h1{font-size:24px;font-weight:500;letter-spacing:.02em}
+#speech-designs h2{font-size:17px;font-weight:500}
+#speech-designs h3{font-size:14px;font-weight:500}
+#speech-designs strong{font-weight:500}
+#speech-designs small,#speech-designs .cs-small{font-size:12px;color:var(--cs-muted)}
+#speech-designs .cs-muted{color:var(--cs-muted)}
+#speech-designs .cs-eyebrow{font-size:11px;letter-spacing:.12em;color:var(--cs-accent)}
+#speech-designs .cs-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+#speech-designs .cs-between{justify-content:space-between}
+#speech-designs .cs-stack{display:grid;gap:16px;min-width:0}
+#speech-designs .cs-gap-sm{gap:8px}
+#speech-designs .cs-gallery{padding:16px 0 18px;display:grid;gap:12px}
+#speech-designs .cs-design-tabs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+#speech-designs .cs-design-tabs button{display:grid;gap:3px;text-align:left;padding:10px;background:var(--cs-panel)}
+#speech-designs .cs-design-tabs button[aria-pressed=true]{background:var(--cs-raised);border-color:var(--cs-accent);box-shadow:inset 0 -2px var(--cs-accent)}
+#speech-designs .cs-design-tabs b{font-size:12px;color:var(--cs-accent);font-weight:500}
+#speech-designs .cs-scenario{font-size:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#speech-designs .cs-scenario select{width:auto;max-width:100%;font-size:12px;padding:5px 8px}
+#speech-designs .cs-window{border:1px solid var(--cs-line);border-radius:12px;overflow:hidden;background:var(--cs-bg)}
+#speech-designs .cs-topbar{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--cs-panel)}
+#speech-designs .cs-brand{display:flex;align-items:center;gap:10px;letter-spacing:.05em}
+#speech-designs .cs-logo{display:grid;place-items:center;background:var(--cs-raised);border:1px solid var(--cs-line);width:30px;height:30px;border-radius:9px;color:var(--cs-accent)}
+#speech-designs .cs-mainnav{display:flex;gap:24px;padding:0 24px;background:var(--cs-panel);border-bottom:1px solid var(--cs-line)}
+#speech-designs .cs-mainnav button{border:0;border-radius:0;background:transparent;padding:10px 0;border-bottom:2px solid transparent;color:var(--cs-muted)}
+#speech-designs .cs-mainnav button[aria-current=page]{border-bottom-color:var(--cs-accent);color:var(--cs-text)}
+#speech-designs .cs-content{padding:22px 26px;display:grid;gap:20px;min-width:0}
+#speech-designs .cs-heading{display:grid;gap:4px}
+#speech-designs .cs-back{justify-self:start;font-size:12px;min-height:28px;padding:0}
+#speech-designs .cs-master{padding:15px 18px;border:1px solid var(--cs-line);border-radius:10px;background:var(--cs-panel);display:grid;gap:8px}
+#speech-designs .cs-master small{display:block}
+#speech-designs .cs-switch{display:inline-flex;align-items:center;gap:9px;cursor:pointer;min-height:36px}
+#speech-designs .cs-switch input{appearance:none;position:relative;width:29px;height:12px;margin:6px 3px;padding:0;border:0;border-radius:20px;background:light-dark(#8a9fa9,#526c7c);flex:none;cursor:pointer}
+#speech-designs .cs-switch input::after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;top:-2px;left:0;background:light-dark(#46616f,#91a9b9);transition:transform .15s}
+#speech-designs .cs-switch input:checked{background:light-dark(#5c957b,#518b73)}
+#speech-designs .cs-switch input:checked::after{transform:translateX(13px);background:light-dark(#246a4d,#afe1c8)}
+#speech-designs .cs-switch output{color:var(--cs-muted);font-size:12px;min-width:24px}
+#speech-designs .cs-switch input:checked~output{color:var(--cs-accent)}
+#speech-designs .cs-status{font-size:12px;color:var(--cs-accent)}
+#speech-designs .cs-badge{border-radius:5px;background:var(--cs-raised);padding:3px 8px;font-size:12px}
+#speech-designs .cs-alert{padding:12px 14px;border-left:3px solid var(--cs-warn);background:var(--cs-panel);color:var(--cs-warn);border-radius:4px;display:grid;gap:6px}
+#speech-designs .cs-section{min-width:0;display:grid;align-content:start;gap:16px;padding:20px;border:1px solid var(--cs-line);border-radius:10px;background:var(--cs-panel)}
+#speech-designs .cs-title{display:flex;gap:10px;align-items:baseline;justify-content:space-between;flex-wrap:wrap}
+#speech-designs .cs-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+#speech-designs .cs-field{display:grid;gap:7px;min-width:0}
+#speech-designs select,#speech-designs input[type=number]{width:100%;min-width:0;border:1px solid var(--cs-line);border-radius:7px;background:var(--cs-bg);padding:9px 10px}
+#speech-designs input[type=range]{width:100%;min-width:0;accent-color:var(--cs-accent);cursor:pointer;margin:6px 0;height:20px}
+#speech-designs .cs-value{font-variant-numeric:tabular-nums;color:var(--cs-accent)}
+#speech-designs .cs-input-unit{display:flex;gap:8px;align-items:center}
+#speech-designs .cs-input-unit input{max-width:110px}
+#speech-designs .cs-divider{border:0;border-top:1px solid var(--cs-line);margin:0;width:100%}
+#speech-designs .cs-sample{background:var(--cs-bg);padding:14px;border-radius:8px;display:grid;gap:8px}
+#speech-designs details{border-top:1px solid var(--cs-line);padding-top:12px;min-width:0}
+#speech-designs summary{cursor:pointer;min-height:34px;padding:3px 0}
+#speech-designs details>div{padding-top:12px}
+#speech-designs a{color:var(--cs-accent)}
+#speech-designs .cs-footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding-top:3px;font-size:12px;color:var(--cs-muted)}
+#speech-designs .cs-dual{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
+#speech-designs .cs-tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--cs-line);padding-bottom:10px}
+#speech-designs .cs-tabs button{background:transparent;border:0;color:var(--cs-muted);padding:8px 14px}
+#speech-designs .cs-tabs button[aria-pressed=true]{background:var(--cs-raised);color:var(--cs-text)}
+#speech-designs .cs-tab-body{max-width:690px;width:100%;margin:auto;display:grid;gap:18px;padding:4px 0}
+#speech-designs .cs-accordion{background:var(--cs-panel);border:1px solid var(--cs-line);border-radius:10px;padding:0 18px}
+#speech-designs .cs-accordion details:first-child{border-top:0}
+#speech-designs .cs-accordion details{padding:14px 0}
+#speech-designs .cs-accordion summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px}
+#speech-designs .cs-accordion summary::after{content:'＋';color:var(--cs-muted)}
+#speech-designs .cs-accordion details[open]>summary::after{content:'−'}
+#speech-designs .cs-accordion summary strong{display:block}
+#speech-designs .cs-accordion details>div{padding:18px 0 4px}
+#speech-designs .cs-summary-voice{display:flex;align-items:center;gap:16px}
+#speech-designs .cs-voice-mark{display:grid;place-items:center;background:var(--cs-raised);border-radius:13px;min-width:54px;height:54px;color:var(--cs-accent);font-size:24px}
+#speech-designs .cs-mixer{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+#speech-designs .cs-channel{background:var(--cs-bg);border-radius:8px;padding:18px 12px;display:grid;gap:14px;justify-items:center;min-width:0}
+#speech-designs .cs-channel input[type=range]{writing-mode:vertical-lr;direction:rtl;width:32px;height:150px}
+#speech-designs .cs-channel input[type=number]{text-align:center;padding:6px;max-width:100px}
+#speech-designs .cs-channel .cs-value{font-size:22px}
+#speech-designs .cs-steps{display:grid;grid-template-columns:180px minmax(0,1fr);gap:24px}
+#speech-designs .cs-stepnav{display:grid;align-content:start;gap:10px}
+#speech-designs .cs-stepnav button{display:flex;gap:10px;align-items:center;text-align:left;background:transparent;border-color:transparent}
+#speech-designs .cs-stepnav button[aria-pressed=true]{background:var(--cs-raised);border-color:var(--cs-line)}
+#speech-designs .cs-stepnum{display:grid;place-items:center;width:28px;height:28px;border:1px solid var(--cs-line);border-radius:50%;color:var(--cs-accent);flex:none}
+#speech-designs .cs-endbar{padding:16px 0;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+#speech-designs .cs-debug{font-size:12px;color:var(--cs-muted);margin-top:8px}
+#speech-designs pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;margin:8px 0}
+#speech-designs [hidden]{display:none!important}
+@media(max-width:720px){#speech-designs .cs-dual{grid-template-columns:1fr}#speech-designs .cs-content{padding:18px}#speech-designs .cs-steps{grid-template-columns:1fr}#speech-designs .cs-stepnav{grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}#speech-designs .cs-stepnav button{padding:8px;gap:7px}#speech-designs .cs-section{padding:16px}}
+@media(max-width:480px){#speech-designs .cs-design-tabs{grid-template-columns:repeat(3,minmax(0,1fr))}#speech-designs .cs-topbar{padding:14px}#speech-designs .cs-topbar>small{display:none}#speech-designs .cs-content{padding:15px 12px}#speech-designs .cs-fields{grid-template-columns:1fr}#speech-designs .cs-mixer{grid-template-columns:repeat(2,minmax(0,1fr))}#speech-designs .cs-master{padding:13px}#speech-designs .cs-master>.cs-row{align-items:flex-start}#speech-designs .cs-stepnav button{display:grid;justify-items:start;font-size:12px}#speech-designs .cs-stepnum{width:24px;height:24px}#speech-designs select,#speech-designs input[type=number]{font-size:16px}#speech-designs .cs-scenario select{font-size:14px}}
+@media(pointer:coarse){#speech-designs button,#speech-designs summary,#speech-designs .cs-switch{min-height:44px}}
+@media(prefers-reduced-motion:reduce){#speech-designs *{transition:none!important}}
+</style>
+<div id="speech-designs" aria-label="コメント読み上げ・5案の比較見本">
+  <div class="cs-gallery">
+    <div class="cs-row cs-between"><span class="cs-eyebrow">DESIGN STUDY / COMMENT SPEECH</span><small>比較見本 · 実際の設定は変更しません</small></div>
+    <nav class="cs-design-tabs" aria-label="デザイン案"></nav>
+    <div class="cs-row cs-between"><span id="cs-concept"></span><label class="cs-scenario">状態の見本<select id="cs-scenario"><option value="ready">通常</option><option value="off">読み上げオフ</option><option value="starting">エンジン準備中</option><option value="missing">エンジン未設定</option><option value="voice">話者未選択</option><option value="save-error">保存失敗</option></select></label></div>
+  </div>
+  <div id="cs-product" class="cs-window" aria-label="コメント読み上げの管理画面"></div>
+  <div class="cs-endbar"><button type="button" data-cycle="-1" aria-label="前のデザイン案">← 前の案</button><small id="cs-tradeoff"></small><button type="button" data-cycle="1" aria-label="次のデザイン案">次の案 →</button></div>
+  <details class="cs-debug"><summary>見本の操作状態</summary><pre id="cs-payload"></pre></details>
+</div>
+<script>
+(() => {
+  const root = document.getElementById('speech-designs');
+  const product = root.querySelector('#cs-product');
+  const variants = {
+    A: ['一覧で調整', '声と読み上げ内容を、ひと目で。', '全体を見渡しやすい / 狭い画面では縦に長い'],
+    B: ['目的別タブ', '今やりたいことに、集中する。', '項目を探しやすく、画面がコンパクト'],
+    C: ['要約から展開', 'いつもの設定を、必要な分だけ。', '普段の確認が速い / 詳細を見るには展開が必要'],
+    D: ['音声ミキサー', '声を触って、聞き心地を整える。', '声の微調整に強い / 内容設定は下に配置'],
+    E: ['順番に設定', '接続から読み方まで、順番に。', '初回の準備が分かりやすい / 再調整には移動が必要']
+  };
+  let initial = 'D';
+  try { initial = new URLSearchParams(location.search).get('variant') || 'D'; } catch { /* inline host */ }
+  const state = { variant: variants[initial] ? initial : 'A', tab: 'voice', step: 0, page: 'editor', origin: 'settings', scenario: 'ready', enabled: true, engine: 'ready', speaker: 'ずんだもん', style: 'ノーマル', speed: 1, pitch: 0, intonation: 1, volume: 1, readSource: false, readAuthor: false, maxLength: 200, queue: 0, dropped: 0, saved: true, notice: '' };
+  const voices = { 'ずんだもん': ['ノーマル', 'あまあま', 'ツンツン'], '四国めたん': ['ノーマル', 'あまあま'], '春日部つむぎ': ['ノーマル'] };
+  const limits = { speed: [.5,2,.1], pitch: [-.15,.15,.01], intonation: [0,2,.1], volume: [0,2,.1], maxLength: [50,500,1] };
+  const names = { speed:'話速', pitch:'音高', intonation:'抑揚', volume:'音量' };
+  const opened = new Set(['c-voice']);
+  const esc = value => String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  const fmt = key => key === 'pitch' ? Number(state[key]).toFixed(2) : Number(state[key]).toFixed(1);
+  const suffix = key => key === 'speed' ? '×' : key === 'volume' ? '×' : '';
+  const switcher = (key,label) => `<label class="cs-switch"><span>${label}</span><input id="cs-${key}" type="checkbox" data-key="${key}" ${state[key]?'checked':''}><output>${state[key]?'オン':'オフ'}</output></label>`;
+  const section = (title,body,extra='') => `<section class="cs-section"><div class="cs-title"><h2>${title}</h2>${extra}</div>${body}</section>`;
+  const detail = (id,title,body) => `<details data-open="${id}" ${opened.has(id)?'open':''}><summary>${title}</summary><div class="cs-stack">${body}</div></details>`;
+  function knob(key) {
+    const [min,max,step] = limits[key];
+    return `<label class="cs-field"><span class="cs-row cs-between">${names[key]}<output class="cs-value" data-value="${key}">${fmt(key)}${suffix(key)}</output></span><input id="cs-${key}" data-key="${key}" type="range" min="${min}" max="${max}" step="${step}" value="${state[key]}" aria-label="${names[key]}"></label>`;
+  }
+  function voiceFields() {
+    return `<div class="cs-fields"><label class="cs-field">話者<select id="cs-speaker" data-key="speaker"><option value="">選択してください</option>${Object.keys(voices).map(v=>`<option ${state.speaker===v?'selected':''}>${v}</option>`).join('')}</select></label><label class="cs-field">スタイル<select id="cs-style" data-key="style" ${!state.speaker?'disabled':''}>${state.speaker?voices[state.speaker].map(v=>`<option ${state.style===v?'selected':''}>${v}</option>`).join(''):'<option>話者を選択してください</option>'}</select></label></div>`;
+  }
+  function preview() {
+    return `<div class="cs-sample"><small>固定文で声を確認</small><p>これはコメント読み上げのテストです</p><div class="cs-row cs-between"><small>PCだけで試聴 · 読み上げオフでも利用できます</small><button type="button" data-action="preview" class="cs-primary" ${!state.speaker||state.engine==='starting'?'disabled':''}>▷ この声を試聴</button></div></div>`;
+  }
+  function tuning() { return `<div class="cs-fields">${knob('speed')}${knob('volume')}</div>${detail('fine','声の細かな調整',`<div class="cs-fields">${knob('pitch')}${knob('intonation')}</div>`)}`; }
+  function contentFields() {
+    return `<div class="cs-stack cs-gap-sm">${switcher('readSource','コメントソース名を読む')}${switcher('readAuthor','投稿者名を読む')}<small>本文は常に対象です。ソース名 → 投稿者名 → 本文の順に読みます。</small></div><hr class="cs-divider"><label class="cs-field">本文の最大文字数<span class="cs-input-unit"><input id="cs-maxLength" data-key="maxLength" type="number" value="${state.maxLength}" min="50" max="500" step="1"><span>文字</span></span><small>50〜500文字。超えた分は「以下省略」と読みます。</small></label>${detail('rules','読み上げのルール', '<p class="cs-small">新着コメントだけを読み上げます。URLは「URL」に置き換え、絵文字は読みません。</p><p class="cs-small">待ち件数は10件まで。超えた場合は古い未読から破棄します。</p>')}`;
+  }
+  function engineFields() {
+    const label = {ready:'使用できます',starting:'準備中',missing:'エンジンの指定が必要です'}[state.engine];
+    return `<div class="cs-row cs-between"><div><h3>VOICEVOX Engine</h3><span class="cs-status">${label}</span></div><button type="button" data-action="voices" ${state.engine==='starting'?'disabled':''}>話者一覧を更新</button></div><p class="cs-small">VOICEVOXは別途インストールします。既に起動している場合は、そのエンジンを利用します。</p><div><button type="button" data-action="engine">エンジンの場所を指定</button></div><p class="cs-small">VOICEVOXフォルダー内の vv-engine / run.exe を選択してください。</p><hr class="cs-divider"><div><h3>PCの再生先</h3><p class="cs-small">Windowsの既定の音声出力を使用します。</p></div><a class="cs-small" href="https://voicevox.hiroshiba.jp/term/" target="_blank" rel="noreferrer">VOICEVOXの利用規約・クレジット ↗</a>`;
+  }
+  function statusPanel() {
+    const text = state.engine==='missing'?'エンジン未設定':state.engine==='starting'?'エンジン準備中':!state.speaker?'話者の選択が必要':state.enabled?'新着コメントを待っています':'コメント読み上げはオフです';
+    return `<div class="cs-master"><div class="cs-row cs-between"><div><h3>コメントを読み上げる</h3><small>${text}</small></div>${switcher('enabled','')}</div><div class="cs-row cs-between"><span class="cs-status">VOICEVOX · ${state.engine==='ready'?'準備完了':state.engine==='starting'?'準備中':'未設定'}</span><small>読み上げ待ち ${state.queue}件 · 破棄累計 ${state.dropped}件</small></div><small>オフにすると、再生中の音声と待ちコメントをクリアします。</small></div>`;
+  }
+  function alertPanel() {
+    if(state.scenario==='save-error') return '<div class="cs-alert" role="alert"><strong>設定を保存できませんでした</strong><span class="cs-small">変更内容はこの画面に保持しています。</span><div><button type="button" data-action="retry">保存を再試行</button></div></div>';
+    if(state.engine==='missing') return '<div class="cs-alert" role="alert"><strong>VOICEVOXが見つかりません</strong><span>インストール済みの場合は、エンジンの場所を指定してください。</span><div><button type="button" data-action="engine">エンジンの場所を指定</button></div></div>';
+    if(!state.speaker) return '<div class="cs-alert" role="alert"><strong>読み上げる話者を選んでください</strong><span>オンでも、声を選ぶまではコメントを読み上げません。</span><div><button type="button" data-action="choose-voice">声の設定を開く</button></div></div>';
+    if(state.engine==='starting') return '<div class="cs-alert" role="status">VOICEVOXを準備しています。最大30秒かかります。</div>';
+    return '';
+  }
+  const voiceBody = () => voiceFields()+tuning()+preview();
+  function VariantA() {
+    return `<div class="cs-dual">${section('声と聞き心地',voiceBody(),'<span class="cs-eyebrow">VOICE</span>')}${section('読み上げる内容',contentFields(),'<span class="cs-eyebrow">CONTENT</span>')}</div>${detail('engine','VOICEVOXの接続・利用規約',engineFields())}`;
+  }
+  function VariantB() {
+    const tabs = [['voice','声・音量'],['content','読み上げる内容'],['engine','VOICEVOX']];
+    return `<nav class="cs-tabs" aria-label="設定の分類">${tabs.map(([key,label])=>`<button id="cs-tab-${key}" type="button" data-tab="${key}" aria-pressed="${state.tab===key}">${label}</button>`).join('')}</nav><div class="cs-tab-body">${state.tab==='voice'?section('声を選んで、聞き心地を調整',voiceBody()):state.tab==='content'?section('どこまで読み上げるか',contentFields()):section('音声エンジンの準備',engineFields())}</div>`;
+  }
+  function VariantC() {
+    return `<div class="cs-summary-voice"><div class="cs-voice-mark" aria-hidden="true">♪</div><div><h2>${esc(state.speaker||'話者未選択')}</h2><small>${esc(state.speaker?state.style:'声を選択してください')} · 話速 ${fmt('speed')}× · 音量 ${fmt('volume')}×</small></div></div><div class="cs-accordion">${detail('c-voice',`<span><strong>声を変える</strong><small>${esc(state.speaker||'未選択')} / ${esc(state.style)}</small></span>`,voiceFields()+preview())}${detail('c-tune',`<span><strong>聞き心地を調整する</strong><small>話速 ${fmt('speed')}× · 音量 ${fmt('volume')}× · 音高 ${fmt('pitch')} · 抑揚 ${fmt('intonation')}</small></span>`,`<div class="cs-fields">${Object.keys(names).map(knob).join('')}</div>`)}${detail('c-content',`<span><strong>読み上げる内容を変える</strong><small>${state.readSource?'ソース名・':''}${state.readAuthor?'投稿者名・':''}本文 / 最大${state.maxLength}文字</small></span>`,contentFields())}${detail('c-engine',`<span><strong>VOICEVOXを確認する</strong><small>接続・話者一覧・利用規約</small></span>`,engineFields())}</div>`;
+  }
+  function VariantD() {
+    const channels = Object.keys(names).map(key=>{
+      const [min,max,step]=limits[key];
+      return `<div class="cs-channel"><label for="cs-${key}">${names[key]}</label><output class="cs-value" data-value="${key}">${fmt(key)}${suffix(key)}</output><input id="cs-${key}" data-key="${key}" type="range" min="${min}" max="${max}" step="${step}" value="${state[key]}" aria-label="${names[key]}"><input id="cs-num-${key}" data-key="${key}" type="number" min="${min}" max="${max}" step="${step}" value="${state[key]}" aria-label="${names[key]}の数値"></div>`;
+    }).join('');
+    return `${section('声のコントロール',voiceFields()+`<div class="cs-mixer">${channels}</div>`+preview())}<div class="cs-dual">${section('読み上げる内容',contentFields())}${section('VOICEVOX',engineFields())}</div>`;
+  }
+  function VariantE() {
+    const steps = ['接続を確認','声を整える','内容を決める'];
+    return `<div class="cs-steps"><nav class="cs-stepnav" aria-label="設定の手順">${steps.map((label,i)=>`<button type="button" data-step="${i}" aria-pressed="${state.step===i}"><span class="cs-stepnum">${i+1}</span><span>${label}</span></button>`).join('')}</nav><div class="cs-stack">${section(steps[state.step],state.step===0?engineFields():state.step===1?voiceBody():contentFields())}<div class="cs-row cs-between"><button type="button" data-step="${state.step-1}" ${state.step===0?'disabled':''}>← 前へ</button><span class="cs-small">${state.step+1} / 3</span>${state.step<2?`<button type="button" class="cs-primary" data-step="${state.step+1}">${steps[state.step+1]} →</button>`:'<span class="cs-status">設定内容は自動保存</span>'}</div></div></div>`;
+  }
+  function payload() { root.querySelector('#cs-payload').textContent=JSON.stringify(state,null,2); }
+  function render() {
+    root.querySelector('.cs-design-tabs').innerHTML=Object.entries(variants).map(([key,[name]])=>`<button type="button" data-variant="${key}" aria-pressed="${state.variant===key}"><b>${key}</b><span>${name}</span></button>`).join('');
+    root.querySelector('#cs-concept').textContent=variants[state.variant][1];
+    root.querySelector('#cs-tradeoff').textContent=variants[state.variant][2];
+    root.querySelector('#cs-scenario').value=state.scenario;
+    product.innerHTML=`<header class="cs-topbar"><div class="cs-brand"><span class="cs-logo" aria-hidden="true">▤</span><strong>きゃすメイト</strong></div><small>バックエンド接続済み</small></header><nav class="cs-mainnav" aria-label="メイン"><button type="button" data-page="home" ${state.page==='home'?'aria-current="page"':''}>ホーム</button><button type="button" data-page="settings" ${state.page!=='home'?'aria-current="page"':''}>設定</button></nav><main class="cs-content">${state.page==='editor'?`<button type="button" class="cs-quiet cs-back" data-page="${state.origin}">← ${state.origin==='home'?'ホーム':'設定'}に戻る</button><div class="cs-heading"><h1>コメント読み上げ</h1><p class="cs-small">新着コメントを、あなたの聞きやすい声で。</p></div>${statusPanel()}${alertPanel()}<div id="cs-notice" class="cs-alert" role="status" ${!state.notice?'hidden':''}>${esc(state.notice)}</div>${({A:VariantA,B:VariantB,C:VariantC,D:VariantD,E:VariantE})[state.variant]()}<footer class="cs-footer"><span>${state.saved?'✓ 変更は自動保存':'保存できていない変更があります'}</span><span>見本 · 操作と保存は模擬表示です</span></footer>`:`<div class="cs-heading"><h1>${state.page==='home'?'配信のホーム':'設定'}</h1><p class="cs-small">読み上げ設定からの戻り先（見本）</p></div><button type="button" data-action="open-editor" class="cs-row cs-between"><span>コメント読み上げ</span><span>声・音量・読み上げ内容 →</span></button>`}</main>`;
+    const enabled=product.querySelector('#cs-enabled');
+    if(enabled) enabled.setAttribute('aria-label','コメント読み上げ');
+    payload();
+  }
+  function chooseVariant(key) {
+    state.variant=key;state.page='editor';state.notice='';
+    try{const url=new URL(location.href);url.searchParams.set('variant',key);history.replaceState(null,'',url);}catch{/* embedded host */}
+    render();
+    root.querySelector(`[data-variant="${key}"]`).focus({preventScroll:true});
+  }
+  function notice(text) {
+    state.notice=text;
+    const box=root.querySelector('#cs-notice');
+    if(box){box.hidden=false;box.textContent=text;}
+    payload();
+  }
+  root.addEventListener('toggle',event=>{const key=event.target.dataset.open;if(key){if(event.target.open)opened.add(key);else opened.delete(key);}},true);
+  root.addEventListener('input',event=>{
+    const input=event.target,key=input.dataset.key;
+    if(!key||!limits[key]||!input.validity.valid||input.value==='')return;
+    state[key]=Number(input.value);state.saved=state.scenario!=='save-error';
+    product.querySelectorAll(`[data-value="${key}"]`).forEach(el=>el.textContent=fmt(key)+suffix(key));
+    product.querySelectorAll(`input[data-key="${key}"]`).forEach(el=>{if(el!==input)el.value=input.value;});payload();
+  });
+  root.addEventListener('change',event=>{
+    const input=event.target,key=input.dataset.key;
+    if(input.id==='cs-scenario'){
+      state.scenario=input.value;state.engine=input.value==='missing'?'missing':input.value==='starting'?'starting':'ready';
+      state.enabled=input.value!=='off';state.speaker=input.value==='voice'?'':'ずんだもん';state.style='ノーマル';state.saved=input.value!=='save-error';state.notice='';render();return;
+    }
+    if(!key)return;
+    if(limits[key]){
+      if(!input.validity.valid||input.value===''){input.value=state[key];notice(`${key==='maxLength'?'本文の最大文字数':names[key]}は ${limits[key][0]}〜${limits[key][1]} の範囲で入力してください。直前の有効値を保持しました。`);return;}
+      state[key]=Number(input.value);
+    } else if(input.type==='checkbox'){
+      state[key]=input.checked;
+      if(key==='enabled'&&!input.checked)state.queue=0;
+    }else{state[key]=input.value;if(key==='speaker')state.style=voices[input.value]?.[0]||'';}
+    state.saved=state.scenario!=='save-error';
+    const id=input.id;render();product.querySelector(`#${id}`)?.focus({preventScroll:true});
+  });
+  root.addEventListener('click',event=>{
+    const button=event.target.closest('button');if(!button||button.disabled)return;
+    if(button.dataset.variant){chooseVariant(button.dataset.variant);return;}
+    if(button.dataset.cycle){const keys=Object.keys(variants);chooseVariant(keys[(keys.indexOf(state.variant)+Number(button.dataset.cycle)+5)%5]);return;}
+    if(button.dataset.tab){state.tab=button.dataset.tab;render();root.querySelector(`#cs-tab-${state.tab}`).focus({preventScroll:true});return;}
+    if(button.dataset.step!==undefined){state.step=Number(button.dataset.step);render();root.querySelector(`[data-step="${state.step}"]`).focus({preventScroll:true});return;}
+    if(button.dataset.page){state.page=button.dataset.page;render();return;}
+    if(button.dataset.action==='open-editor'){state.origin=state.page;state.page='editor';render();return;}
+    if(button.dataset.action==='preview'){notice(`試聴の操作見本：${state.speaker} / ${state.style}、話速${fmt('speed')}×、音量${fmt('volume')}×で固定文をPCへ再生します。この見本では音は出ません。`);return;}
+    if(button.dataset.action==='engine'){notice('ファイル選択の操作見本：本体では vv-engine / run.exe を選択して確認します。この見本からPCの設定は変更しません。');return;}
+    if(button.dataset.action==='voices'){notice('話者一覧の更新見本：本体ではVOICEVOXから利用できる話者を取得します。ここでは見本の3話者を表示しています。');return;}
+    if(button.dataset.action==='retry'){state.scenario='ready';state.saved=true;state.notice='再保存できた状態の見本です。';render();return;}
+    if(button.dataset.action==='choose-voice'){state.tab='voice';state.step=1;opened.add('c-voice');render();root.querySelector('#cs-speaker')?.focus();}
+  });
+  root.addEventListener('keydown',event=>{
+    if(event.key==='Enter'&&event.target.matches('input[type=checkbox]')){event.preventDefault();event.target.click();return;}
+    if(event.target.closest('input,select,textarea,[contenteditable]'))return;
+    if(!event.target.matches('[data-variant]'))return;
+    if(event.key==='ArrowLeft'||event.key==='ArrowRight'){event.preventDefault();const keys=Object.keys(variants);chooseVariant(keys[(keys.indexOf(state.variant)+(event.key==='ArrowRight'?1:4))%5]);}
+  });
+  render();
+  if(globalThis.Tweak){
+    const tweaks=new Tweak({container:root,onChange:()=>chooseVariant(state.variant)});
+    tweaks.addSelect(state,'variant',{label:'画面構成',options:Object.entries(variants).map(([value,[label]])=>({value,label:`${value} · ${label}`}))});
+  }
+})();
+</script>

@@ -1,0 +1,12 @@
+import { mkdtemp, mkdir } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { resolve, join } from 'node:path';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import electron from 'electron';
+const directory = await mkdtemp(join(tmpdir(), 'casmate-phone-recognition-'));
+const output = resolve('tmp/initial-setup-phone-recognition-comparison');
+await mkdir(output, { recursive: true });
+const result = await promisify(execFile)(electron, [resolve('prototypes/initial-setup-phone-recognition-throwaway/verify-electron.mjs'), output], { cwd: directory, windowsHide: true, timeout: 90000 });
+process.stdout.write(result.stdout); process.stderr.write(result.stderr);
+if (!result.stdout.includes('PASS:')) throw new Error('Prototype checks did not report success');

@@ -1,0 +1,94 @@
+/* The live workspace alone fills the remaining management viewport. */
+.management-live-active .management-body { display:flex; flex-direction:column; padding:14px 18px 10px; }
+.management-live-active .management-body>.management-page-heading { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+.management-live-active .management-live:not([hidden]) { flex:1; display:flex; flex-direction:column; min-height:0; }
+.management-shell .studio-live-layout { display:grid; grid-template-columns:minmax(0,1fr); grid-template-rows:auto auto minmax(160px,1fr) auto auto; height:100%; min-height:0; min-width:0; gap:8px; align-items:stretch; }
+.management-shell .studio-live-operations { min-width:0; border:1px solid var(--studio-line); border-radius:10px; background:var(--studio-surface); overflow:hidden; }
+.studio-live-operations>h2 { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); margin:0; }
+.management-shell .studio-live-operations .home-operations { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:0; }
+.management-shell .studio-live-operations .home-operations article { display:flex; align-items:center; justify-content:space-between; min-width:0; gap:8px; padding:8px 12px; border:0; border-radius:0; background:transparent; }
+.management-shell .studio-live-operations article+article { border-left:1px solid var(--studio-line); }
+.studio-live-operations .operation-copy { min-width:0; }
+.management-shell .studio-live-operations .feature-link { min-height:24px; padding:0; font-size:var(--management-font-body); white-space:nowrap; }
+.management-shell .studio-live-operations .studio-live-operation-status { height:2.7em; margin:2px 0 0; font-size:var(--management-font-secondary); line-height:1.35; overflow:auto; color:var(--studio-muted); }
+.management-shell .studio-live-operations .slim-switch { min-height:32px; width:calc(28px + 7px + 2.2em); font-size:var(--management-font-secondary); }
+.management-shell .studio-live-operations .slim-switch[aria-disabled=true] { opacity:.45; cursor:not-allowed; }
+.management-shell .studio-live-connections { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; min-width:0; }
+.management-shell .studio-live-connections>button { display:flex; align-items:center; gap:8px; padding:5px 9px; min-height:36px; min-width:0; border:0; border-radius:7px; background:var(--studio-surface); color:var(--studio-text); text-align:left; font-size:var(--management-font-secondary); }
+.studio-live-connections>button>span:first-child { flex-shrink:0; color:var(--studio-muted); }
+.studio-live-connections strong { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:inherit; font-weight:550; }
+.studio-live-connections>button>span:last-child { margin-left:auto; color:var(--studio-accent); }
+.management-shell .studio-live-connections>.live-summary-attention strong { color:var(--studio-warning); }
+#live-connections-summary strong { display:grid; flex:1; align-items:center; max-width:100%; white-space:normal; overflow:visible; overflow-wrap:anywhere; }
+#live-connections-summary strong::before { content:'3件接続中・要確認'; visibility:hidden; grid-area:1/1; }
+#live-connections-summary strong>span { grid-area:1/1; }
+.management-shell .studio-live-layout>.studio-comment-feed { display:flex; flex-direction:column; min-height:0; padding:0; overflow:hidden; }
+.management-shell .studio-live-layout .studio-comment-feed>.home-section-heading { display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:8px 12px; margin:0; border-bottom:1px solid var(--studio-line); }
+.management-shell .studio-live-layout .studio-comment-feed h2 { margin:0; padding:0; border:0; font-size:var(--management-font-heading); }
+.studio-live-feed-actions { margin-left:auto; display:flex; flex-wrap:wrap; max-width:100%; gap:6px; align-items:center; justify-content:flex-end; }
+.management-shell .studio-live-feed-actions>button { min-height:30px; padding:4px 8px; font-size:var(--management-font-secondary); color:var(--studio-accent); }
+.management-shell .studio-live-feed-actions>.studio-live-auto-scroll { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:0 6px; width:11em; max-width:100%; line-height:1.35; }
+.studio-live-auto-scroll>span { white-space:nowrap; }
+.studio-live-auto-scroll-value { width:3.5ch; text-align:center; }
+.management-shell .studio-live-auto-scroll[aria-pressed=true] { background:var(--studio-soft); border-color:var(--studio-accent); }
+.management-shell .studio-live-feed-actions>#live-list-settings { min-width:30px; padding:2px; font-size:18px; border:0; }
+.management-shell .studio-live-feed-actions>.studio-live-comment-window { width:7em; white-space:nowrap; }
+.management-shell .studio-live-comment-window[aria-pressed=true] { background:var(--studio-soft); border-color:var(--studio-accent); color:var(--studio-accent); }
+.management-shell .studio-live-comment-window[aria-disabled=true] { opacity:.45; cursor:not-allowed; }
+.management-shell .studio-live-layout .studio-comment-stream { flex:1; min-height:0; height:auto; padding:8px 12px; }
+.management-shell .studio-live-layout .studio-comment-feed>.studio-footer-links { flex-wrap:nowrap; min-height:28px; padding:4px 12px; margin:0; border-top:1px solid var(--studio-line); font-size:var(--management-font-secondary); }
+.studio-live-follow-state { display:grid; flex:1; min-width:0; overflow-wrap:anywhere; }
+.studio-live-follow-state::before { content:'読み返し中・自動スクロール OFF　新着9999+件'; visibility:hidden; grid-area:1/1; }
+.studio-live-follow-state>span { grid-area:1/1; }
+.studio-comment-feed>.studio-footer-links>span:last-child { flex-shrink:0; }
+.studio-live-transcript { display:flex; align-items:center; gap:10px; min-height:36px; min-width:0; font-size:var(--management-font-secondary); }
+.studio-live-transcript>span { flex-shrink:0; color:var(--studio-muted); }
+.studio-live-transcript>p { flex:1; min-width:0; margin:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+.management-shell .studio-live-transcript>button { flex-shrink:0; min-height:30px; padding:2px 0; font-size:var(--management-font-secondary); }
+.studio-live-utilities { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:4px 10px; min-height:28px; font-size:var(--management-font-secondary); color:var(--studio-muted); }
+.management-shell .studio-live-utilities>button { min-height:28px; padding:2px 0; font-size:var(--management-font-secondary); }
+.management-shell .studio-live-dialog { padding:0; width:min(580px,calc(100vw - 24px)); max-height:calc(100dvh - 24px); border:1px solid var(--studio-line); border-radius:12px; background:var(--studio-surface); color:var(--studio-text); overflow:hidden; }
+.management-shell .studio-live-dialog::backdrop { background:#0009; }
+.management-shell .studio-live-dialog[open] { display:flex; flex-direction:column; }
+.studio-live-dialog-heading { flex-shrink:0; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 18px; border-bottom:1px solid var(--studio-line); }
+.management-shell .studio-live-dialog-heading h2 { margin:0; font-size:var(--management-font-heading); }
+.management-shell .studio-live-dialog-heading>button { flex-shrink:0; background:var(--studio-accent); color:var(--studio-accent-text); border:1px solid var(--studio-accent); }
+.studio-live-dialog-body { min-height:0; padding:18px; overflow:auto; }
+.management-shell .studio-live-dialog .home-connections { padding:0; border:0; background:transparent; }
+.management-shell .studio-live-dialog .home-source-grid { grid-template-columns:1fr; }
+.management-shell .studio-live-dialog .home-source { display:flex; align-items:center; flex-wrap:wrap; gap:8px; padding:12px; }
+.management-shell .studio-live-dialog .home-source .source-link { flex:1; }
+.management-shell .studio-live-dialog .home-source-status { margin:0; }
+.management-shell .studio-live-dialog .slim-switch { width:calc(28px + 7px + 2.2em); }
+.management-shell .studio-live-dialog .window-controls { padding:0; border:0; }
+.management-shell .studio-live-dialog .window-control>span { min-height:2.7em; }
+.management-shell .studio-live-dialog .window-control>button { min-height:3em; width:10em; max-width:100%; }
+.management-shell .studio-live-dialog [aria-disabled=true] { opacity:.45; cursor:not-allowed; }
+.management-shell .studio-live-detail-message { height:5.6em; overflow:auto; font-size:var(--management-font-secondary); line-height:1.4; color:var(--studio-muted); }
+.studio-live-dialog-body>.studio-footer-links { flex-wrap:wrap; }
+@media(max-width:680px) {
+  .management-shell .studio-live-operations .home-operations article { flex-direction:column; align-items:flex-start; padding:8px 10px; gap:2px; }
+  .management-shell .studio-live-operations .slim-switch-wrap { max-width:none; }
+  .management-shell .studio-live-connections>button { flex-wrap:wrap; align-content:center; gap:2px 5px; padding:4px 7px; min-height:50px; }
+  .studio-live-connections>button>span:first-child { width:100%; }
+  .studio-live-connections>button>span:last-child { display:none; }
+}
+@media(max-width:420px) {
+  .management-shell .studio-live-feed-actions>.studio-live-comment-window { width:30px; padding:4px; }
+  .studio-live-window-label { display:none; }
+  .management-live-active .management-body { padding:8px 7px 6px; }
+  .management-shell .studio-live-operations .home-operations article { padding:6px; }
+  .management-shell .studio-live-operations .feature-link { font-size:var(--management-font-secondary); }
+  .management-shell .studio-live-connections>button { padding:4px 6px; }
+  .management-shell .studio-live-operations .slim-switch { gap:5px; }
+  .studio-live-transcript { gap:6px; }
+  .studio-live-transcript>span { max-width:8em; }
+  .management-shell .studio-live-dialog-body { padding:12px; }
+}
+@media(max-width:280px) {
+  .management-shell .studio-live-operations .home-operations { grid-template-columns:minmax(0,1fr); }
+  .management-shell .studio-live-operations .home-operations article { flex-direction:row; align-items:center; }
+  .management-shell .studio-live-operations article+article { border-left:0; border-top:1px solid var(--studio-line); }
+  .management-shell .studio-live-connections { grid-template-columns:minmax(0,1fr); }
+  .studio-live-transcript { flex-wrap:wrap; }
+}

@@ -1,0 +1,63 @@
+{
+  "type": "casmate.outdoor",
+  "version": 14,
+  "pcId": "22222222-2222-4222-8222-222222222222",
+  "deviceId": "11111111-1111-4111-8111-111111111111",
+  "network": "direct",
+  "pcKey": {
+    "algorithm": "sha256-spki",
+    "fingerprint": "57a9107266db870f0c194786feb80f8c713479958436b1a6d6b025b2e152859a"
+  },
+  "endpoints": [
+    {
+      "id": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "family": "ipv4",
+      "address": "8.8.8.8",
+      "tcpPort": 3001
+    },
+    {
+      "id": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      "family": "ipv6",
+      "address": "2606:4700:4700::1111",
+      "tcpPort": 3001
+    }
+  ],
+  "comments": {
+    "registrationId": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+    "revision": 1,
+    "token": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "protocolVersion": 2
+  },
+  "control": {
+    "protocolVersion": 2
+  },
+  "outdoor": {
+    "registrationId": "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+    "revision": 1,
+    "token": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+    "passphrase": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "endpoints": [
+      {
+        "id": "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+        "family": "ipv6",
+        "address": "2001:4860:4860::8888",
+        "outdoorPort": 10008
+      }
+    ]
+  },
+  "obsControl": {
+    "registrationId": "ffffffff-ffff-4fff-8fff-ffffffffffff",
+    "revision": 1,
+    "token": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  },
+  "registrationUpdate": {
+    "registrationId": "99999999-9999-4999-8999-999999999999",
+    "revision": 1,
+    "token": "9999999999999999999999999999999999999999999999999999999999999999"
+  },
+  "updateRevision": 1,
+  "preparation": {
+    "video": "ready",
+    "obsControl": "ready"
+  }
+}

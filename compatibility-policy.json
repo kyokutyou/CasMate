@@ -1,0 +1,131 @@
+{
+  "contracts": {
+    "pcSettings": {
+      "current": 16,
+      "supported": [13, 14, 15, 16],
+      "retired": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+      ]
+    },
+    "pcSmartphoneStore": {
+      "current": 6,
+      "supported": [
+        4,
+        5,
+        6
+      ],
+      "retired": [
+        1,
+        2,
+        3
+      ]
+    },
+    "androidRegistrationStore": {
+      "current": 6,
+      "supported": [
+        5,
+        6
+      ],
+      "retired": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    "androidOutdoorQuality": {
+      "current": 1,
+      "supported": [
+        1
+      ],
+      "retired": [],
+      "initialImport": "complete-unversioned"
+    },
+    "privateInvitation": {
+      "current": 11,
+      "supported": [
+        11
+      ],
+      "retired": [
+        6
+      ]
+    },
+    "privateRegistration": {
+      "current": 15,
+      "supported": [
+        12,
+        15
+      ],
+      "retired": [
+        5,
+        7,
+        8
+      ]
+    },
+    "directInvitation": {
+      "current": 13,
+      "supported": [
+        13
+      ],
+      "retired": [
+        9
+      ]
+    },
+    "directRegistration": {
+      "current": 16,
+      "supported": [
+        14,
+        16
+      ],
+      "retired": [
+        10
+      ]
+    },
+    "mobileProtocol": {
+      "current": 2,
+      "supported": [
+        2
+      ],
+      "retired": [
+        1
+      ]
+    },
+    "controlProtocol": {
+      "current": 3,
+      "supported": [
+        2,
+        3
+      ],
+      "retired": [
+        1
+      ]
+    }
+  },
+  "registrationContracts": [
+    {
+      "network": "private",
+      "invitation": 11,
+      "registration": 15,
+      "mobileProtocol": 2,
+      "controlProtocol": 3
+    },
+    {
+      "network": "direct",
+      "invitation": 13,
+      "registration": 16,
+      "mobileProtocol": 2,
+      "controlProtocol": 3
+    }
+  ]
+}

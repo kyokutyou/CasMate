@@ -1,0 +1,82 @@
+.management-shell .panel.speech-recognition-panel { padding: 0; border: 0; background: transparent; gap: 0; }
+.management-shell .speech-recognition-panel > .panel-heading { display: none; }
+.speech-recognition-panel > .card-details { display: grid; gap: 12px; padding: 0; border: 0; }
+.speech-recognition-panel > .card-details[hidden] { display: none; }
+.recognition-section { min-width: 0; display: grid; gap: 8px; padding: 14px; border: 1px solid var(--studio-line, #3c5360); border-radius: 12px; background: var(--studio-surface, #1c2b35); }
+.recognition-section h3 { margin: 0; font-size:var(--management-font-heading, 18px); }
+.recognition-section p { margin: 0; }
+.speech-recognition-panel button[aria-disabled=true] { opacity: .45; cursor: not-allowed; }
+.recognition-section .muted { font-size:var(--management-font-body, 13px); line-height: 1.65; }
+.recognition-master { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.recognition-master > div { flex: 1 1 240px; min-width: 0; }
+.recognition-master h3 { margin-bottom: 5px; }
+.recognition-master .slim-switch.slim-switch { width: calc(35px + 2.2em); }
+.recognition-input-use { display: grid; grid-template-rows: 1.65em 1.65em; min-width: 0; font-size: var(--management-font-body, 14px); line-height: 1.65; }
+.recognition-input-use > p { overflow: auto; scrollbar-gutter: stable; overflow-wrap: anywhere; }
+.recognition-master .recognition-input-use { margin-top: 4px; }
+.recognition-input-help[data-changed=true] { color: var(--studio-warning, #ffd18b); font-weight: 700; }
+.recognition-step { display: inline-grid; place-items: center; width: 25px; height: 25px; margin-right: 10px; border-radius: 50%; background: var(--studio-panel, #2d4546); color: var(--studio-muted, #abd8bf); font-size:var(--management-font-body, 13px); }
+.recognition-microphone { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: end; }
+.recognition-section label { min-width: 0; font-size:var(--management-font-body, 14px); }
+.recognition-section select, .recognition-section input { min-width: 0; }
+.recognition-microphone button { height: 42px; }
+.recognition-model { display: grid; grid-template-columns: minmax(0, 1fr) 160px; gap: 16px; align-items: center; }
+.recognition-model-state { height: 1.65em; line-height: 1.65; font-size:var(--management-font-body, 13px); overflow: auto; scrollbar-gutter: stable; overflow-wrap: anywhere; }
+.recognition-model-help { height: 1.65em; overflow: auto; scrollbar-gutter: stable; overflow-wrap: anywhere; }
+.recognition-model-actions { display: grid; gap: 8px; }
+.recognition-model-actions button { width: 100%; height: 3.2em; padding: 4px 8px; font-size:var(--management-font-body, 13px); line-height: 1.3; overflow-wrap: anywhere; }
+.recognition-disclosure > summary { display: flex; align-items: center; gap: 8px; min-height: 34px; cursor: pointer; list-style: none; font-size:var(--management-font-body, 14px); font-weight: 600; }
+.recognition-disclosure > summary::-webkit-details-marker { display: none; }
+.recognition-disclosure > summary::before { content: '+'; flex: 0 0 16px; color: var(--studio-muted, #abd8bf); font-size: 20px; font-weight: 400; }
+.recognition-disclosure[open] > summary::before { content: '−'; }
+.recognition-disclosure > summary > span:first-child { flex: 1; }
+.recognition-disclosure summary small { margin-left: 8px; color: var(--studio-muted, #9bb3c2); font-size:var(--management-font-body, 12px); font-weight: 400; }
+.recognition-invalid { flex: 0 0 3em; font-size:var(--management-font-secondary, 12px); color: var(--studio-accent, #ffd391); }
+.recognition-fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; padding-top: 10px; }
+.recognition-number { display: grid; align-content: start; gap: 5px; }
+.recognition-number > small { color: var(--studio-muted, #9bb3c2); font-size:var(--management-font-secondary, 12px); }
+.recognition-field-help { display: block; overflow: auto; scrollbar-gutter: stable; font-size:var(--management-font-secondary, 12px); line-height: 1.6; }
+.recognition-apply { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-top: 13px; border-top: 1px solid var(--studio-line, #3c5360); }
+.recognition-apply-state { flex: 1 1 210px; height: 3em; overflow: auto; scrollbar-gutter: stable; }
+.recognition-apply-status { display: block; padding: .35em .5em; border-left: 3px solid transparent; border-radius: 5px; line-height: 1.5; }
+.recognition-apply-status[data-dirty=true] { color: var(--studio-warning, #ffd18b); background: var(--studio-warning-surface, #423521); border-left-color: var(--studio-warning, #ffd18b); }
+.recognition-recovery-help { height: 4.95em; overflow: auto; scrollbar-gutter: stable; overflow-wrap: anywhere; }
+.recognition-apply > button, .recognition-recovery button { flex: 0 1 12em; width: 12em; max-width: 100%; min-width: 0; height: 3.2em; display: inline-flex; align-items: center; justify-content: center; padding: 4px 8px; font-size:var(--management-font-body, 14px); line-height: 1.3; overflow-wrap: anywhere; }
+.recognition-preview-heading > button { width: 160px; height: 40px; padding: 4px 8px; font-size:var(--management-font-body, 14px); }
+.recognition-preview-heading { display: grid; grid-template-columns: minmax(0, 1fr) 160px; align-items: center; gap: 12px; }
+.recognition-preview-state { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: 1.65em 3.3em; gap: 4px; min-width: 0; padding: 8px; border-left: 3px solid var(--studio-line, #3c5360); border-radius: 5px; font-size: var(--management-font-body, 14px); line-height: 1.65; }
+.recognition-preview-state[data-attention=true] { border-left-color: var(--studio-warning, #ffd18b); }
+.recognition-state-heading { display: flex; flex-wrap: wrap; column-gap: 12px; overflow: auto; scrollbar-gutter: stable; }
+.recognition-state-message { min-width: 0; min-height: 0; overflow: auto; scrollbar-gutter: stable; overflow-wrap: anywhere; font-size: var(--management-font-secondary, 12px); }
+.recognition-last-result { display: grid; gap: 8px; }
+.recognition-latest { height: 144px; overflow: auto; scrollbar-gutter: stable; padding: 12px; border: 1px solid var(--studio-line, #3c5360); border-radius: 8px; background: var(--studio-surface, #14232d); }
+.recognition-empty { display: grid; gap: 8px; align-content: center; min-height: 100%; }
+.recognition-empty strong { color: var(--studio-muted, #b6d5e2); }
+.recognition-entry { display: grid; gap: 8px; min-width: 0; overflow-wrap: anywhere; }
+.recognition-entry time, .recognition-entry > span { color: var(--studio-muted, #9bb3c2); font-size:var(--management-font-secondary, 12px); }
+.recognition-entry > p { font-size:var(--management-font-heading, 18px); line-height: 1.7; white-space: pre-wrap; }
+.recognition-history-list { height: 240px; overflow: auto; scrollbar-gutter: stable; padding: 12px; background: var(--studio-surface, #14232d); border-radius: 8px; }
+.recognition-history-list .recognition-entry { padding: 10px 0; border-bottom: 1px solid var(--studio-line, #3c5360); }
+.recognition-detail-body { display: grid; gap: 12px; padding-top: 12px; }
+.recognition-detail-body > button { justify-self: start; }
+@media (max-width: 760px) { .recognition-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) {
+  .recognition-section { padding: 14px; }
+  .recognition-input-use { grid-template-rows: 1.65em 3.3em; }
+  .recognition-preview-state { grid-template-rows: 3.3em 4.95em; }
+  .recognition-state-heading { display: block; }
+  .recognition-state-heading > * { display: block; }
+  .recognition-model-help { height: 3.3em; }
+  .recognition-apply-state { height: 4.5em; }
+  .recognition-preview-heading { grid-template-columns: minmax(0, 1fr); }
+  .recognition-preview-heading > button { justify-self: end; }
+}
+@media (max-width: 390px) {
+  .recognition-input-use { grid-template-rows: 3.3em 3.3em; }
+  .recognition-model { grid-template-columns: minmax(0, 1fr); }
+  .recognition-model-actions { justify-self: end; width: 160px; max-width: 100%; }
+  .recognition-fields, .recognition-microphone, .recognition-model-actions { grid-template-columns: minmax(0, 1fr); }
+  .recognition-apply > button, .recognition-preview-heading > button { width: 100%; }
+  .recognition-apply > button { flex-basis: 100%; }
+  .recognition-disclosure summary small { display: block; margin-left: 0; }
+}

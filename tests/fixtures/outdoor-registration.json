@@ -1,0 +1,12 @@
+{
+  "type": "casmate.outdoor", "version": 1, "registrationId": "test-registration", "revision": 1,
+  "address": "100.64.0.1", "obsPort": 10000, "statusPort": 3001,
+  "passphrase": "TESTONLY0123456789abcdefghijklmn",
+  "token": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "quality": {
+    "videoCodec": "h264", "fps": 30, "videoBitrate": 2500000,
+    "landscapeWidth": 1280, "landscapeHeight": 720, "portraitWidth": 720, "portraitHeight": 1280,
+    "audioCodec": "aac-lc", "sampleRate": 48000, "channels": 1, "audioBitrate": 64000,
+    "latencyMs": 1000, "encryption": "aes-256"
+  }
+}

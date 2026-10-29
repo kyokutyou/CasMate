@@ -1,0 +1,8 @@
+/* Hidden sizing copies share a cell; only the longest wrapped message sets height. */
+.compact-feedback { position:relative; min-width:0; overflow:auto; scrollbar-gutter:stable; }
+/* Validation colors must not invoke the generic error text size and change wrapping. */
+.management-shell .compact-feedback.field-error { font-size:var(--compact-feedback-font-size,var(--management-font-secondary)); }
+.compact-feedback-reserve { display:grid; visibility:hidden; pointer-events:none; }
+.compact-feedback-reserve>span { grid-area:1/1; min-width:0; overflow-wrap:anywhere; white-space:pre-wrap; }
+.compact-feedback-reserve>span::before { content:attr(data-reserve); }
+.compact-feedback-content { position:absolute; inset:0; padding:inherit; box-sizing:border-box; overflow-wrap:anywhere; white-space:pre-wrap; }

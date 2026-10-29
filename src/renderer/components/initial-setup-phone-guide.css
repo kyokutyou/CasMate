@@ -1,0 +1,13 @@
+.setup-phone-guides{display:grid;gap:18px;min-width:0}.setup-phone-guide{min-width:0;padding-block:16px;border-top:1px solid var(--studio-line)}.setup-phone-guide h4{margin:0 0 14px;font-size:var(--management-font-body)}.setup-phone-guide ol{padding-inline-start:1.6em;display:grid;gap:10px;line-height:1.8}.setup-phone-controls{margin:0;max-width:440px}.setup-phone-controls svg{display:block;width:100%;height:auto}.setup-phone-controls figcaption{font-size:var(--management-font-secondary);color:var(--studio-muted);line-height:1.7;margin-top:8px}.setup-phone-guide .setup-inline-note{margin-top:14px;overflow-wrap:anywhere}
+.setup-phone-speech-help{height:auto;line-height:1.7;font-size:var(--management-font-secondary);overflow:auto}.setup-phone-speech #setup-phone-speech-preview{display:inline-grid;max-width:100%;white-space:normal}.setup-phone-speech #setup-phone-speech-preview::before{content:'▷ この声を試聴';visibility:hidden;grid-area:1/1}.setup-phone-speech #setup-phone-speech-preview::after{content:'試聴を準備中…';visibility:hidden;grid-area:1/1}.setup-phone-speech #setup-phone-speech-preview>span{grid-area:1/1}.setup-phone-speech #setup-phone-speech-preview[aria-disabled=true]{opacity:.5;cursor:default}
+
+.setup-phone-speech-help .compact-feedback-content{white-space:pre-line}
+.setup-phone-guide .setup-phone-step-note{display:block;margin-block:6px 0;color:var(--studio-muted);font-size:var(--management-font-secondary);line-height:1.7}
+.setup-phone-permission-note{margin-top:10px;padding-left:12px;border-left:2px solid var(--studio-line);font-size:var(--management-font-secondary);line-height:1.7}
+.setup-phone-permission-note p{margin:4px 0}
+.setup-phone-check{margin-block:16px;padding-left:12px;border-left:3px solid var(--studio-accent);line-height:1.8}
+.setup-phone-check>strong{display:block}.setup-phone-check ul{margin:6px 0;padding-left:1.4em}.setup-phone-check p{margin:6px 0 0}
+.setup-phone-troubleshooting{margin-top:16px;padding-top:12px;border-top:1px solid var(--studio-line);line-height:1.8}
+.setup-phone-troubleshooting summary{font-weight:600}.setup-phone-troubleshooting ul{padding-left:1.4em;margin-block:10px 0}.setup-phone-troubleshooting li+li{margin-top:6px}
+.setup-phone-troubleshooting dl{margin:10px 0 0}.setup-phone-troubleshooting dl>div+div{margin-top:12px}.setup-phone-troubleshooting dt{font-weight:600}.setup-phone-troubleshooting dd{margin:2px 0 0}
+.setup-phone-preview-notes{margin-block:12px;color:var(--studio-muted);font-size:var(--management-font-secondary);line-height:1.7}.setup-phone-preview-notes p{margin:6px 0}.setup-phone-preview-notes ul{margin:4px 0 8px;padding-left:1.4em}

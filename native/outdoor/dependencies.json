@@ -1,0 +1,19 @@
+{
+  "srt": {
+    "version": "1.5.7",
+    "revision": "899348d8318eb9a3c5a5b6ec43c4a1114288773a",
+    "url": "https://codeload.github.com/Haivision/srt/tar.gz/899348d8318eb9a3c5a5b6ec43c4a1114288773a",
+    "sha256": "82050d96a1a55d54b423fed4ad80ddb6f30b31bf33e317ffd6726c91ee9a6170",
+    "patches": [
+      {
+        "file": "verified-ipv6-only.json",
+        "sha256": "33009a46d88cb318d5fe34f1e8d8fe699e9a973ed1839d226f200f162c465432"
+      }
+    ]
+  },
+  "mbedtls": {
+    "version": "3.6.7",
+    "url": "https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-3.6.7/mbedtls-3.6.7.tar.bz2",
+    "sha256": "a7e8bcbec0e6f761b4af24f25677626b35f762f68eef79c08677a363212d11f6"
+  }
+}

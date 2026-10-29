@@ -1,0 +1,61 @@
+/* きゃすメイト v0.5.0 / OBS「音声認識」用
+ * このファイル全体をブラウザソースの「カスタムCSS」に貼り付けます。
+ * まずは「変更する値」だけ編集してください。詳しくは obs-custom-css.md。
+ */
+
+/* ===== 変更する値 ===== */
+:root {
+  --cm-font: "Yu Gothic UI", "Meiryo", sans-serif;
+  --cm-size: 40px;                  /* 認識結果の文字サイズ */
+  --cm-text: #ffffff;
+  --cm-background: rgba(16, 20, 32, 0.78);
+  --cm-border: 1px solid rgba(255, 255, 255, 0.25);
+  --cm-radius: 14px;
+  --cm-padding: 12px 20px;          /* 字幕内の余白：上下 左右 */
+  --cm-edge: 12px;                  /* ブラウザソースの外周余白 */
+  --cm-line-height: 1.5;            /* 行間（単位なし） */
+  --cm-weight: 700;
+  --cm-text-shadow: 0 2px 3px rgba(0, 0, 0, 0.8);
+  --cm-card-shadow: none;
+  --cm-max-width: 100%;             /* 字幕ボックスの最大幅。例：900px */
+  --cm-horizontal: flex-start;      /* 左=flex-start、中央=center、右=flex-end */
+  --cm-vertical: flex-end;          /* 上=flex-start、中央=center、下=flex-end */
+  --cm-text-align: left;            /* ボックス内の文字：left / center / right */
+}
+
+/* ===== 以下は表示に値を適用する部分 ===== */
+html, body, #root {
+  margin: 0 !important;
+  min-width: 0 !important;
+  width: 100%;
+  height: 100%;
+  background: transparent !important;
+  overflow: hidden !important;
+}
+
+.speech-recognition-overlay {
+  box-sizing: border-box;
+  padding: var(--cm-edge) !important;
+  font-family: var(--cm-font) !important;
+  font-size: var(--cm-size) !important;
+  color: var(--cm-text) !important;
+  justify-content: var(--cm-horizontal);
+  align-items: var(--cm-vertical);
+}
+
+.speech-recognition-overlay .speech-recognition-overlay-text {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: min(100%, var(--cm-max-width));
+  background: var(--cm-background) !important;
+  border: var(--cm-border);
+  border-radius: var(--cm-radius) !important;
+  padding: var(--cm-padding) !important;
+  box-shadow: var(--cm-card-shadow);
+  text-shadow: var(--cm-text-shadow);
+  text-align: var(--cm-text-align);
+  font-weight: var(--cm-weight);
+  line-height: var(--cm-line-height);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

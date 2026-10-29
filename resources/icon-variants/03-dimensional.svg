@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="きゃすメイト 立体感の強いアイコン案">
+  <defs>
+    <radialGradient id="b" cx="0" cy="0" r="1" gradientTransform="translate(342 245) rotate(45) scale(722 690)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#B8A8FF"/><stop offset="0.45" stop-color="#8667FF"/><stop offset="1" stop-color="#5E3BCF"/>
+    </radialGradient>
+    <linearGradient id="t" x1="710" y1="680" x2="850" y2="844" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFA0CA"/><stop offset="1" stop-color="#F0529A"/>
+    </linearGradient>
+    <filter id="s" x="-14%" y="-14%" width="128%" height="138%"><feDropShadow dy="34" stdDeviation="28" flood-color="#241947" flood-opacity="0.36"/></filter>
+    <clipPath id="c"><rect x="128" y="160" width="768" height="584" rx="222"/></clipPath>
+  </defs>
+  <g filter="url(#s)">
+    <path d="M691 688c20 75 77 132 171 160-46-55-65-113-59-174l-112 14Z" fill="url(#t)"/>
+    <rect x="128" y="160" width="768" height="584" rx="222" fill="url(#b)"/>
+    <ellipse cx="350" cy="200" rx="250" ry="145" fill="#FFFFFF" opacity="0.2" clip-path="url(#c)"/>
+    <path d="M185 514c25 120 122 187 258 193" fill="none" stroke="#39218E" stroke-width="24" stroke-linecap="round" opacity="0.16"/>
+  </g>
+  <g fill="#FFFFFF">
+    <rect x="342" y="369" width="86" height="166" rx="43"/>
+    <rect x="469" y="294" width="86" height="316" rx="43"/>
+    <rect x="596" y="342" width="86" height="220" rx="43"/>
+  </g>
+</svg>

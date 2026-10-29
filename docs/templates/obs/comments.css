@@ -1,0 +1,110 @@
+/* きゃすメイト v0.5.0 / OBS「コメント」用
+ * このファイル全体をブラウザソースの「カスタムCSS」に貼り付けます。
+ * まずは「変更する値」だけ編集してください。詳しくは obs-custom-css.md。
+ */
+
+/* ===== 変更する値 ===== */
+:root {
+  --cm-font: "Yu Gothic UI", "Meiryo", sans-serif; /* OBSのPCにあるフォント */
+  --cm-size: 32px;                  /* 本文の文字サイズ */
+  --cm-text: #ffffff;               /* 本文の色 */
+  --cm-background: rgba(16, 20, 32, 0.78); /* カードの背景。最後の値は不透明度 */
+  --cm-border: 1px solid rgba(255, 255, 255, 0.25);
+  --cm-radius: 14px;                /* カードの角丸 */
+  --cm-padding: 12px 16px;          /* カード内の余白：上下 左右 */
+  --cm-edge: 12px;                  /* ブラウザソースの外周余白 */
+  --cm-gap: 8px;                    /* 積み上げ時のカード間隔 */
+  --cm-line-height: 1.5;            /* 本文の行間（単位なし） */
+  --cm-weight: 600;                 /* 本文の太さ：400=通常、700=太字 */
+  --cm-text-shadow: 0 2px 3px rgba(0, 0, 0, 0.8);
+  --cm-card-shadow: none;           /* 例：0 3px 8px rgba(0, 0, 0, 0.4) */
+  --cm-meta-size: 0.75em;           /* 本文サイズに対する見出しの比率 */
+  --cm-author-color: #a9e5ff;       /* 投稿者名の色 */
+  --cm-source-color: #ffffff;       /* サービス名の色 */
+  --cm-source-background: rgba(255, 255, 255, 0.16);
+  --cm-source-display: inline-flex; /* サービス名を隠すなら none */
+  --cm-author-display: inline;      /* 投稿者名を隠すなら none */
+  --cm-emote-height: 1.45em;        /* 本文サイズに対するエモートの高さ */
+}
+
+/* ===== 以下は表示に値を適用する部分 ===== */
+html, body, #root {
+  margin: 0 !important;
+  min-width: 0 !important;
+  width: 100%;
+  height: 100%;
+  background: transparent !important;
+  overflow: hidden !important;
+}
+
+.overlay-comments {
+  box-sizing: border-box;
+  padding: var(--cm-edge) !important;
+  gap: var(--cm-gap);
+  font-family: var(--cm-font) !important;
+  font-size: var(--cm-size) !important;
+  color: var(--cm-text) !important;
+  text-align: left;
+}
+
+.overlay-comments .overlay-comment {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  background: var(--cm-background) !important;
+  border: var(--cm-border);
+  border-radius: var(--cm-radius) !important;
+  padding: var(--cm-padding) !important;
+  box-shadow: var(--cm-card-shadow);
+  transform: rotate(var(--cm-tilt, 0deg));
+}
+
+/* This template uses plain cards. Opt in to the app's sticky decorations. */
+.overlay-comments .overlay-comment::before { display: var(--cm-tape-display, none); }
+.overlay-comments .overlay-comment::after { display: var(--cm-fold-display, none); }
+
+.overlay-comments .comment {
+  min-width: 0;
+  border-radius: 0;
+  overflow-wrap: anywhere;
+  text-shadow: var(--cm-text-shadow);
+}
+
+.overlay-comments .comment-meta {
+  font-size: var(--cm-meta-size);
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.overlay-comments .comment-meta:empty { display: none; }
+
+.overlay-comments .comment-meta strong {
+  display: var(--cm-author-display);
+  color: var(--cm-author-color);
+  font-weight: 700;
+}
+
+.overlay-comments .source-badge {
+  display: var(--cm-source-display);
+  color: var(--cm-source-color);
+  background: var(--cm-source-background);
+  font-size: 0.85em;
+  padding: 0.15em 0.45em;
+  border-radius: 5px;
+}
+
+.overlay-comments .comment-body {
+  color: var(--cm-text);
+  font-weight: var(--cm-weight);
+  line-height: var(--cm-line-height);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.overlay-comments .emote {
+  height: var(--cm-emote-height);
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  vertical-align: middle;
+}

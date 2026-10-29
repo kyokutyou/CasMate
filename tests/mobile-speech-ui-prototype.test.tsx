@@ -1,0 +1,78 @@
+// @vitest-environment jsdom
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { Prototype } from '../prototypes/mobile-speech-ui-throwaway/prototype';
+afterEach(() => { cleanup(); vi.useRealTimers(); window.history.replaceState(null, '', '/'); });
+const payload = () => JSON.parse(screen.getByTestId('payload').textContent ?? '{}');
+const choose = (key: string) => fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${key}`) }));
+const toggle = async (name: string) => { await act(async () => { fireEvent.click(screen.getByRole('switch', { name })); }); };
+describe('スマホ音声再生のUI見本', () => {
+  it('共通見出し、独立した公開設定、明示操作でのQR表示を維持する', async () => {
+    render(<Prototype />);
+    expect(screen.getByRole('button', { name: '← 設定に戻る' }).textContent).toBe('←');
+    expect(screen.queryByRole('img')).toBeNull();
+    await toggle('LAN公開'); await toggle('Tailscale公開');
+    expect(payload().enabled).toEqual({ lan: true, tailscale: true });
+    expect(screen.queryByRole('img')).toBeNull();
+    fireEvent.click(screen.getAllByRole('button', { name: '接続案内・URL・QR' })[0]);
+    expect(screen.getByRole('img').getAttribute('alt')).toContain('192.168.1.24:3939/comments');
+    fireEvent.click(screen.getByLabelText('LANのURLを2つ表示'));
+    expect(screen.getAllByRole('img')).toHaveLength(2);
+    choose('B'); fireEvent.click(screen.getByRole('tab', { name: 'スマホ接続' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Tailscale 公開中' }));
+    expect(screen.getByRole('img').getAttribute('alt')).toContain('100.100.10.24:3939/comments');
+    expect(payload().enabled).toEqual({ lan: true, tailscale: true });
+    choose('C'); choose('A');
+    expect(screen.getByRole('switch', { name: 'LAN公開' })).toHaveAttribute('aria-checked', 'true');
+    expect(window.location.search).toBe('?variant=A');
+  });
+  it('Tailscale障害がLANへ波及せず、失敗した経路のQRを表示しない', async () => {
+    vi.useFakeTimers(); render(<Prototype />);
+    await toggle('LAN公開'); await toggle('Tailscale公開');
+    fireEvent.change(screen.getByLabelText('環境・状態の見本'), { target: { value: 'notInstalled' } });
+    expect(payload().available).toEqual({ lan: true, tailscale: false });
+    fireEvent.click(screen.getAllByRole('button', { name: '接続案内・URL・QR' })[1]);
+    expect(screen.queryByRole('img')).toBeNull();
+    expect(screen.getByRole('link', { name: 'Windows版の導入 ↗' })).toHaveAttribute('href', 'https://tailscale.com/docs/install/windows');
+    expect(screen.getByRole('button', { name: /要確認 1件/ })).toBeVisible();
+    act(() => vi.advanceTimersByTime(5000));
+    expect(screen.getByRole('button', { name: /要確認 1件/ })).toBeVisible();
+    await toggle('Tailscale公開'); await toggle('Tailscale公開');
+    expect(payload().available.tailscale).toBe(false);
+  });
+  it('音質の範囲外入力を保存せず、案やページをまたいで未保存入力を保持する', () => {
+    render(<Prototype />);
+    fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '129' } });
+    fireEvent.blur(screen.getByRole('spinbutton'));
+    expect(payload().savedBitrate).toBe(32);
+    choose('B'); fireEvent.click(screen.getByRole('tab', { name: '音質と状態' }));
+    expect(screen.getByRole('spinbutton')).toHaveValue(129);
+    expect(screen.getByRole('spinbutton')).toHaveAttribute('aria-invalid', 'true');
+    fireEvent.click(screen.getByRole('button', { name: '設定', exact: true }));
+    fireEvent.click(screen.getByRole('button', { name: /スマホ音声再生/ }));
+    expect(screen.getByRole('spinbutton')).toHaveValue(129);
+    fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '16' } });
+    fireEvent.blur(screen.getByRole('spinbutton'));
+    expect(payload().savedBitrate).toBe(16);
+  });
+  it('通知を共通ヘッダーへ置き、連続操作から4秒後に消し、入力中は案を変えない', () => {
+    vi.useFakeTimers(); render(<Prototype />);
+    const field = screen.getByRole('spinbutton'); field.focus();
+    fireEvent.keyDown(field, { key: 'ArrowRight' });
+    expect(payload().variant).toBe('A');
+    fireEvent.click(screen.getByRole('button', { name: '成功通知', exact: true }));
+    expect(document.querySelector('.management-header .toast-message')).toBeInTheDocument();
+    expect(field).toHaveFocus();
+    act(() => vi.advanceTimersByTime(3000));
+    fireEvent.click(screen.getByRole('button', { name: '長文通知' }));
+    act(() => vi.advanceTimersByTime(3000));
+    expect(document.querySelectorAll('.toast-message')).toHaveLength(1);
+    act(() => vi.advanceTimersByTime(1000));
+    expect(document.querySelector('.toast-message')).toBeNull();
+    fireEvent.keyDown(window, { key: 'ArrowRight' });
+    expect(payload().variant).toBe('B');
+    fireEvent.keyDown(screen.getByRole('tab', { name: '公開設定' }), { key: 'ArrowRight' });
+    expect(payload().variant).toBe('B');
+    expect(screen.getByRole('tab', { name: 'スマホ接続' })).toHaveFocus();
+  });
+});

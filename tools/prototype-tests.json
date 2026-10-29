@@ -1,0 +1,10 @@
+[
+  "tests/management-ui-prototype.test.tsx",
+  "tests/comment-filter-ui-prototype.test.tsx",
+  "tests/comment-overlay-ui-prototype.test.tsx",
+  "tests/mobile-speech-ui-prototype.test.tsx",
+  "tests/next-thread-ui-prototype.test.tsx",
+  "tests/obs-control-ui-prototype.test.tsx",
+  "tests/text-effects-ui-prototype.test.tsx",
+  "tests/android-drawing-ui-prototype.test.ts"
+]
