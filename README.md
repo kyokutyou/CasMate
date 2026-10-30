@@ -6,7 +6,7 @@
 
 ## ダウンロード
 
-現在、配布物は公開準備中です。Windows用インストーラーとAndroid用APKは、まだ公開していません。
+Windows用インストーラーとAndroid用APKは、[v0.5.0のリリースページ](https://github.com/kyokutyou/CasMate/releases/tag/v0.5.0)からダウンロードできます。
 
 PC版は **Windows 11（x64）**、Android版は **Android 10以降**が対象です。ソースから起動する場合は、下の「ソースからビルド」を参照してください。
 
