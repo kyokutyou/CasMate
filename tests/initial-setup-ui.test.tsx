@@ -1320,6 +1320,7 @@ it.each([false, true])('文字演出の追加失敗をキャンセルすると�
 
 it('キャラクターA案は画像1枚で確認でき、口パクテストはプレビューだけに作用する', async () => {
   api.snapshot!.settings.character.simple.closedAsset = '/assets/closed.png';
+  api.snapshot!.settings.character.simple.openAsset = null;
   await showStep('character', 'character');
   const check = screen.getByRole('checkbox', { name: 'キャラクターの画像を確認できた' });
   expect(check).toHaveAttribute('aria-disabled', 'false');

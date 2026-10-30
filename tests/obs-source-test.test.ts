@@ -4,6 +4,10 @@ import { ObsSourceTestController } from '../src/main/obs/obs-source-test-control
 import { createDefaultSettings } from '../src/main/core/settings/schema';
 import { deviceId } from './fixtures/obs-source-registration';
 import { speechDesignFromSettings } from '../src/shared/obs-design';
+import { CharacterAssetStore } from '../src/main/server/character-asset-store';
+import { mkdtemp } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 
 afterEach(() => vi.useRealTimers());
 async function setup() {
@@ -18,6 +22,18 @@ async function setup() {
   return { ...fixture, sources: fixture.controller, controller, request, settings, acquire };
 }
 describe('OBS display test', () => {
+  it('同梱の初期画像だけでOBSキャラクター表示テストを開始できる', async () => {
+    const f = await setup();
+    const target = { kind: 'overlay', overlay: 'character' } as const;
+    const input = await f.add({ target });
+    const store = new CharacterAssetStore(await mkdtemp(join(tmpdir(), 'casmate-obs-default-assets-')), resolve('public'));
+    const controller = new ObsSourceTestController({ sources: f.sources, obs: { acquireSourceTest: f.acquire },
+      settings: () => f.settings, assetReadable: async asset => Boolean(await store.dimensions(asset)) });
+    try {
+      await controller.start({ ...f.request, target, inputUuid: input.inputUuid! });
+      expect(controller.display('character').display?.data).toEqual({ kind: 'character', appearance: f.settings.character.simple });
+    } finally { await controller.shutdown(); }
+  });
   it('uses independent speech appearance in the speech display test', async () => {
     const f = await setup();
     const target = { kind: 'overlay', overlay: 'speech' } as const;

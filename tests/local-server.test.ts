@@ -1,6 +1,7 @@
-import { mkdtemp, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import request from 'supertest';
 import { AppState } from '../src/main/core/app-state';
@@ -494,6 +495,29 @@ describe('ローカルREST境界', () => {
     expect(reconnect.status).toBe(200);
     expect(reconnect.body.snapshot.sourceStatuses.twitch.state).toBe('connecting');
     state.dispose();
+  });
+
+  it('同梱画像を配信し、初期の閉口画像を維持して口開きを差し替えられる', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'casmate-assets-'));
+    const state = new AppState(createDefaultSettings());
+    const app = createHttpApplication({ state, port: 3000, operationToken: 'secret',
+      staticDirectory: resolve('public'), assetStore: new CharacterAssetStore(directory, resolve('public')) });
+    const headers = { Host: 'localhost:3000', Origin: 'http://localhost:3000', 'X-CasMate-Token': 'secret', 'Content-Type': 'image/png' };
+    try {
+      const closed = await request(app).get(state.snapshot().settings.character.simple.closedAsset!).set('Host', 'localhost:3000');
+      expect(closed.status).toBe(200);
+      const open = state.snapshot().settings.character.simple.openAsset!;
+      const bytes = await readFile(resolve('public' + open));
+      const served = await request(app).get(open).set('Host', 'localhost:3000');
+      expect(served.status).toBe(200);
+      expect(createHash('sha256').update(served.body).digest('hex')).toBe(createHash('sha256').update(bytes).digest('hex'));
+      const replaced = await request(app).post('/api/character/simple/assets/open').set(headers).send(bytes);
+      expect(replaced.status).toBe(200);
+      expect(replaced.body.snapshot.settings.character.simple).toMatchObject({ closedAsset: '/assets/characters/casmate-girl-idle-closed.png', openAsset: expect.stringMatching(/^\/assets\/open-/) });
+      const rejected = await request(app).post('/api/character/simple/assets/open').set(headers).send(onePixelPng);
+      expect(rejected.status).toBe(400);
+      expect(state.snapshot().settings.character.simple.openAsset).toBe(replaced.body.assetUrl);
+    } finally { state.dispose(); }
   });
 
   it('簡易キャラクターの閉口・口開きPNGを登録・解除する', async () => {

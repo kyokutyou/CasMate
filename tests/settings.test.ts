@@ -10,6 +10,16 @@ import {
 } from '../src/main/core/settings';
 
 describe('アプリ設定', () => {
+  it('初期画像を保存済みの独自素材や解除済み状態へ再適用しない', async () => {
+    const root = await mkdtemp(join(tmpdir(), 'casmate-character-defaults-'));
+    const store = new SettingsStore(join(root, 'settings.json'));
+    const fresh = (await store.load()).settings;
+    expect(fresh.character.simple.closedAsset).toBe('/assets/characters/casmate-girl-idle-closed.png');
+    for (const assets of [{ closedAsset: '/assets/closed-custom.png', openAsset: '/assets/open-custom.png' }, { closedAsset: null, openAsset: null }]) {
+      await store.save({ ...fresh, character: { ...fresh.character, simple: { ...fresh.character.simple, ...assets } } });
+      expect((await new SettingsStore(join(root, 'settings.json')).load()).settings.character.simple).toMatchObject(assets);
+    }
+  });
   it('新規コメントはタイトな付箋を使い、保存済みの外観と音声認識の初期値は保持する', async () => {
     const root = await mkdtemp(join(tmpdir(), 'casmate-sticky-default-'));
     const file = join(root, 'settings.json');
@@ -165,15 +175,15 @@ describe('アプリ設定', () => {
       expect((await new SettingsStore(path).load()).settings.commentOverlay.mode).toBe('stack');
     }
   });
-  it('簡易キャラクター表示のv12既定値を生成する', () => {
+  it('同梱キャラクター画像と標準の微動を新規設定へ適用する', () => {
     expect(createDefaultSettings()).toMatchObject({
       schemaVersion: 16,
       aiListener: { contextCharacters: 3000, model: 'gemini-3.1-flash-lite' },
       character: {
         mode: 'simple',
         simple: {
-          closedAsset: null,
-          openAsset: null,
+          closedAsset: '/assets/characters/casmate-girl-idle-closed.png',
+          openAsset: '/assets/characters/casmate-girl-idle-open.png',
           motion: {
             enabled: true,
             verticalAmplitudePercent: 0.5,
@@ -266,7 +276,7 @@ describe('アプリ設定', () => {
       commentFilter: { ngWords: [], asciiArtEnabled: false },
       character: {
         mode: 'simple',
-        simple: { closedAsset: null, openAsset: null },
+        simple: { closedAsset: '/assets/characters/casmate-girl-idle-closed.png', openAsset: '/assets/characters/casmate-girl-idle-open.png' },
         alwaysOnTop: true,
         clickThrough: false,
         windowVisible: false,

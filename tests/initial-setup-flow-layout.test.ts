@@ -23,6 +23,9 @@ it('初回設定の通し操作・保存失敗・単独経路をElectronと通�
   try {
     await build({ configFile: false, plugins: [react()], logLevel: 'error', resolve: { alias: [{ find: /^\.\.\/api$/, replacement: resolve('tests/fixtures/board-management-api.ts') }] }, define: { 'process.env.NODE_ENV': '"production"' }, oxc: { jsx: { development: false } }, build: { outDir: directory, emptyOutDir: false, cssCodeSplit: false, lib: { entry: resolve('tests/fixtures/board-management-renderer.tsx'), name: 'SetupDevices', formats: ['iife'], fileName: () => 'harness.js', cssFileName: 'harness' } } });
     const snapshot = obsRegistrationSnapshot();
+    // This file:// harness verifies navigation without an HTTP asset server.
+    snapshot.settings.character.simple.closedAsset = null;
+    snapshot.settings.character.simple.openAsset = null;
     snapshot.initialSetup = { ...new InitialSetupStore('unused', false).view(snapshot), started: true, selected: ['aiListener','textEffects','character'], smartphoneUses:[], position:'aiListener' };
     const service = { ready: false, message: '', account: null, latest: null };
     snapshot.aiListener = { requested: false, status: 'stopped', message: '停止中', nextAt: null, memoryCharacters: 0, hasKey: false, authorization: null, postingBudget: { used: 0, limit: 60, nextAllowedAt: null }, services: { youtube: { ...service }, twitch: { ...service }, shitaraba: { ...service }, jpnkn: { ...service } } };

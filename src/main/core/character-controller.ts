@@ -4,14 +4,15 @@ import type {
   SimpleCharacterMotionSettings,
 } from '../../shared/types';
 import { defaultSimpleCharacterMotionSettings } from '../../shared/simple-character';
+import { defaultCharacterAssets } from '../../shared/default-character-assets';
 
 export { defaultSimpleCharacterMotionSettings } from '../../shared/simple-character';
 
 export const defaultCharacterSettings: CharacterSettings = {
   mode: 'simple',
   simple: {
-    closedAsset: null,
-    openAsset: null,
+    closedAsset: defaultCharacterAssets.closed,
+    openAsset: defaultCharacterAssets.open,
     motion: { ...defaultSimpleCharacterMotionSettings },
   },
   alwaysOnTop: true,

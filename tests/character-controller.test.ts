@@ -22,7 +22,7 @@ function characterSettings(
 
 describe('簡易キャラクター状態', () => {
   it('口開き素材がなくても読み上げ中の口形を同期し古い通知を捨てる', () => {
-    const controller = new CharacterController();
+    const controller = new CharacterController(characterSettings({ closedAsset: '/closed.png', openAsset: null }));
 
     controller.startSpeech('comment-1');
     controller.applyMouthShape('comment-1', 'open');
@@ -68,7 +68,7 @@ describe('簡易キャラクター状態', () => {
   });
 
   it('閉口素材がない間は微動を開始しない', () => {
-    const controller = new CharacterController();
+    const controller = new CharacterController(characterSettings({ closedAsset: null, openAsset: null }));
     expect(controller.snapshot().motionStartedAtMs).toBeNull();
   });
 

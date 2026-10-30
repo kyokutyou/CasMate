@@ -71,6 +71,7 @@ it('開口画像が読めなければ既存の管理面通知を呼び、閉口�
 });
 it('画像寸法の読込失敗は読み込み中のままにせず、選び直す案内を固定領域へ表示する', () => {
   const snapshot = obsRegistrationSnapshot(); snapshot.settings.character.simple.closedAsset = '/closed.png';
+  snapshot.settings.character.simple.openAsset = null;
   const report = vi.fn();
   const panel = () => <ManagementNavigation.Provider value={{ editor: 'character', initialSetup: true, reportError: report, open: vi.fn() }}><SetupCharacter snapshot={snapshot} upload={vi.fn()} saveMotion={vi.fn()} onError={vi.fn()} /></ManagementNavigation.Provider>;
   const result = render(panel());

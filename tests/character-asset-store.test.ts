@@ -1,6 +1,6 @@
 import { mkdtemp, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { CharacterAssetStore } from '../src/main/server/character-asset-store';
 import { crc32, deflateSync } from 'node:zlib';
@@ -29,6 +29,16 @@ const opaqueOnePixelPng = Buffer.from(
 );
 
 describe('CharacterAssetStore', () => {
+  it('同梱の初期素材を検証し、任意の同梱パスや管理素材への混同を拒否する', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'casmate-assets-'));
+    const store = new CharacterAssetStore(directory, resolve('public'));
+    for (const name of ['closed', 'open']) {
+      expect(await store.dimensions(`/assets/characters/casmate-girl-idle-${name}.png`)).toEqual({ width: 1080, height: 1920 });
+    }
+    expect(await store.dimensions('/assets/characters/../icon.png')).toBeNull();
+    expect(await store.dimensions('/assets/characters/unknown.png')).toBeNull();
+    expect(await new CharacterAssetStore(directory).dimensions('/assets/characters/casmate-girl-idle-closed.png')).toBeNull();
+  });
   it.each([
     { name: '低ビット深度のグレー', raw: [0, 0], color: 0, depth: 1 },
     { name: 'パレット', raw: [0, 0], color: 3, depth: 1 },

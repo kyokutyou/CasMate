@@ -33,6 +33,8 @@ describe('簡易キャラクター専用設定画面', () => {
     cleanup();
     vi.clearAllMocks();
     const settings = createDefaultSettings();
+    settings.character.simple.closedAsset = null;
+    settings.character.simple.openAsset = null;
     mocks.snapshot = {
       settings,
       settingsRevision: 1,
@@ -43,6 +45,14 @@ describe('簡易キャラクター専用設定画面', () => {
         assetWarning: null,
       },
     } as AppSnapshot;
+  });
+
+  it('同梱の初期画像を表示し、登録操作なしで口パクテストを利用できる', () => {
+    mocks.snapshot!.settings.character = createDefaultSettings().character;
+    render(<SimpleCharacterSettingsPage />);
+    expect(screen.getByRole('img', { name: '簡易キャラクターのプレビュー' })).toHaveAttribute('src', '/assets/characters/casmate-girl-idle-closed.png');
+    expect(screen.getByLabelText('口を開けた画像（PNG）を選択')).toBeEnabled();
+    expect(screen.getByRole('button', { name: '口パクをテスト' })).toBeEnabled();
   });
 
   it('大プレビュー、PNG素材操作、6スライダー、標準復元を提供する', () => {

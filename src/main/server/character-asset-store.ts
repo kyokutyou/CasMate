@@ -4,6 +4,7 @@ import { imageSize } from 'image-size';
 import type { CharacterAssetSlot } from '../../shared/types';
 import { ValidationError } from '../core/validation-error';
 import { validatePng } from './png-validation';
+import { defaultCharacterAssets } from '../../shared/default-character-assets';
 
 export interface AssetDimensions {
   width: number;
@@ -15,7 +16,7 @@ const formats = {
 } as const;
 
 export class CharacterAssetStore {
-  constructor(readonly directory: string) {}
+  constructor(readonly directory: string, private readonly bundledDirectory?: string) {}
 
   async save(
     slot: CharacterAssetSlot,
@@ -66,9 +67,13 @@ export class CharacterAssetStore {
   }
 
   async dimensions(assetUrl: string): Promise<AssetDimensions | null> {
-    if (!/^\/assets\/[\w.-]+$/.test(assetUrl)) return null;
+    const bundled = assetUrl === defaultCharacterAssets.closed || assetUrl === defaultCharacterAssets.open;
+    if (bundled ? !this.bundledDirectory : !/^\/assets\/[\w.-]+$/.test(assetUrl)) return null;
     try {
-      const content = await readFile(join(this.directory, assetUrl.slice('/assets/'.length)));
+      const path = bundled
+        ? join(this.bundledDirectory!, assetUrl.slice(1))
+        : join(this.directory, assetUrl.slice('/assets/'.length));
+      const content = await readFile(path);
       if (content.length > 20 * 1024 * 1024) return null;
       const dimensions = imageSize(content);
       if (dimensions.type !== 'png' || !dimensions.width || !dimensions.height || dimensions.width > 8192 || dimensions.height > 8192 || hasPngChunk(content, 'acTL')) return null;

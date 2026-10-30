@@ -210,7 +210,7 @@ async function startApplication() {
   if (quitting) return;
   state.setObsControlState(obsControl.view());
   createIndependentWindowControllers();
-  const assetStore = new CharacterAssetStore(characterAssetDirectory);
+  const assetStore = new CharacterAssetStore(characterAssetDirectory, rendererDirectory());
 
   let port = loaded.settings.application.port;
   obsSources = new ObsSourceRegistrationController({
