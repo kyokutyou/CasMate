@@ -7,7 +7,7 @@ import type { TimedOverlayComment } from '../src/shared/types';
 
 describe('OBSコメントのローカル表示期限', () => {
   it('バックエンド切断中でも期限を過ぎた表示を除外する', () => {
-    const item = (id: string, expiresAt: string): TimedOverlayComment => ({
+    const item = (id: string, expiresAt: string | null): TimedOverlayComment => ({
       expiresAt,
       comment: {
         id: `youtube:${id}`, externalId: id, source: 'youtube', authorName: 'Viewer',
@@ -18,9 +18,11 @@ describe('OBSコメントのローカル表示期限', () => {
     const items = [
       item('expired', '2026-08-23T00:00:00.000Z'),
       item('active', '2026-08-23T00:00:10.000Z'),
+      item('persistent', null),
     ];
 
-    expect(unexpiredOverlayComments(items, Date.parse('2026-08-23T00:00:05.000Z')).map(({ comment }) => comment.externalId)).toEqual(['active']);
+    expect(unexpiredOverlayComments(items, Date.parse('2026-08-23T00:00:05.000Z')).map(({ comment }) => comment.externalId)).toEqual(['active', 'persistent']);
+    expect(unexpiredOverlayComments(items, Date.parse('2027-01-01T00:00:00.000Z')).map(({ comment }) => comment.externalId)).toEqual(['persistent']);
   });
 });
 

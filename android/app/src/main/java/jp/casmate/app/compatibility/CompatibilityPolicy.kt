@@ -2,8 +2,8 @@
 package jp.casmate.app.compatibility
 
 object CompatibilityPolicy {
-    const val PC_SETTINGS = 16
-    val PC_SETTINGS_SUPPORTED = setOf(13, 14, 15, 16)
+    const val PC_SETTINGS = 17
+    val PC_SETTINGS_SUPPORTED = setOf(13, 14, 15, 16, 17)
     val PC_SETTINGS_RETIRED = setOf<Int>(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
     const val PC_SMARTPHONE_STORE = 6
     val PC_SMARTPHONE_STORE_SUPPORTED = setOf(4, 5, 6)

@@ -7,6 +7,7 @@ import { SlimSwitch } from './SlimSwitch';
 import './ai-listener-panel.css';
 import { AiVisualPanel } from './AiVisualPanel';
 import { AiApiTest } from './AiApiTest';
+import { AiReplyTest } from './AiReplyTest';
 import { ManagementNavigation, SetupPresentation } from '../management-navigation';
 import { AiUsageSummary } from './AiUsageSummary';
 import { CompactFeedback } from './CompactFeedback';
@@ -225,6 +226,7 @@ export function AiListenerPanel({ settings, savedSettings = settings, view, chan
         change({ ...settings, personas: exists ? settings.personas.map(p => p.id === editing.id ? editing : p) : [...settings.personas, editing] }); closeEditor();
       }}>{m.savePersona}</button><button className="secondary" onClick={closeEditor}>{m.cancel}</button></div></fieldset>}
       </div>
+      <AiReplyTest settings={savedSettings} blocked={busy || runtimeBusy || view.requested || !view.hasKey || Boolean(saveError || editing || key.trim()) || JSON.stringify(settings) !== JSON.stringify(savedSettings)} mutate={mutate} onError={setError} onSuccess={onSuccess}/>
     </Section>)}
     {panel('participants', <Section title="参加先と人格" autoSave description="掲示板は、接続中のしたらば・jpnknのどちらかに参加します。">
       <>{basic && <label>参加先<select aria-label="準備する参加先" value={setupSource} onChange={event => setSetupSource(event.target.value as AiSource)}>{aiSources.map(source => <option key={source} value={source}>{sourceLabels[source]}</option>)}</select></label>}<div className="ai-service-list">{aiSources.filter(source => !basic || source === setupSource).map(source => { const serviceGuide = aiServiceGuide(settings, view, source); return <article className="ai-service" key={source}>

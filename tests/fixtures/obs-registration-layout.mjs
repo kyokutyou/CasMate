@@ -265,11 +265,12 @@ app.whenReady().then(async () => {
       await ready("document.querySelector('[data-action=test]')?.getAttribute('aria-disabled') === 'false'");
       await evaluate("document.querySelector('[data-action=test]').focus({preventScroll:true})");
       const beforeTest = await evaluate(measure);
+      const receptionTest = await evaluate("document.querySelector('[data-action=test]').textContent==='コメント受信テスト'");
       await evaluate("document.querySelector('[data-action=test]').click()");
-      await ready("document.querySelector('.obs-test-status')?.textContent.includes('テスト表示を送信しました')");
+      await ready(receptionTest ? "document.querySelector('.toast-region')?.textContent.includes('テストコメントを1件投入しました')" : "document.querySelector('.obs-test-status')?.textContent.includes('テスト表示を送信しました')");
       assert.deepEqual(await evaluate(measure), beforeTest, `${width}px test sending positions/scroll`);
       assert.equal(await evaluate("document.activeElement === document.querySelector('[data-action=test]')"), true, 'test focus remains');
-      await evaluate("document.querySelector('[data-action=test]').click()");
+      if (!receptionTest) await evaluate("document.querySelector('[data-action=test]').click()");
       await ready("document.querySelector('[data-action=test]')?.getAttribute('aria-disabled') === 'false'");
       assert.deepEqual(await evaluate(measure), beforeTest, `${width}px test stopped positions/scroll`);
       await capture(`${width}-display-test`);

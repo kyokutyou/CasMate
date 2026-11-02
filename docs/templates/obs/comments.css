@@ -19,6 +19,7 @@
   --cm-text-shadow: 0 2px 3px rgba(0, 0, 0, 0.8);
   --cm-card-shadow: none;           /* 例：0 3px 8px rgba(0, 0, 0, 0.4) */
   --cm-meta-size: 0.75em;           /* 本文サイズに対する見出しの比率 */
+  --cm-meta-gap: 4px;               /* 見出しと本文の間隔 */
   --cm-author-color: #a9e5ff;       /* 投稿者名の色 */
   --cm-source-color: #ffffff;       /* サービス名の色 */
   --cm-source-background: rgba(255, 255, 255, 0.16);
@@ -73,7 +74,7 @@ html, body, #root {
 .overlay-comments .comment-meta {
   font-size: var(--cm-meta-size);
   gap: 8px;
-  margin-bottom: 4px;
+  margin-bottom: calc(var(--cm-meta-gap) - var(--cm-ink-gap-trim, 0px));
 }
 
 .overlay-comments .comment-meta:empty { display: none; }

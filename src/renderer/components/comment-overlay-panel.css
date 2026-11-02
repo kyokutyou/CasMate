@@ -25,3 +25,5 @@
 .comment-overlay-panel .overlay-single-number-line>.overlay-input-help{flex:1;min-width:min(100%,12em);padding-top:0}
 .speech-recognition-overlay-panel .overlay-single-number-line{max-width:520px}
 @media(max-width:580px){.overlay-timing-row{grid-template-columns:18px minmax(0,1fr) 3em;gap:6px 8px;padding:10px 0}.overlay-timing-row>.overlay-timing-mark{grid-column:1;grid-row:1}.overlay-timing-row>h4{grid-column:2;grid-row:1}.overlay-timing-row>.overlay-timing-active{grid-column:3;grid-row:1}.overlay-timing-row>.overlay-input,.overlay-timing-row>.overlay-timing-main{grid-column:2/-1;grid-row:2}}
+
+@media(max-width:580px){.comment-overlay-panel .overlay-field-grid{grid-template-columns:1fr}}

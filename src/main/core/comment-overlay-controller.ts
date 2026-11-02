@@ -5,10 +5,12 @@ import type {
   TimedOverlayComment,
 } from '../../shared/types';
 import { defaultCommentOverlayAppearance } from '../../shared/comment-overlay-theme';
+import { appendOverlayComment } from '../../shared/comment-overlay-flow';
 
 export const defaultCommentOverlaySettings: CommentOverlaySettings = {
   mode: 'single',
-  stackDurationSeconds: 10,
+  stackMaxComments: 10,
+  stackAlignment: 'top',
   singleDurationSeconds: 10,
   stackDirection: 'newestBottom',
   showSource: false,
@@ -36,19 +38,9 @@ export class CommentOverlayController {
       return;
     }
 
-    if (this.settings.mode === 'stack') {
-      this.active.push(this.withExpiry(comment, this.settings.stackDurationSeconds));
-      if (this.active.length > 10) {
-        this.active.splice(0, this.active.length - 10);
-      }
-    } else if (this.active.length === 0) {
-      this.active = [this.withExpiry(comment, this.settings.singleDurationSeconds)];
-    } else {
-      this.queue.push(comment);
-      if (this.queue.length > 100) {
-        this.queue.shift();
-      }
-    }
+    const next = appendOverlayComment({ active: this.active, queue: this.queue }, comment, this.settings, Date.now());
+    this.active = next.active;
+    this.queue = next.queue;
 
     this.changed();
   }
@@ -60,6 +52,7 @@ export class CommentOverlayController {
       this.clearDisplay();
       return;
     }
+    if (this.settings.mode === 'stack') this.trimStack();
     this.changed();
   }
 
@@ -117,7 +110,13 @@ export class CommentOverlayController {
   }
 
   dispose(): void {
-    this.cancelTimers();
+    this.clearDisplay();
+  }
+
+  private trimStack(): void {
+    if (this.active.length > this.settings.stackMaxComments) {
+      this.active.splice(0, this.active.length - this.settings.stackMaxComments);
+    }
   }
 
   private contains(id: string): boolean {
@@ -163,8 +162,9 @@ export class CommentOverlayController {
     }
 
     const nextExpiry = Math.min(
-      ...this.active.map((item) => new Date(item.expiresAt).getTime()),
+      ...this.active.flatMap((item) => item.expiresAt === null ? [] : [new Date(item.expiresAt).getTime()]),
     );
+    if (!Number.isFinite(nextExpiry)) return;
     this.timer = setTimeout(() => this.expire(), Math.max(0, nextExpiry - Date.now()));
   }
 
@@ -172,10 +172,11 @@ export class CommentOverlayController {
     const now = Date.now();
     if (this.settings.mode === 'stack') {
       this.active = this.active.filter(
-        (item) => new Date(item.expiresAt).getTime() > now,
+        (item) => item.expiresAt === null || new Date(item.expiresAt).getTime() > now,
       );
     } else if (
       this.active[0] &&
+      this.active[0].expiresAt !== null &&
       new Date(this.active[0].expiresAt).getTime() <= now
     ) {
       const next = this.queue.shift();

@@ -193,6 +193,8 @@ html:has(.overlay-comments), body:has(.overlay-comments), #root:has(.overlay-com
 }
 /* Keep short lists at the top; overflowing lists still hide the oldest comments. */
 .overlay-comment:last-child { margin-bottom: auto; }
+.overlay-comments.mode-stack.alignment-bottom .overlay-comment:last-child { margin-bottom: 0; }
+.overlay-comments.mode-stack.alignment-bottom .overlay-comment:first-child { margin-top: auto; }
 .overlay-comments .comment {
   min-width: 0;
   padding: 0;

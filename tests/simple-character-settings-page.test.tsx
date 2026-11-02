@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createDefaultSettings } from '../src/main/core/settings';
 import type { AppSnapshot } from '../src/shared/types';
 
@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   uploadAsset: vi.fn(async () => undefined),
   clearAsset: vi.fn(async () => undefined),
   reportCharacterAssetError: vi.fn(),
+  mutate: vi.fn(async () => ({})),
 }));
 
 vi.mock('../src/renderer/api', () => ({
@@ -23,10 +24,41 @@ vi.mock('../src/renderer/api', () => ({
     uploadAsset: mocks.uploadAsset,
     clearAsset: mocks.clearAsset,
     reportCharacterAssetError: mocks.reportCharacterAssetError,
+    mutate: mocks.mutate,
   }),
 }));
 
 import { SimpleCharacterSettingsPage } from '../src/renderer/pages/SimpleCharacterSettingsPage';
+afterEach(cleanup);
+
+it('素材の保存中と保存失敗中は受信テストせず、素材の再保存後に再開できる', async () => {
+  const settings = createDefaultSettings(); settings.commentSpeech.enabled = true; settings.commentSpeech.voice = { speakerUuid: 'speaker', styleId: 1 };
+  mocks.snapshot = { settings, settingsRevision: 1, character: { mouthShape: 'closed', assetWarning: null } } as AppSnapshot;
+  mocks.mutate.mockClear(); let fail!: (error: Error) => void;
+  mocks.uploadAsset.mockImplementationOnce(() => new Promise((_resolve, reject) => { fail = reject; })).mockResolvedValue(undefined);
+  render(<SimpleCharacterSettingsPage/>);
+  const input = screen.getByLabelText('口を閉じた画像（PNG）を選択'), button = screen.getByRole('button', { name: 'コメント受信テスト' });
+  fireEvent.change(input, { target: { files: [new File(['png'], 'closed.png', { type: 'image/png' })] } });
+  expect(button).toHaveAttribute('aria-disabled', 'true'); fireEvent.click(button); expect(mocks.mutate).not.toHaveBeenCalled();
+  await act(async () => fail(new Error('素材を保存できません。')));
+  expect(button).toHaveAttribute('aria-disabled', 'true');
+  await act(async () => fireEvent.change(input, { target: { files: [new File(['png'], 'closed.png', { type: 'image/png' })] } }));
+  expect(button).toHaveAttribute('aria-disabled', 'false');
+});
+
+it('実際の読み上げと口パクを受信テストし、通信失敗後も設定を変えず再試行できる', async () => {
+  const settings = createDefaultSettings(); settings.commentSpeech.enabled = true; settings.commentSpeech.voice = { speakerUuid: 'speaker', styleId: 1 };
+  mocks.snapshot = { settings, settingsRevision: 1, character: { mouthShape: 'closed', assetWarning: null } } as AppSnapshot;
+  mocks.mutate.mockRejectedValueOnce(new Error('一時的な通信失敗')).mockResolvedValue({});
+  render(<SimpleCharacterSettingsPage/>);
+  const button = await screen.findByRole('button', { name: 'コメント受信テスト' });
+  await act(async () => fireEvent.click(button));
+  expect(screen.getByLabelText('操作の問題')).toHaveTextContent('一時的な通信失敗');
+  expect(button).toHaveAttribute('aria-disabled', 'false');
+  await act(async () => fireEvent.click(button));
+  expect(mocks.mutate).toHaveBeenLastCalledWith('/api/comments/test');
+  expect(screen.getByLabelText('操作の問題')).toBeEmptyDOMElement();
+});
 
 describe('簡易キャラクター専用設定画面', () => {
   beforeEach(() => {

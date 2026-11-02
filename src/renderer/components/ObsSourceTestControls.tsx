@@ -1,3 +1,4 @@
+import { TestActionButton } from './TestActionButton';
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { ObsSourceTestContext, ObsSourceTestRequest, ObsSourceTestState } from '../../shared/obs-source-test';
 
@@ -11,8 +12,10 @@ export interface ObsSourceTestControlsProps {
   prepare?(): Promise<ObsSourceTestRequest | null>;
   notice(message: string, error: boolean): void;
   registrationAction?: ReactNode;
+  startLabel?: string;
+  unavailableMessage?: string;
 }
-export function ObsSourceTestControls({ selection, state, blocked, context, contextRevision = 0, action, prepare, notice, registrationAction }: ObsSourceTestControlsProps) {
+export function ObsSourceTestControls({ selection, state, blocked, context, contextRevision = 0, action, prepare, notice, registrationAction, startLabel = '表示テスト（5秒）', unavailableMessage }: ObsSourceTestControlsProps) {
   const id = useId();
   const [eligibility, setEligibility] = useState<ObsSourceTestContext | null>(null);
   const [pending, setPending] = useState(false);
@@ -48,12 +51,13 @@ export function ObsSourceTestControls({ selection, state, blocked, context, cont
   const submit = async (stop: boolean) => {
     if (!callbacks.current.action || (!stop && (pending || !selection || !eligibility?.available || blocked || state?.busy))) return;
     if (stop && (stopping || !state?.busy || !state.current)) return;
-    if (stop) setStopping(true); else setPending(true);
+    if (stop) { setStopping(true); setPending(false); } else setPending(true);
     const request = { serial: ++serial.current, stop, previousId: state?.current?.id ?? null, selection: JSON.stringify(selection), observed: false };
     outstanding.current = request;
     setError('');
     try {
       const prepared = stop ? null : callbacks.current.prepare ? await callbacks.current.prepare() : selection;
+      if (serial.current !== request.serial) return;
       if (!stop && !prepared) return;
       if (prepared) request.selection = JSON.stringify(prepared);
       await callbacks.current.action(stop ? 'stop' : 'start', stop ? { testId: state!.current!.id } : prepared!);
@@ -70,14 +74,14 @@ export function ObsSourceTestControls({ selection, state, blocked, context, cont
   const targetCurrent = state?.current && selection && JSON.stringify(state.current.target) === JSON.stringify(selection.target) && state.current.inputUuid === selection.inputUuid ? state.current : null;
   const active = Boolean(state?.busy && state.current);
   const message = error || (targetCurrent && (targetCurrent.phase !== 'complete' || targetCurrent.needsAttention) ? targetCurrent.message : '')
-    || (active && !targetCurrent ? `${state!.current!.title}のテストを実行中です。「テスト終了」で停止できます。` : '') || eligibility?.message
-    || (!selection ? '追加後に表示テストを使えます。' : !eligibility && !state?.busy ? 'テスト可否を確認しています。' : '実際の表示はOBSで確認してください。');
+    || (active && !targetCurrent ? `${state!.current!.title}のテストを実行中です。「テスト終了」で停止できます。` : '') || (!active ? unavailableMessage : '') || eligibility?.message
+    || (!selection ? '追加後に表示テストを使えます。' : !eligibility && !state?.busy ? 'テスト可否を確認しています。' : selection.target.overlay === 'comments' ? 'コメント1件を通常の受信処理へ投入します。表示・読み上げ・文字演出に反応し、履歴に残ります。AIリスナーには渡しません。' : '実際の表示はOBSで確認してください。');
   return <section className="obs-test-controls" aria-label={registrationAction ? 'OBS登録・表示テストの操作' : 'OBS表示テスト'}>
     <div className={registrationAction ? 'obs-registration-actions obs-test-buttons' : 'obs-test-buttons'}>
       {registrationAction}
-      <button type="button" className="secondary" data-action="test" aria-describedby={`${id}-status`}
+      <TestActionButton data-action="test" aria-describedby={`${id}-status`}
         aria-busy={pending || stopping} aria-disabled={active ? stopping || !action : pending || blocked || !eligibility?.available || Boolean(state?.busy) || !action}
-        onClick={() => void submit(active)}>{stopping ? '終了中…' : active ? 'テスト終了' : pending ? '準備中…' : '表示テスト（5秒）'}</button>
+        onClick={() => void submit(active)}>{stopping ? '終了中…' : active ? 'テスト終了' : pending ? '準備中…' : selection?.target.overlay === 'comments' ? 'コメント受信テスト' : startLabel}</TestActionButton>
     </div>
     <div id={`${id}-status`} className="obs-test-status" role="status" tabIndex={0} aria-label="OBS表示テストの状態">
       {message}

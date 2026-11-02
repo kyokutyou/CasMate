@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { verifyObsOverlayTest } from './obs-overlay-test-checks.mjs';
 
 export async function verifyObsDesign({ evaluate, resize, capture, pressKey, clickSpinner, requestClose, resetCloseWarning }) {
   // Keep the real 500ms autosave debounce; wait for its visible result instead
@@ -26,6 +27,14 @@ export async function verifyObsDesign({ evaluate, resize, capture, pressKey, cli
     await evaluate(`designHarness.update({managementTheme:${JSON.stringify(theme)},managementTextSize:'large'})`);
     await settle();
     await tab('adjust');
+    if(theme==='ocean'&&width===1200){
+      const gap=()=>evaluate(`(()=>{const d=document.querySelector('.design-editing-fields > [role=tabpanel]:not([hidden]) iframe').contentDocument,m=d.querySelector('.comment-meta'),s=d.defaultView.getComputedStyle(m),trim=parseFloat(s.getPropertyValue('--cm-ink-gap-trim'));if(!(trim>0))throw Error('Missing visible-gap correction');return parseFloat(s.marginBottom)+trim})()`);
+      const original=await evaluate(`document.querySelector('input[aria-label="見出しと本文の間隔"]')?.value ?? [...document.querySelectorAll('input')].find(e=>[...e.labels??[]].some(l=>l.textContent==='見出しと本文の間隔'))?.value`);
+      await input('見出しと本文の間隔','24');assert.ok(Math.abs(await gap()-24)<1,'preview applies exact metadata/body gap');
+      await input('見出しと本文の間隔','0');assert.ok(Math.abs(await gap())<1,'zero removes metadata/body gap');
+      await input('見出しと本文の間隔',original);
+    }
+    await verifyObsOverlayTest({ evaluate, selector: '.design-editing-fields > [role=tabpanel]:not([hidden]) .obs-overlay-test-panel', capture: width===320||width===1200 ? capture : null, name: `design-${theme}-${width}`, setMessage: message => evaluate(`designHarness.testMessage(${JSON.stringify(message)})`) });
     await evaluate('scrollTo(0,0)');
     const compact = await evaluate(`(() => {const p=document.querySelector('.design-editing-fields > [role=tabpanel]:not([hidden])');const g=p.querySelectorAll('.design-adjust-group');const pair=g[0].querySelector('.control-pair');return {groups:[...g].map(e=>e.getAttribute('aria-label')),headingColor:getComputedStyle(g[0].querySelector('h3')).color,lineHeight:p.querySelectorAll('input[type=text]').length,columns:getComputedStyle(pair).gridTemplateColumns.split(' ').length,width:p.querySelector('.design-adjust-panel').clientWidth,clipped:[...p.querySelectorAll('.design-adjust-panel input[type=text],.design-adjust-panel input[type=number],.design-adjust-panel select')].filter(e=>e.getClientRects().length&&e.scrollWidth>e.clientWidth+2).map(e=>({label:e.getAttribute('aria-label')||e.labels?.[0]?.textContent||e.id,value:e.value,width:e.clientWidth,scroll:e.scrollWidth}))};})()`);
     assert.deepEqual(compact.groups,['文字','背景','余白・形']);assert.deepEqual(compact.clipped,[],'compact inputs fit: '+JSON.stringify(compact));

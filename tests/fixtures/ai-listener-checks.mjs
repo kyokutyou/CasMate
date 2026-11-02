@@ -94,5 +94,19 @@ export async function verifyAiListener({evaluate,resize,settle,capture}) {
   await resize(320,760);
   await evaluate("aiLayoutHarness.settings({participants:{youtube:{enabled:false,personaId:''},twitch:{enabled:false,personaId:''},shitaraba:{enabled:false,personaId:''},jpnkn:{enabled:true,personaId:''}}});aiLayoutHarness.update({hasKey:true});document.querySelector('.ai-runtime-primary button').click()");await settle();
   assert.equal(await evaluate("document.activeElement===document.querySelector('.ai-persona-editor > label textarea')"),true,'persona guide returns to existing draft editor');
+  for (const width of [320,1024]) {
+    await resize(width,760);
+    await evaluate(`(()=>{document.querySelector('.ai-persona-editor .button-row button:last-child')?.click();const key=document.querySelector('#ai-panel-connections input[type=password]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(key,'');key.dispatchEvent(new Event('input',{bubbles:true}));aiLayoutHarness.settings({personas:[{id:'test-persona',name:'テスト人格',personality:'',tone:'',firstPerson:'',topics:'',notes:''}]});aiLayoutHarness.update({hasKey:true,requested:false});document.getElementById('ai-personas').click();document.querySelector('.ai-reply-test').open=true;})()`); await settle();
+    await evaluate(`(()=>{const s=document.querySelector('.ai-reply-test select');Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(s,'test-persona');s.dispatchEvent(new Event('change',{bubbles:true}));})()`); await settle();
+    await evaluate(`(()=>{const b=document.querySelector('.ai-reply-test button');b.scrollIntoView({block:'center'});b.focus({preventScroll:true});})()`); await settle();
+    const geometry=()=>evaluate(`(()=>{const b=document.querySelector('.ai-reply-test button'),r=b.getBoundingClientRect(),p=document.querySelector('.management-body');return {box:[r.x,r.y,r.width,r.height],scroll:p.scrollTop,height:p.scrollHeight,focus:document.activeElement===b,overflow:document.documentElement.scrollWidth>innerWidth};})()`);
+    const before=await geometry(); assert.equal(before.overflow,false);
+    await evaluate(`document.querySelector('.ai-reply-test button').click()`); await settle();
+    assert.equal(await evaluate(`document.querySelector('.ai-reply-test-result').textContent`),'人格のテスト返答です。');
+    assert.equal(await evaluate(`aiLayoutHarness.calls().at(-1)`),'/api/ai-listener/test-reply');
+    assert.deepEqual(await geometry(),before,'local reply and success notification preserve position and focus');
+    await evaluate(`document.querySelector('.ai-reply-test-result').scrollIntoView({block:'center'})`); await settle();
+    if(capture) await capture(`ai-reply-test-${width}.png`);
+  }
   return count;
 }

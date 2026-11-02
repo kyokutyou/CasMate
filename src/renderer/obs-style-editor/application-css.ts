@@ -20,7 +20,7 @@ export function applicationDesignCss(target: 'comments' | 'speech', design: ObsC
 .overlay-comments .overlay-comment { max-width: min(100%, var(--cm-max-width, 440px)); transform: rotate(var(--cm-tilt, var(--cm-paper-tilt))); }
 .overlay-comments .overlay-comment::before { display: var(--cm-tape-display, block); }
 .overlay-comments .overlay-comment::after { display: var(--cm-fold-display, block); }
-.overlay-comments .comment-meta { margin-bottom: var(--cm-meta-gap, 2px); }
+.overlay-comments .comment-meta { margin-bottom: calc(var(--cm-meta-gap, var(--cm-design-meta-gap, 2px)) - var(--cm-ink-gap-trim, 0px)); }
 .overlay-comments .comment-meta strong { font-weight: 500; }
 .overlay-comments .source-badge { font-size: .72em; padding: .15em .4em; }
 `;

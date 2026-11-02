@@ -1,5 +1,10 @@
 main.character-settings-page { width:min(1200px,100%); }
 .character-settings-page .topbar { flex-wrap:wrap; }
+.character-settings-notice { position:relative; }
+.character-test-notifications { position:absolute; inset:0; pointer-events:none; }
+.character-test-notifications .toast-region { position:absolute; inset:0; width:min(100%,280px); transform:none; }
+.character-test-notifications .banner { display:flex; align-items:center; gap:6px; width:100%; min-width:0; height:36px; margin:0; padding:4px; overflow:hidden; pointer-events:auto; background:var(--studio-success-surface,#243c36); color:var(--studio-success,#b6d9cb); font-size:var(--management-font-secondary,12px); line-height:18px; }
+.character-test-notifications .toast-message { min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .character-settings-page h1 { overflow-wrap:anywhere; }
 .character-settings-notice { height:2.8em; overflow:auto; overflow-wrap:anywhere; line-height:1.4; color:#ffb5c0; }
 .character-settings-workspace { display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:20px; align-items:start; }

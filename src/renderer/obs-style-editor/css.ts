@@ -49,7 +49,7 @@ export function generateCss(target: Target, design: CommentDesign | SpeechDesign
   let additions: string;
   if (target === 'comments' && 'showSource' in design) {
     Object.assign(variables, {
-      gap: `${design.gap}px`, 'meta-size': `${design.metaScale}em`, 'author-color': design.authorColor,
+      gap: `${design.gap}px`, 'meta-size': `${design.metaScale}em`, 'meta-gap': `${design.metaGap}px`, 'author-color': design.authorColor,
       'source-color': design.sourceColor, 'source-background': rgba(design.sourceBackgroundColor, design.sourceBackgroundOpacity),
       'source-display': design.showSource ? 'inline-flex' : 'none', 'author-display': design.showAuthor ? 'inline' : 'none',
       'emote-height': `${design.emoteScale}em`,

@@ -22,6 +22,18 @@ import { AiStore } from '../src/main/ai/ai-store';
 function deferred<T>() { let resolve!: (value: T) => void; const promise = new Promise<T>(r => { resolve = r; }); return { promise, resolve }; }
 const comment = (text = '視聴者のコメント', source: IncomingComment['source'] = 'youtube'): IncomingComment => ({ source, externalId: text, authorName: '送信しない名前', content: [{ type: 'text', text }], initialHistory: false });
 const controllers: AiController[] = [];
+it('受信テストだけはAIリスナーへ渡さず、通常コメントは引き続き渡す', async () => {
+  const { c } = await setup();
+  const state = new AppState(createDefaultSettings());
+  const receive = vi.spyOn(c, 'comment');
+  try {
+    state.attachAi(c);
+    state.receiveTestComments('test-ai-exclusion');
+    expect(receive).not.toHaveBeenCalled();
+    state.acceptComment(comment('本物のコメント'));
+    expect(receive).toHaveBeenCalledOnce();
+  } finally { state.dispose(); }
+});
 async function removeMemoryFixture(directory: string) {
   const target = resolve(directory);
   if (!target.startsWith(resolve(tmpdir()) + sep) || !target.split(sep).at(-1)?.startsWith('casmate-ai-memory-count-')) throw new Error('Unexpected fixture directory');

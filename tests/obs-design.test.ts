@@ -6,9 +6,60 @@ import { readStoredSettings } from '../src/main/core/settings/stored-format';
 import { createHttpApplication } from '../src/main/server/local-server';
 import { readOnlyEvent, readOnlySnapshot } from '../src/main/server/local-view-projections';
 import { commentDesignFromSettings, speechDesignFromSettings, validateObsDesign } from '../src/shared/obs-design';
+import { applicationDesignCss } from '../src/renderer/obs-style-editor/application-css';
 
 const headers = { Host: '127.0.0.1:3000', Origin: 'http://127.0.0.1:3000', 'X-CasMate-Token': 'secret' };
 describe('OBSデザインの保存と公開', () => {
+  it.each(['paper', 'card'] as const)('旧%sの見出し間隔を維持し、変更した間隔を保存・公開する', async variant => {
+    const settings = createDefaultSettings();
+    const design = commentDesignFromSettings(settings.commentOverlay); design.variant = variant;
+    Reflect.deleteProperty(design.style, 'metaGap');
+    expect(validateObsDesign('comments', design).style.metaGap).toBe(variant === 'paper' ? 2 : 4);
+    design.style.metaGap = 24;
+    const state = new AppState(settings);
+    try {
+      const app = createHttpApplication({ state, port: 3000, operationToken: 'secret' });
+      const response = await request(app).put('/api/obs-design/comments').set(headers).send(design);
+      expect(response.status).toBe(200);
+      expect(state.snapshot().settings.commentOverlay.design?.style.metaGap).toBe(24);
+      const loaded = readStoredSettings(JSON.parse(JSON.stringify(state.snapshot().settings)));
+      expect(loaded.settings.commentOverlay.design?.style.metaGap).toBe(24);
+      const css = applicationDesignCss('comments', design);
+      expect(css).toContain('--cm-design-meta-gap: 24px');
+      expect(css).toContain('var(--cm-meta-gap, var(--cm-design-meta-gap');
+    } finally { state.dispose(); }
+  });
+  it('常設積み上げの件数・配置を部分保存し、失敗・不正値で表示と外観を巻き戻さない', async () => {
+    const settings = createDefaultSettings(); settings.commentOverlay.mode = 'stack';
+    const saveSettings = vi.fn(async () => undefined);
+    const state = new AppState(settings, { saveSettings });
+    const app = createHttpApplication({ state, port: 3000, operationToken: 'secret' });
+    try {
+      for (let index = 0; index < 5; index++) state.acceptComment({ externalId: String(index), source: 'youtube', authorName: '視聴者',
+        content: [{ type: 'text', text: `コメント${index}` }], initialHistory: false });
+      const design = commentDesignFromSettings(settings.commentOverlay); design.style.fontSize = 42;
+      await Promise.all([state.updateObsDesign('comments', design), state.updateObsDesign('comments', { stackMaxComments: 3, stackAlignment: 'bottom', stackDirection: 'newestTop' }, true)]);
+      expect(state.snapshot().settings.commentOverlay).toMatchObject({ design, stackMaxComments: 3, stackAlignment: 'bottom', stackDirection: 'newestTop' });
+      expect(state.snapshot().commentOverlay.active.map(item => item.comment.externalId)).toEqual(['2', '3', '4']);
+      expect(state.snapshot().commentOverlay.active.every(item => item.expiresAt === null)).toBe(true);
+      const before = state.snapshot();
+      for (const value of [{ stackMaxComments: 2.5 }, { stackMaxComments: 51 }, { stackAlignment: 'left' }, { stackDurationSeconds: 10 }]) {
+        const response = await request(app).put('/api/obs-design/comments/options').set(headers).send(value);
+        expect(response.status).toBe(400);
+        expect(state.snapshot().settings).toEqual(before.settings);
+        expect(state.snapshot().commentOverlay).toEqual(before.commentOverlay);
+      }
+      saveSettings.mockRejectedValueOnce(new Error('保存失敗'));
+      const failed = await request(app).put('/api/obs-design/comments/options').set(headers).send({ stackMaxComments: 1 });
+      expect(failed.status).toBe(500);
+      expect(state.snapshot().commentOverlay).toEqual(before.commentOverlay);
+      expect(state.snapshot().settings).toEqual(before.settings);
+      const response = await request(app).put('/api/obs-design/comments/options').set(headers).send({ stackMaxComments: 1 });
+      expect(response.status).toBe(200);
+      expect(response.body.snapshot.settings.commentOverlay).toMatchObject({ stackMaxComments: 1, design });
+      expect(state.snapshot().commentOverlay.active.map(item => item.comment.externalId)).toEqual(['4']);
+    } finally { state.dispose(); }
+  });
   it('初回設定の文字サイズを最新デザインへ部分保存し、保存失敗・不正値では変更しない', async () => {
     const saveSettings = vi.fn(async () => undefined);
     const state = new AppState(createDefaultSettings(), { saveSettings });

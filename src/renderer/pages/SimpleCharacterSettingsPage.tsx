@@ -3,10 +3,15 @@ import type { CharacterAssetSlot, CharacterState, SimpleCharacterMotionSettings 
 import { defaultSimpleCharacterMotionSettings } from '../../shared/simple-character';
 import { useApplicationState } from '../api';
 import { CharacterImage } from '../components/CharacterImage';
+import { CommentReceptionControls } from '../components/ObsOverlayTestPanel';
+import { ManagementToast } from '../components/ManagementToast';
+import { useSuccessNoticeExpiry } from '../use-success-notice-expiry';
 import './simple-character-settings.css';
 
 export function SimpleCharacterSettingsPage() {
   const api = useApplicationState(true);
+  const [notice, setNotice] = useState<{ message: string; tone: 'success' } | null>(null);
+  useSuccessNoticeExpiry(notice, setNotice);
   const [draft, setDraft] = useState<SimpleCharacterMotionSettings | null>(null);
   const [motionSaveState, setMotionSaveState] = useState<'saved' | 'pending' | 'saving' | 'error'>('saved');
   const editVersion = useRef(0);
@@ -15,6 +20,8 @@ export function SimpleCharacterSettingsPage() {
   const latestSavedMotion = useRef<SimpleCharacterMotionSettings | null>(null);
   useLayoutEffect(() => { latestSavedMotion.current = api.snapshot?.settings.character.simple.motion ?? null; }, [api.snapshot]);
   const [errorNotice, setErrorNotice] = useState<string | null>(null);
+  const [assetPending, setAssetPending] = useState(0);
+  const [assetFailed, setAssetFailed] = useState(false);
   const pendingPreview = useRef<SimpleCharacterMotionSettings | null>(null);
   const previewTimer = useRef<number | null>(null);
   const saveTimer = useRef<number | null>(null);
@@ -104,12 +111,14 @@ export function SimpleCharacterSettingsPage() {
   const simple = snapshot.settings.character.simple;
 
   const run = async (operation: () => Promise<unknown>) => {
+    setAssetPending(count => count + 1); setAssetFailed(false);
     try {
       setErrorNotice(null);
       await operation();
     } catch (error) {
+      setAssetFailed(true);
       report(error);
-    }
+    } finally { setAssetPending(count => count - 1); }
   };
   const selectAsset = (slot: CharacterAssetSlot) => (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -141,7 +150,7 @@ export function SimpleCharacterSettingsPage() {
 
   return <main className="character-settings-page">
     <header className="topbar"><div><h1>簡易キャラクター設定</h1></div><span aria-label="接続状態">{api.connected ? '接続済み' : '再接続中'}</span></header>
-    <div className="character-settings-notice" role="status" aria-label="操作の問題">{errorNotice ?? api.error ?? snapshot.warning ?? ''}</div>
+    <div className="character-settings-notice"><div role="status" aria-label="操作の問題">{errorNotice ?? api.error ?? snapshot.warning ?? ''}</div><div className="character-test-notifications"><ManagementToast notice={!errorNotice && !api.error && !snapshot.warning ? notice : null}/></div></div>
     <div className="character-settings-workspace">
     <section className="panel character-settings-preview" aria-label="キャラクタープレビュー">
       <h2>プレビュー</h2>
@@ -151,7 +160,11 @@ export function SimpleCharacterSettingsPage() {
     </section>
     <div className="character-settings-controls">
     <section className="panel">
-      <h2>PNG素材</h2>
+      <div className="settings-test-heading"><h2>PNG素材</h2>
+      <CommentReceptionControls help="PCの読み上げに合わせて、OBS・独立ウィンドウの口パクも確認できます。" api={api} active unsaved={motionSaveState !== 'saved' || assetPending > 0 || assetFailed} invalidSelector='.character-settings-page [aria-invalid="true"]'
+        blockedReason={!simple.closedAsset || !simple.openAsset ? '口を閉じた画像と口を開けた画像を設定してください。' : !snapshot.settings.commentSpeech.enabled || !snapshot.settings.commentSpeech.voice ? 'コメント読み上げをONにし、話者を選んでください。' : ''}
+        notice={(message, error) => { if (error) { setNotice(null); report(new Error(message)); } else { setErrorNotice(null); setNotice({ message, tone: 'success' }); } }}/>
+</div>
       <p className="muted">静止PNG（20 MiB以下、各辺8,192px以下）を使用します。</p>
       <p className="muted character-asset-order-help">{simple.closedAsset ? '口を開けた画像（PNG）は口を閉じた画像（PNG）と同じ大きさにしてください。' : 'まず口を閉じた画像（PNG）を登録してください。'}</p>
       <div className="asset-controls">
@@ -183,6 +196,7 @@ export function SimpleCharacterSettingsPage() {
       </fieldset>
       <button className="secondary" onClick={() => { const next = { ...defaultSimpleCharacterMotionSettings, enabled: draft.enabled }; preview(next, false); void save(next); }}>標準に戻す</button>
     </section>
+
     </div>
     </div>
   </main>;

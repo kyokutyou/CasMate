@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useId, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { ManagementNavigation } from '../management-navigation';
 import type { CommentListSettings, CommonComment } from '../../shared/types';
 import { messages } from '../messages';
 import { CommentItem } from './CommentItem';
@@ -8,6 +9,7 @@ import { CompactFeedback } from './CompactFeedback';
 import './comment-list-panel.css';
 
 interface Props {
+  renderTest?(active: boolean, invalid: boolean): ReactNode;
   settings: CommentListSettings;
   windowVisible: boolean;
   commentsUrl: string;
@@ -37,7 +39,8 @@ const previewComments: CommonComment[] = [
     sequence: 3, receivedAt: '2026-10-18T00:00:00Z', initialHistory: false },
 ];
 
-export function CommentListPanel({ settings, windowVisible, commentsUrl, saveError, windowOperationBusy = false, onChange, onSave, onToggleWindow, onSuccess, onError }: Props) {
+export function CommentListPanel({ settings, windowVisible, commentsUrl, saveError, windowOperationBusy = false, onChange, onSave, onToggleWindow, onSuccess, onError, renderTest }: Props) {
+  const navigation = useContext(ManagementNavigation);
   const id = useId();
   const [fieldError, setFieldError] = useState('');
   const [inputErrors, setInputErrors] = useState<Record<string, string>>({});
@@ -104,7 +107,7 @@ export function CommentListPanel({ settings, windowVisible, commentsUrl, saveErr
       </section>
     </div>
     <section className="list-setting-section" aria-labelledby={`${id}-appearance`}>
-      <h3 id={`${id}-appearance`}>文字と色</h3>
+      <div className="settings-test-heading"><h3 id={`${id}-appearance`}>文字と色</h3>{renderTest?.(!navigation || navigation.editor === 'commentList', Boolean(fieldError || Object.values(inputErrors).some(Boolean)))}</div>
       <div className="list-setting-grid">
         <AppearanceField field="fontSizePx" label="文字サイズ（px）" value={String(settings.fontSizePx)} kind="size" valid={validSize}
           help="8〜200pxで設定できます。" error="8〜200の範囲で入力してください。" onError={reportInput}

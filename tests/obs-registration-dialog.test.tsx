@@ -311,7 +311,7 @@ it.each(['lan', 'tailscale', 'direct'] as const)('スマホ/%sでは表示テス
   const testAction = vi.fn(async () => undefined);
   const p = setup({ smartphone, testContext, testAction }, target);
   open('検証入口'); await loaded();
-  expect(within(modal()).queryByRole('button', { name: '表示テスト（5秒）' })).toBeNull();
+  expect(within(modal()).queryByRole('button', { name: /表示テスト（5秒）|コメント受信テスト/ })).toBeNull();
   expect(within(modal()).queryByRole('button', { name: 'テスト終了' })).toBeNull();
   expect(within(modal()).queryByLabelText('OBS表示テストの状態')).toBeNull();
   expect(testContext).not.toHaveBeenCalled(); expect(testAction).not.toHaveBeenCalled();
@@ -322,7 +322,7 @@ it.each(['lan', 'tailscale', 'direct'] as const)('スマホ/%sでは表示テス
 
 it.each(['comments', 'speech', 'effects', 'character'] as const)('ブラウザ/%sでは表示テスト操作を残す', async overlay => {
   setup({}, { kind: 'overlay', overlay }); open('検証入口'); await loaded();
-  expect(within(modal()).getByRole('button', { name: '表示テスト（5秒）' })).toBeVisible();
+  expect(within(modal()).getByRole('button', { name: /表示テスト（5秒）|コメント受信テスト/ })).toBeVisible();
   expect(within(modal()).queryByRole('button', { name: 'テスト終了' })).toBeNull();
 });
 
@@ -375,7 +375,7 @@ it('削除通知で前回の確認表示とテスト可否を更新し、操作�
   const context = vi.fn().mockResolvedValueOnce(initial).mockResolvedValueOnce(initial).mockResolvedValue(current);
   const testContext = vi.fn().mockResolvedValue({ available: true, message: '' });
   const p = setup({ context, testContext, testAction: vi.fn() }); open(); await loaded(); await act(async () => fireEvent.click(addButton()));
-  await waitFor(() => expect(within(modal()).getByRole('button', { name: '表示テスト（5秒）' })).toHaveAttribute('aria-disabled', 'false'));
+  await waitFor(() => expect(within(modal()).getByRole('button', { name: /表示テスト（5秒）|コメント受信テスト/ })).toHaveAttribute('aria-disabled', 'false'));
   const button = addButton(); act(() => button.focus());
   testContext.mockResolvedValue({ available: false, message: 'このOBSソースは対象のシーンに追加されていません。「OBSに追加」で追加してからテストしてください。' });
   p.update({ contextRevision: 1 });
@@ -538,7 +538,7 @@ it('テストボタンも押した時点の対象を取得してから送信す�
   const context = vi.fn().mockResolvedValueOnce(initial).mockResolvedValue({ ...initial, currentSceneUuid: 'scene-other' });
   const action = vi.fn(async () => undefined);
   setup({ context, testContext: vi.fn(async () => ({ available: true, message: '' })), testAction: action }); open(); await loaded();
-  const button = within(modal()).getByRole('button', { name: '表示テスト（5秒）' }); await waitFor(() => expect(button).toHaveAttribute('aria-disabled', 'false'));
+  const button = within(modal()).getByRole('button', { name: /表示テスト（5秒）|コメント受信テスト/ }); await waitFor(() => expect(button).toHaveAttribute('aria-disabled', 'false'));
   await act(async () => fireEvent.click(button)); expect(action).toHaveBeenCalledWith('start', { target: comments, collection: '配信', sceneUuid: 'scene-other', inputUuid: 'a' });
 });
 it('Tabを内部で循環し、Escで閉じて入口へフォーカスを戻す', async () => {

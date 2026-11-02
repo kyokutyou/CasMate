@@ -1,4 +1,5 @@
 import { access, readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { imageSize } from 'image-size';
 import { describe, expect, it } from 'vitest';
@@ -55,15 +56,27 @@ describe('v0.2.0配布リソース', () => {
     const root = process.cwd();
     const png = await readFile(join(root, 'resources', 'icon.png'));
     const ico = await readFile(join(root, 'resources', 'icon.ico'));
-    const svg = await readFile(join(root, 'resources', 'icon.svg'), 'utf8');
 
-    expect(imageSize(png)).toMatchObject({ width: 1024, height: 1024, type: 'png' });
+    expect(imageSize(png)).toMatchObject({ width: 256, height: 256, type: 'png' });
     expect(ico.readUInt16LE(0)).toBe(0);
     expect(ico.readUInt16LE(2)).toBe(1);
     expect(ico.readUInt16LE(4)).toBe(7);
-    expect(svg).toContain('#8667FF');
-    expect(svg).toContain('#FF6FAE');
-    expect(svg).not.toMatch(/<text\b/);
+    // 2026-11-02に採用した利用者指定のICOを改変せず使用する。
+    expect(createHash('sha256').update(ico).digest('hex'))
+      .toBe('2b39ec72baa52fd7a401d7dc61c0882fed4db5b4e837197e107e02c8fff7fc8f');
+    const sizes: number[] = [];
+    for (let index = 0; index < ico.readUInt16LE(4); index += 1) {
+      const entry = 6 + index * 16;
+      const size = ico[entry] || 256;
+      sizes.push(size);
+      expect(ico[entry + 1] || 256).toBe(size);
+      if (size === 256) {
+        const length = ico.readUInt32LE(entry + 8);
+        const offset = ico.readUInt32LE(entry + 12);
+        expect(png.equals(ico.subarray(offset, offset + length))).toBe(true);
+      }
+    }
+    expect(sizes).toEqual([16, 24, 32, 48, 64, 128, 256]);
 
     const packageJson = JSON.parse(await readFile(join(root, 'package.json'), 'utf8')) as {
       build: {

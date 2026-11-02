@@ -1,0 +1,22 @@
+.test-action-button.secondary, .management-shell .test-action-button.secondary, .obs-style-editor .test-action-button.secondary {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  width:14em; max-width:100%; min-width:0; height:44px; min-height:44px; justify-self:start;
+  padding:7px 15px; border:1px solid var(--studio-line,#668894); border-radius:999px;
+  background:transparent; color:var(--studio-text,#c8e4eb); font-size:var(--management-font-body,14px); white-space:nowrap;
+}
+.test-action-button svg { flex-shrink:0; }
+.obs-overlay-test-panel .obs-test-buttons { grid-template-columns:minmax(0,1fr); }
+.test-action-button.secondary:hover { background:var(--studio-surface,#2b4652); }
+.test-action-button[aria-disabled=true] { opacity:.5; cursor:not-allowed; }
+.settings-test-heading { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:6px 16px; margin-bottom:12px; }
+.settings-test-heading>h2, .settings-test-heading>h3 { margin:0; }
+.settings-test-heading>.obs-overlay-test-panel, .settings-test-heading>.obs-overlay-test-panel>.obs-test-controls { display:contents; }
+.settings-test-heading .obs-overlay-test-panel .obs-test-buttons { grid-row:1; grid-column:2; width:auto; min-width:0; max-width:100%; margin:0; }
+.settings-test-heading .obs-overlay-test-panel .obs-test-status { grid-row:2; grid-column:1/-1; width:100%; margin:0; }
+.settings-test-heading .test-help { grid-row:3; grid-column:1/-1; }
+@media(max-width:600px) { .settings-test-heading { grid-template-columns:minmax(0,1fr); }.settings-test-heading .obs-overlay-test-panel .obs-test-buttons { grid-row:2; grid-column:1; justify-self:start; }.settings-test-heading .obs-overlay-test-panel .obs-test-status { grid-row:3; }.settings-test-heading .test-help { grid-row:4; } }
+@media(max-width:400px) {
+  .test-action-button.secondary, .management-shell .test-action-button.secondary, .obs-style-editor .test-action-button.secondary, .obs-overlay-test-panel .obs-test-buttons .test-action-button { padding-inline:8px; gap:6px; height:52px; min-height:52px; white-space:normal; }
+  .test-action-button svg { width:14px; }
+  .test-action-button > span { min-width:0; line-height:1.25; }
+}

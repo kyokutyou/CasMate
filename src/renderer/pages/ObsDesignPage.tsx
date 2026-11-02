@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import { useCallback, useEffect, useReducer, useRef, useState, type ReactNode } from 'react';
 import { useApplicationState } from '../api';
 import { commentDesignFromSettings, speechDesignFromSettings, createObsDesignPreset, validateObsDesign } from '../../shared/obs-design';
 import type { ObsCommentDesign, ObsSpeechDesign } from '../../shared/obs-design';
@@ -19,6 +19,7 @@ import { managementTextSizeStyle } from '../management-text-sizes';
 import type {} from '../../shared/obs-design-bridge';
 import '../obs-style-editor/editor.css';
 import { ManagementToast } from '../components/ManagementToast';
+import { ObsOverlayTestPanel } from '../components/ObsOverlayTestPanel';
 import { useSuccessNoticeExpiry } from '../use-success-notice-expiry';
 import './obs-design-page.css';
 
@@ -27,9 +28,9 @@ const editingTabs = [{ id: 'adjust', label: '調整' }, { id: 'presets', label: 
 type EditingTab = typeof editingTabs[number]['id'];
 type EditState = { design: ObsCommentDesign | ObsSpeechDesign; document: EditorDocument };
 
-function Editor({ target, settings, save, onPending, operateSaved, onNotice }: { target: Target; settings: AppSettings;
+function Editor({ target, settings, save, onPending, operateSaved, onNotice, renderObsTest }: { target: Target; settings: AppSettings;
   save(value: ObsCommentDesign | ObsSpeechDesign): Promise<unknown>; onPending(target: Target, pending: boolean): void;
-  operateSaved(operation: SavedDesignOperation): Promise<unknown>; onNotice(message: string): void }) {
+  operateSaved(operation: SavedDesignOperation): Promise<unknown>; onNotice(message: string): void; renderObsTest(pending: boolean): ReactNode }) {
   const [editingTab, setEditingTab] = useState<EditingTab>('adjust');
   const savedCollection = settings.application.obsSavedDesigns?.[target] ?? { nextNumber: 1, items: [] };
   const [copyPending, setCopyPending] = useState(false);
@@ -82,6 +83,7 @@ function Editor({ target, settings, save, onPending, operateSaved, onNotice }: {
         <SampleControls target={target} document={document} {...gesture} onPatch={patch => dispatch({ type: 'edit', transform: current => ({ ...current, document: { ...current.document, previews: { ...current.document.previews, [target]: { ...current.document.previews[target], ...patch } } } }) })} />
       </section>
       <aside className="design-column" aria-label={`${names[target]}のデザイン編集`}>
+        {renderObsTest(saving.pending || Boolean(saving.error))}
         <SavedDesigns target={target} design={design} collection={savedCollection} invalid={() => documentHasInvalidInput(target)} operate={operateSaved} onApply={applyDesign} onPending={setCopyPending} onNotice={onNotice} showSaved={editingTab === 'saved'} navigation={
           <div className="design-editor-tabs" role="tablist" aria-label="デザインの編集項目">{editingTabs.map((tab, index) => <button key={tab.id} type="button" id={`design-editor-tab-${target}-${tab.id}`} role="tab" aria-selected={editingTab === tab.id} aria-controls={`design-editor-panel-${target}-${tab.id}`} tabIndex={editingTab === tab.id ? 0 : -1} onClick={() => setEditingTab(tab.id)} onKeyDown={event => {
             const nextIndex = event.key === 'Home' ? 0 : event.key === 'End' ? editingTabs.length - 1 : event.key === 'ArrowRight' ? (index + 1) % editingTabs.length : event.key === 'ArrowLeft' ? (index + editingTabs.length - 1) % editingTabs.length : null;
@@ -111,8 +113,20 @@ export function ObsDesignPage() {
   const [pending, setPending] = useState({ comments: false, speech: false });
   const [closeMessage, setCloseMessage] = useState('');
   const [closing, setClosing] = useState(false);
+  const [testError, setTestError] = useState('');
+  const testNotice = useRef<string | null>(null);
   const [notice, setNotice] = useState<{ message: string; tone: 'success' } | null>(null);
   useSuccessNoticeExpiry(notice, setNotice);
+  const testOperation = api.snapshot?.obsSourceTest?.current;
+  useEffect(() => {
+    if (!api.snapshot) return;
+    const key = testOperation ? `${testOperation.id}:${testOperation.phase}` : '';
+    if (testNotice.current === null) { testNotice.current = key; return; }
+    if (key === testNotice.current) return;
+    testNotice.current = key;
+    if (testOperation?.needsAttention) { setNotice(null); setTestError(testOperation.message); }
+    else if (testOperation?.phase === 'sending' || testOperation?.target.overlay === 'comments' && testOperation.phase === 'complete' && testOperation.message) { setTestError(''); setNotice({ message: testOperation.message, tone: 'success' }); }
+  }, [api.snapshot, testOperation]);
   const onPending = useCallback((key: Target, value: boolean) => setPending(current => current[key] === value ? current : { ...current, [key]: value }), []);
   const unsaved = pending.comments || pending.speech;
   useEffect(() => window.casmateObsDesign?.onTarget(next => { setClosing(false); setCloseMessage(''); setTarget(next); }), []);
@@ -136,9 +150,17 @@ export function ObsDesignPage() {
     <header className="editor-header"><h1>OBSデザイン編集</h1><div className="design-notifications"><ManagementToast notice={notice}/></div></header>
     <details className="design-help"><summary>使い方・OBSへの反映について</summary><p className="design-css-note">文字や背景を、見本を見ながら調整します。OBSにカスタムCSSを設定している場合、変更が見えないことがあります。見本の文章や寸法は配信へ反映しません。</p></details>
     <fieldset disabled={closing} className="design-editing-fields">
-    <nav className="editor-navigation" aria-label="編集対象"><div className="target-tabs" role="tablist">{(['comments', 'speech'] as const).map(item => <button key={item} id={`design-tab-${item}`} role="tab" aria-selected={target === item} aria-controls={`design-panel-${item}`} tabIndex={target === item ? 0 : -1} onClick={() => setTarget(item)} onKeyDown={event => { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { const next = item === 'comments' ? 'speech' : 'comments'; setTarget(next); document.getElementById(`design-tab-${next}`)?.focus(); event.preventDefault(); } }}>{names[item]}</button>)}</div><p className="design-close-status" role="status">{closeMessage || api.error || '変更は自動保存され、OBS表示へ反映されます。'}</p></nav>
+    <nav className="editor-navigation" aria-label="編集対象"><div className="target-tabs" role="tablist">{(['comments', 'speech'] as const).map(item => <button key={item} id={`design-tab-${item}`} role="tab" aria-selected={target === item} aria-controls={`design-panel-${item}`} tabIndex={target === item ? 0 : -1} onClick={() => setTarget(item)} onKeyDown={event => { if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') { const next = item === 'comments' ? 'speech' : 'comments'; setTarget(next); document.getElementById(`design-tab-${next}`)?.focus(); event.preventDefault(); } }}>{names[item]}</button>)}</div><p className="design-close-status" role="status">{closeMessage || testError || api.error || '変更は自動保存され、OBS表示へ反映されます。'}</p></nav>
     {(['comments', 'speech'] as const).map(item => <section key={item} role="tabpanel" id={`design-panel-${item}`} aria-labelledby={`design-tab-${item}`} hidden={target !== item}>
-      <Editor target={item} settings={settings} onPending={onPending} onNotice={message => setNotice({ message, tone: 'success' })} operateSaved={operation => operation.kind === 'add' ? api.mutate(`/api/obs-design/${item}/saved`, 'POST', operation.body) : api.mutate(`/api/obs-design/${item}/saved/${operation.id}`, 'DELETE')} save={async value => { await api.mutate(`/api/obs-design/${item}`, 'PUT', value); setNotice({ message: `${names[item]}のデザインを保存しました。`, tone: 'success' }); }}/>
+      <Editor target={item} settings={settings} onPending={onPending} onNotice={message => setNotice({ message, tone: 'success' })}
+        renderObsTest={saving => <ObsOverlayTestPanel api={api} state={api.snapshot} target={item} active={target === item && !closing} unsaved={saving}
+          invalidSelector={`#design-panel-${item} [aria-invalid="true"]`}
+          notice={(message, error) => {
+            if (error) { setTestError(message); setNotice(null); }
+            else { setTestError(''); setNotice({ message, tone: 'success' }); }
+          }}/>
+        }
+        operateSaved={operation => operation.kind === 'add' ? api.mutate(`/api/obs-design/${item}/saved`, 'POST', operation.body) : api.mutate(`/api/obs-design/${item}/saved/${operation.id}`, 'DELETE')} save={async value => { await api.mutate(`/api/obs-design/${item}`, 'PUT', value); setNotice({ message: `${names[item]}のデザインを保存しました。`, tone: 'success' }); }}/>
     </section>)}
     </fieldset>
   </div>;

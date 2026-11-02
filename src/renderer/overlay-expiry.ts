@@ -4,7 +4,7 @@ export function unexpiredOverlayComments(
   items: TimedOverlayComment[],
   now: number,
 ): TimedOverlayComment[] {
-  return items.filter((item) => new Date(item.expiresAt).getTime() > now);
+  return items.filter((item) => item.expiresAt === null || new Date(item.expiresAt).getTime() > now);
 }
 
 export function unexpiredSpeechRecognitionOverlayItem(

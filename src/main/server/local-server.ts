@@ -631,6 +631,7 @@ export class LocalServer {
   }
 
   async stop(): Promise<void> {
+    if (this.server) this.options.state.clearCommentOverlay();
     this.unsubscribe?.();
     this.unsubscribe = null;
     const server = this.server;

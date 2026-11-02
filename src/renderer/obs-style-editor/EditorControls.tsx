@@ -95,6 +95,7 @@ export function CommentControls({ design, onPatch, application = false, ...gestu
     <ColorControl editableHex={gesture.compact} revision={gesture.revision} label="サービス名の背景色" value={design.sourceBackgroundColor} onChange={(sourceBackgroundColor) => onPatch({ sourceBackgroundColor })} />
     <NumericControl label="サービス名背景の不透明度" value={design.sourceBackgroundOpacity} min={0} max={100} unit="%" {...gesture} onChange={(sourceBackgroundOpacity) => onPatch({ sourceBackgroundOpacity })} />
     <NumericControl label="見出しの文字サイズ" value={design.metaScale} min={0.5} max={1.5} step={0.05} unit="倍" {...gesture} onChange={(metaScale) => onPatch({ metaScale })} />
+    <NumericControl label="見出しと本文の間隔" value={design.metaGap} min={0} max={64} unit="px" {...gesture} onChange={(metaGap) => onPatch({ metaGap })} />
     <NumericControl label="積み上げの間隔" value={design.gap} min={0} max={64} unit="px" {...gesture} onChange={(gap) => onPatch({ gap })} />
     <NumericControl label="エモートのサイズ" value={design.emoteScale} min={0.5} max={3} step={0.05} unit="倍" {...gesture} onChange={(emoteScale) => onPatch({ emoteScale })} />
     {!application && <p className="panel-note">きゃすメイト側で非表示にした項目は、このCSSでも表示できません。</p>}

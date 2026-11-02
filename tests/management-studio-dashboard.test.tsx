@@ -19,6 +19,16 @@ beforeEach(() => {
 afterEach(cleanup);
 const navigate = (name: string) => fireEvent.click(within(screen.getByRole('navigation')).getByRole('button', { name, exact: true }));
 
+it.each([['commentOverlay', 'コメント受信テスト', '/api/comments/test'], ['speechRecognitionOverlay', '字幕をテスト表示', '/api/overlays/speech-recognition/test'], ['commentList', 'コメント受信テスト', '/api/comments/test'], ['smartphone', 'コメント受信テスト', '/api/comments/test']])('%sで設定後のテスト操作から正しいAPIを呼ぶ', async (editor, label, path) => {
+  render(<Dashboard/>); navigate('設定');
+  fireEvent.click(document.getElementById(`settings-${editor}`)!);
+  const button = screen.getByRole('button', { name: label }); button.focus(); fireEvent.click(button);
+  expect(button).toHaveClass('test-action-button');
+  expect(button.closest('.settings-test-heading')).not.toBeNull();
+  await waitFor(() => expect(api.mutate).toHaveBeenCalledWith(path));
+  expect(button).toHaveFocus();
+});
+
 const speechStates = [
   { enabled: false, engine: 'ready', current: 'playing', label: '停止中' },
   { enabled: false, engine: 'preparing', current: null, label: '停止中' },

@@ -103,6 +103,7 @@
 .sp-compact-settings .sp-comments, .sp-compact-row { padding: 15px 0; border-bottom: 1px solid var(--studio-line); }
 .sp-compact-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; min-width: 0; }
 .sp-compact-row > div { min-width: 0; }
+.sp-audio-quality > div { flex:1 1 100%; }
 .sp-compact-row p { margin: 3px 0 0; }
 .sp-audio-input { display: flex; align-items: center; gap: 9px; font-size: var(--management-font-body, 13px); }
 .sp-audio-input input { width: 78px; min-height: 44px; }

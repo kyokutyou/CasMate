@@ -40,6 +40,8 @@ it('単独HTMLをfileで開き、iframeプレビューと実表示の描画・�
     const editor = join(directory, 'editor.html');
     await writeFile(editor, html.source);
     const base = await readFile(resolve('src/renderer/styles.css'), 'utf8');
+    await build({ configFile: false, logLevel: 'silent', build: { outDir: directory, emptyOutDir: false,
+      lib: { entry: resolve('src/renderer/comment-ink-gap.ts'), name: 'CommentInkGap', formats: ['iife'], fileName: () => 'ink-gap.js' } } });
     const cases = [];
     for (const name of ['stack', 'single', 'hidden', 'speech', 'position', 'hostile', 'shadow'] as const) {
       const doc = createDefaultDocument();
@@ -59,7 +61,7 @@ it('単独HTMLをfileで開き、iframeプレビューと実表示の描画・�
       const markup = renderToStaticMarkup(speech ? <SpeechRecognitionOverlayPage /> : <CommentOverlayPage />);
       const css = speech ? generateCss('speech', doc.designs.speech) : generateCss('comments', doc.designs.comments);
       const path = join(directory, `${name}.html`);
-      await writeFile(path, `<!doctype html><meta charset="utf-8"><style>${base}</style><style>${css}</style><div id="root">${markup}</div>`);
+      await writeFile(path, `<!doctype html><meta charset="utf-8"><style>${base}</style><style>${css}</style><div id="root">${markup}</div><script src="ink-gap.js"></script><script>document.fonts.ready.then(()=>{const main=document.querySelector('.overlay-comments');if(main)CommentInkGap.updateCommentInkGap(main)});</script>`);
       if (process.env.CASMATE_STYLE_OBS_DIRECTORY) {
         const exported = join(process.env.CASMATE_STYLE_OBS_DIRECTORY, `${name}.html`);
         await writeFile(exported, `<!doctype html><meta charset="utf-8"><style>${base}</style><div id="root">${markup}</div>`);
@@ -68,6 +70,8 @@ it('単独HTMLをfileで開き、iframeプレビューと実表示の描画・�
       cases.push({ name, target, document: doc, path });
     }
     await writeFile(join(directory, 'cases.json'), JSON.stringify(cases));
+    const ink = await runElectronFixture('tests/fixtures/comment-ink-gap.mjs', join(directory, 'single.html'), directory, [], 30_000);
+    expect(ink.stdout, ink.stderr).toContain('PASS: comment ink gap');
     const result = await runElectronFixture('tests/fixtures/obs-style-editor-rendering.mjs', editor, directory, [], 60_000);
     expect(result.stdout, result.stderr).toContain('PASS: standalone preview equals live overlay (7 cases), no network');
   } finally {

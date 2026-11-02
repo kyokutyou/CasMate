@@ -30,6 +30,7 @@ export function useApplicationState() {
   }, []);
   return {
     snapshot, connected, error: null,
+    mutate: async (path: string) => { if (path !== '/api/comments/test') throw new Error('Unexpected operation'); trace.push('comment-test'); return {}; },
     previewCharacterMotion: async (motion: SimpleCharacterMotionSettings) => {
       trace.push('preview');
       setSnapshot(current => ({ ...current, character: { ...current.character, motion } }));

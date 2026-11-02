@@ -3,6 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { copyFile, mkdir, readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { copyIfChanged } from './copy-if-changed.mjs';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 let cmake = process.env.CMAKE ?? 'cmake';
@@ -20,7 +21,7 @@ const executable = name => resolve(build, ...(process.platform === 'win32' ? ['R
 if (process.argv.includes('--test')) execFileSync(executable('outdoor-native-tests'), [], { windowsHide: true, stdio: 'inherit' });
 const output = resolve(root, 'resources/outdoor-worker');
 await mkdir(resolve(output, 'licenses'), { recursive: true });
-await copyFile(executable('casmate-outdoor-worker'), resolve(output, `casmate-outdoor-worker${process.platform === 'win32' ? '.exe' : ''}`));
+await copyIfChanged(executable('casmate-outdoor-worker'), resolve(output, `casmate-outdoor-worker${process.platform === 'win32' ? '.exe' : ''}`));
 for (const name of ['srt', 'mbedtls']) {
   await copyFile(resolve(root, 'tmp/outdoor-native-deps', name, 'LICENSE'), resolve(output, 'licenses', `${name}-LICENSE`));
 }

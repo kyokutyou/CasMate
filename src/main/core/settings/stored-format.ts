@@ -19,6 +19,9 @@ export function readStoredSettings(parsed: unknown): { settings: AppSettings; re
   const settings = createDefaultSettings(); let retired = false;
   for (const section of settingsSections) {
     let value = parsed[section];
+    if (section === 'commentOverlay' && typeof version === 'number' && version < 17 && isRecord(value)) {
+      value = migrateCommentOverlay(value);
+    }
     if (section === 'speechRecognitionOverlay' && typeof version === 'number' && version < 16) {
       const { fontFamily, fontSizePx, textColor, backgroundColor, paddingPx, borderRadiusPx } = settings.commentOverlay;
       value = { displayDurationSeconds: 10, fontFamily, fontSizePx, textColor, backgroundColor, paddingPx, borderRadiusPx };
@@ -33,6 +36,15 @@ export function readStoredSettings(parsed: unknown): { settings: AppSettings; re
     settings[section] = validateSettingsSection(section, value) as never;
   }
   return { settings, retired, migrated: version !== policy.current, ...(parsed.voicevoxExecutablePath === undefined ? {} : { voicevoxExecutablePath: nonEmptyString(parsed.voicevoxExecutablePath, 'VOICEVOX Engine実行ファイル', 2000) }) };
+}
+function migrateCommentOverlay(value: Record<string, unknown>): Record<string, unknown> {
+  const seconds = value.stackDurationSeconds;
+  if (typeof seconds !== 'number' || !Number.isFinite(seconds) || seconds < 1 || seconds > 60) {
+    throw new ValidationError('積み上げ表示時間は1～60秒で指定してください。');
+  }
+  const result: Record<string, unknown> = { ...value, stackMaxComments: 10, stackAlignment: 'top' };
+  delete result.stackDurationSeconds;
+  return result;
 }
 function addBoardAiSettings(value: Record<string, unknown>): Record<string, unknown> {
   return { ...value,
@@ -71,10 +83,10 @@ function recognizeRetiredSettings(parsed: Record<string, unknown>, version: numb
     } else {
       // Defaults validate fields absent from historical layouts; no converted value is returned or saved.
       const oldDefaults = defaults[section] as unknown as Record<string, unknown>;
-      const requiredKeys = section === 'application' ? ['port', 'managementWindow', 'commentListWindow'] :
+      const requiredKeys = section === 'commentOverlay' ? [...Object.keys(oldDefaults).filter(key => !['stackMaxComments', 'stackAlignment'].includes(key)), 'stackDurationSeconds'] : section === 'application' ? ['port', 'managementWindow', 'commentListWindow'] :
         section === 'commentList' ? ['showSource', 'showAuthor', 'showContent'] : Object.keys(oldDefaults).filter(key => section !== 'speechRecognition' || !['inputSource', 'smartphoneDeviceId'].includes(key));
       if (!requiredKeys.every(key => Object.hasOwn(value, key) || section === 'mobileSpeech' && key === 'tailscaleEnabled' && version < 11)) throw new ValidationError('旧設定の必須項目を確認できません。');
-      validateSettingsSection(section, { ...oldDefaults, ...value });
+      validateSettingsSection(section, section === 'commentOverlay' ? migrateCommentOverlay({ ...oldDefaults, ...value }) : { ...oldDefaults, ...value });
     }
   }
 }

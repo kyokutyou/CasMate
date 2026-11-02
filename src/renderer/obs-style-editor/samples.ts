@@ -24,5 +24,5 @@ export const previewAppearance: Omit<SpeechRecognitionOverlayAppearance, 'design
 
 export function previewCommentSettings(preview: CommentPreview): CommentOverlaySettings {
   return { ...previewAppearance, showSource: true, showAuthor: true, showContent: true,
-    mode: preview.mode, stackDirection: preview.stackDirection, singleDurationSeconds: 10, stackDurationSeconds: 10 };
+    mode: preview.mode, stackDirection: preview.stackDirection, stackAlignment: 'top', stackMaxComments: 10, singleDurationSeconds: 10 };
 }

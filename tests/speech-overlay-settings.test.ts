@@ -1,3 +1,4 @@
+import { legacySettingsJson } from './fixtures/legacy-settings';
 import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -13,10 +14,10 @@ it.each([13, 14, 15])('版%sの外観を一度だけ引き継ぎ、原本・既�
   source.commentOverlay.backgroundColor = '#12345678';
   source.aiListener.participants.jpnkn.enabled = true;
   const old = Object.fromEntries(Object.entries(source).filter(([key]) => key !== 'speechRecognitionOverlay'));
-  const bytes = JSON.stringify({ ...old, schemaVersion });
+  const bytes = legacySettingsJson({ ...old, schemaVersion });
   await writeFile(file, bytes);
   const loaded = await new SettingsStore(file).load();
-  expect(loaded.settings.schemaVersion).toBe(16);
+  expect(loaded.settings.schemaVersion).toBe(17);
   expect(loaded.settings.speechRecognitionOverlay).toMatchObject({ displayDurationSeconds: 10, fontSizePx: 55, backgroundColor: '#12345678' });
   expect(loaded.settings.aiListener).toEqual(source.aiListener);
   expect(loaded.settings.commentOverlay).toEqual(source.commentOverlay);

@@ -89,8 +89,9 @@ function Harness() {
       onCopyStart={() => update({ notice: undefined })} onCopyNotice={(message, error) => update({ notice: { message, tone: error ? 'error' : 'success' } })}
       testState={value.test} testContext={async () => ({ available: !value.removedFromScene, message: value.removedFromScene ? 'このOBSソースは対象のシーンに追加されていません。「OBSに追加」で追加してからテストしてください。' : '' })}
       testAction={async (action, submitted) => {
-        const test: ObsSourceTestState = action === 'start' && 'target' in submitted ? { busy: true, warnings: [], current: { ...submitted,
-          id: 'display-test', title: targetTitle(submitted.target), phase: 'sending', startedAt: Date.now(), expiresAt: Date.now() + 5000, needsAttention: false, message: 'テスト表示を送信しました。' } }
+        const reception = action === 'start' && 'target' in submitted && submitted.target.overlay === 'comments';
+        const test: ObsSourceTestState = action === 'start' && 'target' in submitted ? { busy: !reception, warnings: [], current: { ...submitted,
+          id: 'display-test', title: targetTitle(submitted.target), phase: reception ? 'complete' : 'sending', startedAt: Date.now(), expiresAt: Date.now() + 5000, needsAttention: false, message: reception ? 'テストコメントを1件投入しました。' : 'テスト表示を送信しました。' } }
           : { ...value.test, busy: false, current: value.test.current ? { ...value.test.current, phase: 'complete', message: '' } : null };
         update({ test, notice: action === 'start' ? { message: test.current?.message ?? '', tone: 'success' } : undefined }); return test;
       }}

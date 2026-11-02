@@ -4,6 +4,7 @@ import { useApplicationState } from '../api';
 import { SmartphonePanel } from '../components/SmartphonePanel';
 import { CommentListPanel } from '../components/CommentListPanel';
 import { CommentOverlayPanel } from '../components/CommentOverlayPanel';
+import { ObsOverlayTestPanel, CommentReceptionControls } from '../components/ObsOverlayTestPanel';
 import { SpeechRecognitionOverlayPanel } from '../components/SpeechRecognitionOverlayPanel';
 import { openObsDesignBrowser } from '../obs-style-editor/open-editor';
 import { useSuccessNoticeExpiry } from '../use-success-notice-expiry';
@@ -59,7 +60,7 @@ export function Dashboard() {
     if (testNotice.current === null) { testNotice.current = key; return; }
     if (key === testNotice.current) return;
     testNotice.current = key;
-    if (testOperation && (testOperation.phase === 'sending' || testOperation.needsAttention && ['complete', 'unknown'].includes(testOperation.phase)))
+    if (testOperation && (testOperation.phase === 'sending' || testOperation.target.overlay === 'comments' && testOperation.phase === 'complete' && Boolean(testOperation.message) || testOperation.needsAttention && ['complete', 'unknown'].includes(testOperation.phase)))
       setNotice({ message: testOperation.message, tone: testOperation.needsAttention ? 'error' : 'success' });
   }, [api.snapshot, testOperation]);
 
@@ -333,6 +334,9 @@ export function Dashboard() {
         onResolve={value => { setNotice(null); return api.mutate('/api/shitaraba/next-thread/resolve', 'POST', value); }}
         onSuccess={message => setNotice({ message, tone: 'success' })} />
       <CommentOverlayPanel settings={draft.commentOverlay}
+        renderObsTest={(active, invalid) => <ObsOverlayTestPanel api={api} state={snapshot} target="comments" active={active}
+          unsaved={invalid || Boolean(saveErrors.commentOverlay) || hasPendingSave('commentOverlay') || JSON.stringify(draft.commentOverlay) !== JSON.stringify(snapshot.settings.commentOverlay)}
+          invalidSelector='.comment-overlay-panel [aria-invalid="true"]' notice={(message, error) => error ? reportError(message) : setNotice({ message, tone: 'success' })}/>}
         onFontSizeChange={value => { commentFontEdit.current = { value: value.design?.style.fontSize ?? value.fontSizePx }; saveDeferred('commentOverlay', value); }}
         onEditDesign={() => navigator.userAgent.includes('Electron') ? api.mutate('/api/windows/obs-design/show', 'POST', { target: 'comments' }) : openObsDesignBrowser('comments')}
         speechEnabled={snapshot.settings.commentSpeech.enabled}
@@ -340,6 +344,7 @@ export function Dashboard() {
         onChange={value => saveDeferred('commentOverlay', value)}
         onSave={value => saveImmediate('commentOverlay', value)} />
       <SpeechRecognitionOverlayPanel settings={draft.speechRecognitionOverlay} saveError={saveErrors.speechRecognitionOverlay}
+        renderTest={(active, invalid) => <CommentReceptionControls api={api} speech active={active} unsaved={invalid || Boolean(saveErrors.speechRecognitionOverlay) || hasPendingSave('speechRecognitionOverlay')} invalidSelector='.speech-recognition-overlay-panel [aria-invalid="true"]' notice={(message, error) => error ? reportError(message) : setNotice({ message, tone: 'success' })}/>}
         onEditDesign={() => navigator.userAgent.includes('Electron') ? api.mutate('/api/windows/obs-design/show', 'POST', { target: 'speech' }) : openObsDesignBrowser('speech')}
         onChange={value => saveDeferred('speechRecognitionOverlay', value)} onSave={value => saveImmediate('speechRecognitionOverlay', value)} onOperationStart={() => setNotice(null)}/>
 <SettingsCard cardId="character" saveError={saveErrors.character} title="キャラクター" eyebrow="CHARACTER" summary={<><p className="muted">独立ウィンドウ {snapshot.settings.character.windowVisible ? '表示中' : '非表示'}</p></>} warning={snapshot.character.assetWarning}>
@@ -358,6 +363,7 @@ export function Dashboard() {
       </SettingsCard>
 
       {snapshot.smartphone && <SmartphonePanel view={snapshot.smartphone} mobile={snapshot.mobileSpeech} audioSettings={draft.mobileSpeech}
+        renderTest={(active, invalid) => <CommentReceptionControls api={api} active={active} help="スマホを登録して接続準備をONにし、スマホ側でコメント画面と読み上げを開始してください。PC側の送信成功と、スマホで見えた・聞こえたことは別です。" unsaved={invalid || hasPendingSave('mobileSpeech') || hasPendingSave('commentSpeech') || Boolean(saveErrors.mobileSpeech || saveErrors.commentSpeech)} invalidSelector='.smartphone-panel [aria-invalid="true"]' notice={(message, error) => error ? reportError(message) : setNotice({ message, tone: 'success' })}/>}
         onRegisterSource={setObsRegistrationRequest} onRegistrationBlockedChange={setSmartphoneRegistrationBlocked}
         registrationWarning={registrationRecoveries.find(value => value.target.kind === 'smartphone')?.message}
         saveError={saveErrors.mobileSpeech} changeAudio={value => saveDeferred('mobileSpeech', value)}
@@ -368,6 +374,7 @@ export function Dashboard() {
             action === 'rename' ? 'PATCH' : action === 'delete' ? 'DELETE' : 'POST', action === 'rename' ? { name } : undefined)}
         invitation={api.smartphoneInvitation} obsInput={api.smartphoneObsInput} directAction={api.smartphoneDirectAction} listAdapters={api.smartphoneAdapters} listLanAdapters={api.smartphoneLanAdapters} onSuccess={message => setNotice({ message, tone: 'success' })} />}
       <CommentListPanel settings={draft.commentList} saveError={saveErrors.commentList}
+        renderTest={(active, invalid) => <CommentReceptionControls api={api} active={active} unsaved={invalid || hasPendingSave('commentList') || Boolean(saveErrors.commentList)} invalidSelector='.comment-list-panel [aria-invalid="true"]' notice={(message, error) => error ? reportError(message) : setNotice({ message, tone: 'success' })}/>}
         windowOperationBusy={shortcutsBusy.commentListWindow}
         windowVisible={snapshot.settings.application.commentListWindowVisible} commentsUrl={`${baseUrl}/comments`}
         onChange={value => saveDeferred('commentList', value)} onSave={value => saveImmediate('commentList', value)}

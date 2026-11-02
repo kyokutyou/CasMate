@@ -274,7 +274,7 @@ export function useApplicationState(management = false) {
       }
       if (value && typeof value === 'object' && (section === 'commentOverlay' || section === 'speechRecognitionOverlay')) {
         const data = value as Record<string, unknown>;
-        const keys = section === 'commentOverlay' ? ['mode', 'stackDurationSeconds', 'singleDurationSeconds', 'stackDirection', 'showSource', 'showAuthor', 'showContent'] : ['displayDurationSeconds'];
+        const keys = section === 'commentOverlay' ? ['mode', 'stackMaxComments', 'stackAlignment', 'singleDurationSeconds', 'stackDirection', 'showSource', 'showAuthor', 'showContent'] : ['displayDurationSeconds'];
         const payload = Object.fromEntries(keys.filter(key => Object.hasOwn(data, key)).map(key => [key, data[key]]));
         if (section === 'commentOverlay' && options) payload.fontSizePx = options.commentFontSizePx;
         return mutate(`/api/obs-design/${section === 'commentOverlay' ? 'comments' : 'speech'}/options`, 'PUT', payload);

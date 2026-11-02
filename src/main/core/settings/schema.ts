@@ -157,12 +157,14 @@ export function validateSettingsSection<K extends SettingsSection>(
           value.mode === 'stack' || value.mode === 'single'
             ? value.mode
             : fail('OBSコメント表示モードが正しくありません。'),
-        stackDurationSeconds: rangeNumber(
-          value.stackDurationSeconds,
+        stackMaxComments: rangeInteger(
+          value.stackMaxComments,
           1,
-          60,
-          '積み上げ表示時間は1～60秒で指定してください。',
+          50,
+          '最大表示件数は1～50の整数で指定してください。',
         ),
+        stackAlignment: value.stackAlignment === 'top' || value.stackAlignment === 'bottom'
+          ? value.stackAlignment : fail('上下の配置が正しくありません。'),
         singleDurationSeconds: rangeNumber(
           value.singleDurationSeconds,
           1,

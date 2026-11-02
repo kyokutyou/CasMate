@@ -18,7 +18,7 @@ export function commentDesignFromSettings(value: Omit<SpeechRecognitionOverlayAp
   if (value.design) return structuredClone(value.design);
   const style = createDefaultDocument().designs.comments;
   Object.assign(style, legacyStyle(value), { paddingX: value.paddingPx * 1.5, fontWeight: 500, lineHeight: 1.55,
-    authorColor: value.textColor.slice(0, 7), sourceColor: value.textColor.slice(0, 7), sourceBackgroundOpacity: 0, metaScale: 0.58 });
+    authorColor: value.textColor.slice(0, 7), sourceColor: value.textColor.slice(0, 7), sourceBackgroundOpacity: 0, metaScale: 0.58, metaGap: 2 });
   style.border.enabled = false; style.textShadow.enabled = false;
   Object.assign(style.cardShadow, { enabled: true, color: '#203a32', opacity: 32 / 255 * 100, x: 1, y: 3, blur: 3 });
   return { style, variant: 'paper', paperColors: value.backgroundColor.toLowerCase() === defaultCommentOverlayAppearance.backgroundColor, textOpacity: opacity(value.textColor) };
@@ -47,7 +47,7 @@ export function validateObsDesign<T extends Target>(target: T, input: unknown): 
   if (typeof data.textOpacity !== 'number' || !Number.isFinite(data.textOpacity) || data.textOpacity < 0 || data.textOpacity > 100) throw new Error('文字の不透明度は0～100%で指定してください。');
   if (target === 'speech') return { style: parseSpeechDesign(data.style, true), textOpacity: data.textOpacity } as ObsDesigns[T];
   if ((data.variant !== 'paper' && data.variant !== 'card') || typeof data.paperColors !== 'boolean') throw new Error('付箋のデザインが正しくありません。');
-  const style = parseCommentDesign(data.style, true);
+  const style = parseCommentDesign(data.style, true, data.variant === 'paper' ? 2 : 4);
   if (!style.showSource || !style.showAuthor) throw new Error('表示項目はOBSコメント表示で変更してください。');
   return { style, textOpacity: data.textOpacity, variant: data.variant, paperColors: data.paperColors } as ObsDesigns[T];
 }

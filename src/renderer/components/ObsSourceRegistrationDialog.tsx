@@ -418,6 +418,7 @@ export function ObsSourceRegistrationDialog({ request, state, obs, smartphone, s
         </div>
         {request.target.kind === 'overlay' ? <ObsSourceTestControls selection={sourceContext && selectedScene && chosenInput ? { target: request.target, collection: sourceContext.collection, sceneUuid: selectedScene, inputUuid: chosenInput } : null}
           state={testState} context={testContext} contextRevision={contextRevision} action={testAction} prepare={prepareTest} blocked={!connected || Boolean(blockedReason || state?.busy || loading || contextRefreshError || retryBlocked)}
+          startLabel={request.target.kind === 'overlay' && request.target.overlay === 'comments' ? 'コメント受信テスト' : undefined}
           notice={(message, error) => onTestNotice?.(message, error)} registrationAction={registrationAction}/>
           : <><div className="obs-registration-actions">{registrationAction}</div><div className="obs-registration-phone-guide" tabIndex={0}><strong>追加したら、スマホから送信</strong><p>スマホで映像送信を開始し、OBSで映像と音声を確認してください。</p></div></>}
         <details className="obs-registration-details"><summary>登録の詳細</summary><div className="obs-registration-details-content" tabIndex={0} aria-label="OBS登録の詳細">

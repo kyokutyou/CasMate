@@ -61,11 +61,39 @@ describe('OBSコメント表示のA案編集画面', () => {
     fireEvent.change(screen.getByLabelText('1件表示時間（秒）'), { target: { value: '61' } });
     await act(async () => fireEvent.click(modes[1]));
     expect(screen.getByLabelText('1件表示時間（秒）')).not.toBeVisible();
-    expect(screen.getByLabelText('各コメントを表示する時間（秒）')).toHaveValue(10);
+    expect(screen.getByLabelText('最大表示件数（件）')).toHaveValue(10);
     expect(persist).toHaveBeenLastCalledWith(expect.objectContaining({ mode: 'stack', singleDurationSeconds: 12.5 }));
     await act(async () => fireEvent.click(modes[0]));
     expect(screen.getByLabelText('1件表示時間（秒）')).toHaveValue(61);
     expect(screen.getByLabelText('1件表示時間（秒）')).toHaveAttribute('aria-invalid', 'true');
+  });
+  it('積み上げの件数と配置を独立保存し、小数・空欄・範囲外と保存失敗の入力を保持する', async () => {
+    render(<Harness/>); await flush(0);
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: '積み上げ', exact: true })));
+    expect(screen.queryByLabelText('各コメントを表示する時間（秒）')).toBeNull();
+    const count = screen.getByLabelText('最大表示件数（件）');
+    for (const value of ['2.5', '', '0', '51']) {
+      persist.mockClear();
+      fireEvent.change(count, { target: { value } }); await flush();
+      expect(count).toHaveAttribute('aria-invalid', 'true');
+      expect(persist).not.toHaveBeenCalled();
+    }
+    fireEvent.change(screen.getByLabelText('新着の追加位置'), { target: { value: 'newestTop' } }); await flush(0);
+    expect(persist).toHaveBeenLastCalledWith(expect.objectContaining({ stackDirection: 'newestTop', stackMaxComments: 10 }));
+    fireEvent.change(screen.getByLabelText('上下の配置'), { target: { value: 'bottom' } }); await flush(0);
+    expect(persist).toHaveBeenLastCalledWith(expect.objectContaining({ stackDirection: 'newestTop', stackAlignment: 'bottom', stackMaxComments: 10 }));
+    expect(count).toHaveValue(51);
+    persist.mockClear();
+    fireEvent.change(count, { target: { value: '50' } }); await flush(499);
+    expect(persist).not.toHaveBeenCalled(); await flush(1);
+    expect(persist).toHaveBeenLastCalledWith(expect.objectContaining({ stackMaxComments: 50 }));
+    persist.mockRejectedValueOnce(new Error('保存できません'));
+    fireEvent.change(count, { target: { value: '12' } }); await flush();
+    expect(count).toHaveValue(12);
+    expect(error).toHaveBeenCalled();
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: '1件ずつ', exact: true })));
+    await act(async () => fireEvent.click(screen.getByRole('button', { name: '積み上げ', exact: true })));
+    expect(count).toHaveValue(12);
   });
   it('同期中も1件表示時間を保存でき、最後の表示項目をオフにしない', async () => {
     render(<Harness speech/>); await flush(0);

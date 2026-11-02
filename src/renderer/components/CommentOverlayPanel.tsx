@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useId, useState } from 'react';
+import { useCallback, useContext, useEffect, useId, useState, type ReactNode } from 'react';
 import type { CommentOverlaySettings } from '../../shared/types';
 import { ManagementNavigation, SetupPresentation } from '../management-navigation';
 import { OverlayNumber } from './OverlayNumber';
@@ -9,6 +9,7 @@ import { CompactFeedback } from './CompactFeedback';
 import './comment-overlay-panel.css';
 
 interface Props {
+  renderObsTest?(active: boolean, invalid: boolean): ReactNode;
   onEditDesign?(): Promise<unknown> | void;
   settings: CommentOverlaySettings;
   speechEnabled: boolean;
@@ -30,8 +31,9 @@ export function CommentOverlayPanel(props: Props) {
   return active || visited ? <CommentOverlayEditor {...props}/> : null;
 }
 
-function CommentOverlayEditor({ settings, speechEnabled, saveError, onChange, onFontSizeChange, onSave, onEditDesign }: Props) {
-  const setup = useContext(ManagementNavigation)?.initialSetup === true;
+function CommentOverlayEditor({ settings, speechEnabled, saveError, onChange, onFontSizeChange, onSave, onEditDesign, renderObsTest }: Props) {
+  const navigation = useContext(ManagementNavigation);
+  const setup = navigation?.initialSetup === true;
   const { obsRegistration } = useContext(SetupPresentation);
   const [setupVisited, setSetupVisited] = useState(setup);
   useEffect(() => { if (setup) setSetupVisited(true); }, [setup]);
@@ -40,8 +42,8 @@ function CommentOverlayEditor({ settings, speechEnabled, saveError, onChange, on
   const [inputErrors, setInputErrors] = useState<Record<string, string>>({});
   const reportInput = useCallback((key: string, error: string) => setInputErrors(current => current[key] === error ? current : { ...current, [key]: error }), []);
   const save = (next: CommentOverlaySettings) => onSave(next).catch(() => undefined);
-  const number = (key: 'stackDurationSeconds' | 'singleDurationSeconds' | 'fontSizePx' | 'paddingPx' | 'borderRadiusPx', label: string, unit: string, min: number, max: number) =>
-    <OverlayNumber field={key} label={label} unit={unit} min={min} max={max} value={key === 'fontSizePx' ? settings.design?.style.fontSize ?? settings.fontSizePx : settings[key]} onError={reportInput} onChange={value => {
+  const number = (key: 'stackMaxComments' | 'singleDurationSeconds' | 'fontSizePx' | 'paddingPx' | 'borderRadiusPx', label: string, unit: string, min: number, max: number) =>
+    <OverlayNumber field={key} label={label} unit={unit} min={min} max={max} integer={key === 'stackMaxComments'} value={key === 'fontSizePx' ? settings.design?.style.fontSize ?? settings.fontSizePx : settings[key]} onError={reportInput} onChange={value => {
       const next = { ...settings, [key]: value };
       if (key === 'fontSizePx' && settings.design) next.design = { ...settings.design, style: { ...settings.design.style, fontSize: value } };
       if (key === 'fontSizePx' && onFontSizeChange) onFontSizeChange(next);
@@ -55,7 +57,9 @@ function CommentOverlayEditor({ settings, speechEnabled, saveError, onChange, on
 
   return <SettingsCard cardId="commentOverlay" title="OBSコメント表示" eyebrow="OBS COMMENT" className="comment-overlay-panel" saveError={saveError}
     navigationWarning={[fieldError, ...Object.values(inputErrors)].filter(Boolean).join(' ')}>
-    <section className="overlay-setting-section" aria-labelledby={`${id}-mode`}><h3 id={`${id}-mode`}>{setup ? <><span className="setup-number">2</span>コメント表示をOBSに追加する</> : '表示方法とタイミング'}</h3>
+    <section className="overlay-setting-section" aria-labelledby={`${id}-mode`}><div className="settings-test-heading"><h3 id={`${id}-mode`}>{setup ? <><span className="setup-number">2</span>コメント表示をOBSに追加する</> : '表示方法とタイミング'}</h3>
+      {!setup && renderObsTest?.(!navigation || navigation.editor === 'commentOverlay', Boolean(fieldError || Object.values(inputErrors).some(Boolean)))}
+    </div>
       {setup && <label className="setup-mode-field">コメントの表示方法<select value={settings.mode} onChange={event => void save({ ...settings, mode: event.target.value as CommentOverlaySettings['mode'] })}><option value="stack">積み上げ</option><option value="single">1件ずつ</option></select></label>}
       <div className="overlay-mode-choices" hidden={setup} role="group" aria-label="表示方法">{([['single', '1件ずつ', '一つのコメントに集中'], ['stack', '積み上げ', '複数のコメントを並べる']] as const).map(([mode, label, help]) =>
         <button type="button" className="secondary" aria-label={label} aria-pressed={settings.mode === mode} key={mode} onClick={() => { if (settings.mode !== mode) void save({ ...settings, mode }); }}>
@@ -78,7 +82,14 @@ function CommentOverlayEditor({ settings, speechEnabled, saveError, onChange, on
           </section>
         </div>
       </div>
-      <div className="overlay-field-grid" hidden={setup || settings.mode !== 'stack'}>{number('stackDurationSeconds', '各コメントを表示する時間', '秒', 1, 60)}<div className="overlay-input"><label htmlFor={`${id}-direction`}>積み上げ方向</label><select id={`${id}-direction`} value={settings.stackDirection} onChange={event => void save({ ...settings, stackDirection: event.target.value as CommentOverlaySettings['stackDirection'] })}><option value="newestBottom">新着を下へ</option><option value="newestTop">新着を上へ</option></select><p className="overlay-input-help">最大10件。古いコメントから消えます。</p></div></div>
+      <div hidden={setup || settings.mode !== 'stack'}>
+        <div className="overlay-field-grid">
+          {number('stackMaxComments', '最大表示件数', '件', 1, 50)}
+          <div className="overlay-input"><label htmlFor={`${id}-direction`}>新着の追加位置</label><select id={`${id}-direction`} value={settings.stackDirection} onChange={event => void save({ ...settings, stackDirection: event.target.value as CommentOverlaySettings['stackDirection'] })}><option value="newestBottom">下</option><option value="newestTop">上</option></select></div>
+          <div className="overlay-input"><label htmlFor={`${id}-alignment`}>上下の配置</label><select id={`${id}-alignment`} value={settings.stackAlignment} onChange={event => void save({ ...settings, stackAlignment: event.target.value as CommentOverlaySettings['stackAlignment'] })}><option value="top">上寄せ</option><option value="bottom">下寄せ</option></select></div>
+        </div>
+        <p className="overlay-note">時間では消えません。上限を超えると古いコメントから消えます。</p>
+      </div>
     </section>
     {(setup || setupVisited) && <section className="overlay-setting-section" hidden={!setup}>{number('fontSizePx', '文字サイズ', 'px', 8, 200)}</section>}
     {setup && obsRegistration}

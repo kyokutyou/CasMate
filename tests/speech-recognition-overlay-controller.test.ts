@@ -10,6 +10,15 @@ describe('OBS音声認識表示状態', () => {
 
   afterEach(() => vi.useRealTimers());
 
+  it('認識OFFでもテスト字幕を現在の表示時間だけ表示し、通常認識は受理しない', () => {
+    const controller = new SpeechRecognitionOverlayController(false, () => {}, 3);
+    controller.test(); const id = controller.snapshot().active?.id;
+    expect(controller.snapshot().active?.text).toBe('OBS音声認識表示のテストです');
+    controller.accept(result('ignored', '通常の認識', 1000)); expect(controller.snapshot().active?.id).toBe(id);
+    vi.advanceTimersByTime(2999); expect(controller.snapshot().active).not.toBeNull();
+    vi.advanceTimersByTime(1); expect(controller.snapshot().active).toBeNull(); controller.dispose();
+  });
+
   it.each([
     [1_000, '2026-08-28T00:00:10.000Z'],
     [5_000, '2026-08-28T00:00:10.000Z'],

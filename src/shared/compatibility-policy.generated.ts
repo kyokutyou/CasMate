@@ -2,12 +2,13 @@
 export const compatibilityPolicy = {
   "contracts": {
     "pcSettings": {
-      "current": 16,
+      "current": 17,
       "supported": [
         13,
         14,
         15,
-        16
+        16,
+        17
       ],
       "retired": [
         1,

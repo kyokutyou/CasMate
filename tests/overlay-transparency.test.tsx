@@ -105,6 +105,25 @@ describe('OBS表示面と独立キャラクター窓の透明背景', () => {
     expect(getComputedStyle(view.getByText('<script>危険</script>')).textAlign).toBe('left');
   });
 
+  it('期限なしの積み上げは切断相当の状態固定中も残り、再読み込みしても一度だけ描画する', () => {
+    vi.useFakeTimers(); vi.setSystemTime(1000);
+    mocks.snapshot!.settings.commentOverlay.mode = 'stack';
+    mocks.snapshot!.commentOverlay.active = [{ expiresAt: null, comment: {
+      id: 'persistent', externalId: 'persistent', sequence: 1, source: 'youtube', authorName: '視聴者',
+      content: [{ type: 'text', text: '残るコメント' }], initialHistory: false, receivedAt: new Date(0).toISOString(),
+    } }];
+    const view = render(<CommentOverlayPage/>);
+    act(() => { vi.advanceTimersByTime(24 * 60 * 60 * 1000); });
+    expect(view.getAllByText('残るコメント')).toHaveLength(1);
+    expect(vi.getTimerCount()).toBe(0);
+    view.unmount();
+    const restored = render(<CommentOverlayPage/>);
+    expect(restored.getAllByText('残るコメント')).toHaveLength(1);
+    mocks.snapshot = { ...mocks.snapshot!, commentOverlay: { active: [], queue: [] } };
+    restored.rerender(<CommentOverlayPage/>);
+    expect(restored.queryByText('残るコメント')).toBeNull();
+  });
+
   it.each(['comments', 'speech'] as const)('待機後に到着した期限切れの%sを表示しない', kind => {
     vi.useFakeTimers();
     vi.setSystemTime(1000);
@@ -211,7 +230,8 @@ function snapshot(): AppSnapshot {
       },
       commentOverlay: {
         mode: 'stack',
-        stackDurationSeconds: 10,
+        stackMaxComments: 10,
+        stackAlignment: 'top',
         singleDurationSeconds: 10,
         stackDirection: 'newestBottom',
         showSource: true,

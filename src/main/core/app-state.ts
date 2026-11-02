@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { createTestComment } from './test-comments';
 import { EventEmitter } from 'node:events';
 import type {
   AppSettings,
@@ -372,6 +373,20 @@ export class AppState {
   }
 
   acceptComment(incoming: IncomingComment): void {
+    this.processComment(incoming, true);
+  }
+
+  private testCommentIndex = 0;
+  testSpeechOverlay(): void {
+    this.speechRecognitionOverlay.test();
+  }
+  receiveTestComments(testId: string): void {
+    const incoming = createTestComment(testId, this.testCommentIndex);
+    this.testCommentIndex = (this.testCommentIndex + 1) % 8;
+    this.processComment(incoming, false);
+  }
+
+  private processComment(incoming: IncomingComment, notifyAi: boolean): void {
     let blocked: boolean;
     try {
       blocked = blocksComment(incoming, this.settings.commentFilter);
@@ -385,7 +400,7 @@ export class AppState {
     }
     const result = this.comments.accept(incoming);
     if (result.duplicate) return;
-    this.ai?.comment(result.comment);
+    if (notifyAi) this.ai?.comment(result.comment);
     this.emit('comment.received', result.comment);
     if (result.removed) this.emit('comment.removed', { id: result.removed.id });
     if (!result.comment.initialHistory) {
@@ -480,7 +495,7 @@ export class AppState {
     const operation = this.settingsUpdateQueue.then(() => {
       if (optionsOnly) {
         const keys = target === 'comments'
-          ? ['mode', 'stackDurationSeconds', 'singleDurationSeconds', 'stackDirection', 'showSource', 'showAuthor', 'showContent', 'fontSizePx']
+          ? ['mode', 'stackMaxComments', 'stackAlignment', 'singleDurationSeconds', 'stackDirection', 'showSource', 'showAuthor', 'showContent', 'fontSizePx']
           : ['displayDurationSeconds'];
         if (!value || typeof value !== 'object' || Array.isArray(value) || Object.keys(value).some(key => !keys.includes(key))) throw new ValidationError('表示設定の項目が正しくありません。');
         if (target === 'comments' && 'fontSizePx' in value) {
@@ -690,6 +705,10 @@ export class AppState {
         this.stopSource(source),
       ),
     );
+    this.clearCommentOverlay();
+  }
+
+  clearCommentOverlay(): void {
     this.overlay.clearDisplay();
   }
 
@@ -725,6 +744,7 @@ export class AppState {
 
   async shutdown(): Promise<void> {
     this.stopping = true;
+    this.clearCommentOverlay();
     this.shitarabaNextThread.dispose();
     // Invalidate pending starts before another service's shutdown can await I/O.
     const sourcesStopping = this.stopAllSources();

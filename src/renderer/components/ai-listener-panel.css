@@ -125,3 +125,10 @@
 @media(min-width:900px) { .ai-persona-layout:has(.ai-persona-editor) { grid-template-columns:200px minmax(0,1fr); align-items:start; }.ai-persona-layout:has(.ai-persona-editor) .ai-persona { flex-wrap:wrap; } }
 @media(max-width:600px) { .ai-fields { grid-template-columns:1fr; gap:16px; }.ai-service { padding:14px; }.ai-persona { flex-wrap:wrap; }.ai-settings .ai-tabs button { padding:10px; }.ai-runtime .button-row { width:100%; } }
 @media(pointer:coarse) { .ai-settings button,.ai-settings summary { min-height:44px; }.ai-settings input,.ai-settings select,.ai-settings textarea { font-size:var(--management-font-body, 16px); } }
+
+.ai-reply-test { min-width:0; margin-top:12px; }
+.ai-reply-test > summary { cursor:pointer; }
+.ai-reply-test-fields { display:grid; gap:10px; min-width:0; padding-top:12px; }
+.ai-reply-test-status { height:4.5em; overflow:auto; overflow-wrap:anywhere; }
+.ai-reply-test-result { height:10em; overflow:auto; white-space:pre-wrap; overflow-wrap:anywhere; padding:12px; border:1px solid var(--studio-line); border-radius:8px; }
+.ai-reply-test button { width:min(100%,240px); height:44px; }

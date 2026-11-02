@@ -6,14 +6,14 @@ import type { Target } from '../src/shared/obs-style';
 import { obsPresets } from '../src/shared/obs-style';
 import { createObsDesignPreset, validateObsDesign } from '../src/shared/obs-design';
 import { addSavedObsDesign, emptySavedObsDesigns, removeSavedObsDesign } from '../src/shared/saved-obs-designs';
-import { obsRegistrationSnapshot } from './fixtures/obs-registration-state';
+import { obsRegistrationContext, obsRegistrationSnapshot } from './fixtures/obs-registration-state';
 
 // Rendering preset thumbnails in jsdom can exceed five seconds during parallel
 // runs. This is the test's wall-clock limit; fake-timer save boundaries stay intact.
 vi.setConfig({ testTimeout: 15_000 });
 
-const mock = vi.hoisted(() => ({ snapshot: null as AppSnapshot | null, error: null as string | null, mutate: vi.fn(async (..._args: unknown[]) => ({})), fonts: vi.fn(async () => ['Yu Gothic UI', 'Meiryo']) }));
-vi.mock('../src/renderer/api', () => ({ useApplicationState: () => ({ snapshot: mock.snapshot, error: mock.error, mutate: mock.mutate }) }));
+const mock = vi.hoisted(() => ({ snapshot: null as AppSnapshot | null, error: null as string | null, mutate: vi.fn(async (..._args: unknown[]) => ({})), fonts: vi.fn(async () => ['Yu Gothic UI', 'Meiryo']), sourceContext: vi.fn(), testContext: vi.fn(), testAction: vi.fn() }));
+vi.mock('../src/renderer/api', () => ({ useApplicationState: () => ({ snapshot: mock.snapshot, error: mock.error, mutate: mock.mutate, obsSourceContext: mock.sourceContext, obsSourceContextRevision: 0, obsTestContext: mock.testContext, obsTestAction: mock.testAction }) }));
 vi.mock('../src/renderer/windows-fonts', () => ({ loadWindowsFonts: mock.fonts }));
 vi.mock('../src/renderer/obs-style-editor/Preview', () => ({ Preview: () => <section aria-label="OBS表示プレビュー"/> }));
 import { ObsDesignPage } from '../src/renderer/pages/ObsDesignPage';
@@ -26,6 +26,7 @@ const flush = async (ms = 0) => { await act(async () => { vi.advanceTimersByTime
 function syncMutation(...args: unknown[]) {
   const [path, method, body] = args;
   if (typeof path !== 'string' || !mock.snapshot) throw new Error('不正なテスト要求');
+  if (path === '/api/comments/test') return Promise.resolve({});
   const settings = mock.snapshot.settings;
   const target = path.includes('/comments') ? 'comments' : 'speech';
   if (path.includes('/saved')) {
@@ -38,9 +39,52 @@ function syncMutation(...args: unknown[]) {
 beforeEach(() => {
   vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} });
   vi.useFakeTimers(); mock.snapshot = obsRegistrationSnapshot(); mock.error = null; mock.mutate.mockReset().mockResolvedValue({}); mock.fonts.mockReset().mockResolvedValue(['Yu Gothic UI', 'Meiryo']); closeReady.mockReset();
+  mock.sourceContext.mockReset().mockImplementation(async target => ({ ...obsRegistrationContext(target), candidates: [{ uuid: target.overlay, name: target.overlay }], presentInputUuids: [target.overlay] }));
+  mock.testContext.mockReset().mockResolvedValue({ available: true, message: '' }); mock.testAction.mockReset().mockResolvedValue(undefined);
   window.casmateObsDesign = { closeReady, onTarget: listener => { targetRequest = listener; return () => undefined; }, onCloseRequest: listener => { closeRequest = listener; return () => undefined; } };
 });
 afterEach(() => { cleanup(); delete window.casmateObsDesign; vi.useRealTimers(); vi.unstubAllGlobals(); });
+
+it('見出しの文字サイズの次で本文との間隔を編集し、不正入力を保存しない', async () => {
+  render(<ObsDesignPage/>); await flush();
+  const gap = panel().getByLabelText('見出しと本文の間隔');
+  const size = panel().getByLabelText('見出しの文字サイズ');
+  const stack = panel().getByLabelText('積み上げの間隔');
+  expect(size.compareDocumentPosition(gap) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(gap.compareDocumentPosition(stack) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  expect(gap).toHaveDisplayValue('2');
+  fireEvent.change(gap, { target: { value: '20' } }); await flush(500);
+  expect(mock.mutate).toHaveBeenLastCalledWith('/api/obs-design/comments', 'PUT', expect.objectContaining({ style: expect.objectContaining({ metaGap: 20 }) }));
+  mock.mutate.mockClear();
+  fireEvent.change(gap, { target: { value: '65' } }); await flush(500);
+  expect(mock.mutate).not.toHaveBeenCalled(); expect(gap).toHaveDisplayValue('65');
+});
+
+it('両対象からOBSテストを送り、保存待ち・不正入力では開始せず、送信通知と共有テスト終了を扱う', async () => {
+  mock.mutate.mockImplementation(syncMutation);
+  const view = render(<ObsDesignPage/>); await flush();
+  expect(document.querySelector('.preview-column .obs-overlay-test-panel')).toBeNull();
+  expect(document.querySelector('.design-column .obs-overlay-test-panel')).not.toBeNull();
+  const testButton = () => panel().getByRole('button', { name: /OBSテスト（5秒）|コメント受信テスト/ });
+  expect(testButton()).toHaveAttribute('aria-disabled', 'false');
+  fireEvent.change(panel().getByLabelText('文字サイズ'), { target: { value: '65' } }); await flush(499);
+  fireEvent.click(testButton()); expect(mock.testAction).not.toHaveBeenCalled();
+  await flush(1); fireEvent.click(testButton()); await flush();
+  expect(mock.mutate).toHaveBeenLastCalledWith('/api/comments/test');
+  expect(panel().queryByLabelText('使用するOBSソース')).toBeNull();
+  fireEvent.change(panel().getByLabelText('文字サイズ'), { target: { value: '' } }); await flush();
+  expect(testButton()).toHaveAttribute('aria-disabled', 'true');
+  await act(async () => targetRequest('speech')); await flush(); fireEvent.click(testButton()); await flush();
+  expect(mock.testAction).toHaveBeenLastCalledWith('start', expect.objectContaining({ target: { kind: 'overlay', overlay: 'speech' } }));
+  mock.snapshot!.obsSourceTest = { busy: true, warnings: [], current: { target: { kind: 'overlay', overlay: 'speech' }, collection: '配信', sceneUuid: 'scene-live', inputUuid: 'speech', id: 'shared-test', title: '音声認識', phase: 'sending', startedAt: 0, expiresAt: 5000, message: 'テスト表示を送信しました', needsAttention: false } };
+  view.rerender(<ObsDesignPage/>); await flush();
+  expect(screen.getByRole('region', { name: '通知' })).toHaveTextContent('テスト表示を送信しました');
+  await act(async () => targetRequest('comments')); await flush();
+  expect(panel().queryByRole('button', { name: 'テスト終了' })).toBeNull();
+  await act(async () => targetRequest('speech')); await flush();
+  fireEvent.click(panel().getByRole('button', { name: 'テスト終了' })); await flush();
+  expect(mock.testAction).toHaveBeenLastCalledWith('stop', { testId: 'shared-test' });
+});
 
 it('詳細を開いて効果を有効化し、数値・カラーコードを編集して保存と取り消しができる', async () => {
   render(<ObsDesignPage/>); await flush();

@@ -5,6 +5,17 @@ import commentsTemplate from '../docs/templates/obs/comments.css?raw';
 import speechTemplate from '../docs/templates/obs/speech-recognition.css?raw';
 
 describe('OBS着せ替え用の再編集設定', () => {
+  it('見出しと本文の間隔をJSON・CSSへ反映し、旧JSONには従来の4pxを補う', () => {
+    const document = createDefaultDocument(); document.designs.comments.metaGap = 23;
+    expect(parseDocument(JSON.stringify(document)).designs.comments.metaGap).toBe(23);
+    expect(generateCss('comments', document.designs.comments)).toContain('--cm-meta-gap: 23px');
+    Reflect.deleteProperty(document.designs.comments, 'metaGap');
+    expect(parseDocument(JSON.stringify(document)).designs.comments.metaGap).toBe(4);
+    for (const value of [-1, 65, '8', null]) {
+      Object.assign(document.designs.comments, { metaGap: value });
+      expect(() => parseDocument(JSON.stringify(document))).toThrow();
+    }
+  });
   it('両方のデザインと見本をまとめて保存・再編集でき、アプリ版は案内情報として扱う', () => {
     const document = createDefaultDocument();
     document.appVersion = '99.0.0';

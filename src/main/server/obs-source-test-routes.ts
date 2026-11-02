@@ -1,4 +1,5 @@
 import type { Express, RequestHandler } from 'express';
+import { randomUUID } from 'node:crypto';
 import type { AppState } from '../core/app-state';
 import { ObsSourceRegistrationError } from '../obs/obs-source-registration-controller';
 import type { ObsSourceTestController } from '../obs/obs-source-test-controller';
@@ -6,10 +7,24 @@ import { asyncHandler, HttpError, isPlainRecord } from './http-handlers';
 
 export function registerObsSourceTestRoutes(app: Express, options: {
   controller?: ObsSourceTestController;
-  state: Pick<AppState, 'snapshotEvent'>;
+  state: Pick<AppState, 'snapshotEvent' | 'receiveTestComments' | 'testSpeechOverlay'>;
   managementRead: RequestHandler;
   operation: RequestHandler;
 }): void {
+  app.post('/api/overlays/speech-recognition/test', options.operation, asyncHandler(async (request, response) => {
+    if (request.body !== undefined && (!isPlainRecord(request.body) || Object.keys(request.body).length !== 0)) throw new HttpError(400, 'SPEECH_TEST_INVALID_REQUEST', 'テスト字幕の内容は指定できません。');
+    options.state.testSpeechOverlay();
+    const snapshot = options.state.snapshotEvent();
+    response.setHeader('Cache-Control', 'no-store');
+    response.json({ snapshot: snapshot.payload, revision: snapshot.revision });
+  }));
+  app.post('/api/comments/test', options.operation, asyncHandler(async (request, response) => {
+    if (request.body !== undefined && (!isPlainRecord(request.body) || Object.keys(request.body).length !== 0)) throw new HttpError(400, 'COMMENT_TEST_INVALID_REQUEST', 'テストコメントの内容は指定できません。');
+    options.state.receiveTestComments(randomUUID());
+    const snapshot = options.state.snapshotEvent();
+    response.setHeader('Cache-Control', 'no-store');
+    response.json({ snapshot: snapshot.payload, revision: snapshot.revision });
+  }));
   const invoke = async <T>(action: (controller: ObsSourceTestController) => Promise<T>): Promise<T> => {
     if (!options.controller) throw new HttpError(503, 'OBS_TEST_UNAVAILABLE', '表示テストを準備中です。');
     try { return await action(options.controller); }

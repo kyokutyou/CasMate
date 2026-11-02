@@ -25,7 +25,7 @@ describe('OBSコメント表示状態', () => {
     vi.useRealTimers();
   });
 
-  it('初回履歴を無視し、積み上げを10件に制限して期限後に取り除く', () => {
+  it('初回履歴を無視し、積み上げを10件に制限して時間が経過しても保持する', () => {
     const controller = new CommentOverlayController();
     controller.updateSettings({ mode: 'stack' });
 
@@ -38,8 +38,38 @@ describe('OBSコメント表示状態', () => {
       Array.from({ length: 10 }, (_, index) => `youtube:${index + 2}`),
     );
 
-    vi.advanceTimersByTime(10_000);
-    expect(controller.snapshot().active).toEqual([]);
+    const active = controller.snapshot().active;
+    expect(active.every(item => item.expiresAt === null)).toBe(true);
+    vi.advanceTimersByTime(24 * 60 * 60 * 1000);
+    expect(controller.snapshot().active).toEqual(active);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it.each([1, 10, 50])('積み上げの上限%s件で最古を削除し、保持中IDを重複追加しない', stackMaxComments => {
+    const controller = new CommentOverlayController();
+    controller.updateSettings({ mode: 'stack', stackMaxComments });
+    for (let index = 1; index <= stackMaxComments + 1; index++) controller.accept(comment(index));
+    controller.accept(comment(stackMaxComments + 1));
+    expect(controller.snapshot().active.map(item => item.comment.sequence)).toEqual(
+      Array.from({ length: stackMaxComments }, (_, index) => index + 2),
+    );
+    expect(controller.snapshot().queue).toEqual([]);
+    controller.dispose();
+  });
+
+  it('件数減少は直ちに反映し、方向・配置の変更と件数増加では保持中コメントを維持する', () => {
+    const controller = new CommentOverlayController();
+    controller.updateSettings({ mode: 'stack' });
+    for (let index = 1; index <= 10; index++) controller.accept(comment(index));
+    controller.updateSettings({ stackMaxComments: 2 });
+    expect(controller.snapshot().active.map(item => item.comment.sequence)).toEqual([9, 10]);
+    const active = controller.snapshot().active;
+    controller.updateSettings({ stackMaxComments: 50, stackDirection: 'newestTop', stackAlignment: 'bottom' });
+    expect(controller.snapshot().active).toEqual(active);
+    controller.clearDisplay();
+    expect(controller.snapshot()).toEqual({ active: [], queue: [] });
+    expect(new CommentOverlayController(controller.getSettings()).snapshot()).toEqual({ active: [], queue: [] });
+    controller.dispose();
   });
 
   it('同期中の秒数変更は現在の表示を保ち、次に開始する代替表示から適用する', async () => {

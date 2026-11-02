@@ -219,6 +219,7 @@ async function startApplication() {
   });
   state.setObsSourceRegistrationState(obsSources.view());
   obsTests = new ObsSourceTestController({ sources: obsSources, obs: obsControl,
+    receiveComments: id => state!.receiveTestComments(id),
     settings: () => state!.snapshot().settings,
     assetReadable: async asset => Boolean(await assetStore.dimensions(asset)),
     onState: value => state?.setObsSourceTestState(value) });

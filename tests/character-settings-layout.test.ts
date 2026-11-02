@@ -24,6 +24,8 @@ it('簡易キャラクター設定で左右配置・狭幅・拡大・保存状�
       build: { outDir: directory, emptyOutDir: false, cssCodeSplit: false,
         lib: { entry: resolve('tests/fixtures/character-settings-renderer.tsx'), name: 'CharacterSettingsHarness', formats: ['iife'], fileName: () => 'harness.js', cssFileName: 'harness' } } });
     const snapshot = obsRegistrationSnapshot();
+    snapshot.settings.commentSpeech.enabled = true;
+    snapshot.settings.commentSpeech.voice = { speakerUuid: 'speaker', styleId: 1 };
     const image = (open: boolean) => 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="320" height="440" viewBox="0 0 320 440"><path fill="#8d9ee8" d="M70 440V290Q160 230 250 290V440"/><circle cx="160" cy="150" r="95" fill="#f6d3b1"/><path fill="#46425e" d="M60 150V90Q160-10 260 90V150L200 65L150 115L110 75Z"/><circle cx="125" cy="155" r="7"/><circle cx="195" cy="155" r="7"/><ellipse cx="160" cy="195" rx="16" ry="${open ? 14 : 3}" fill="#8c4653"/></svg>`);
     snapshot.settings.character.simple.closedAsset = image(false);
     snapshot.settings.character.simple.openAsset = image(true);

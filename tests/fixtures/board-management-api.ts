@@ -2,9 +2,13 @@ import { useCallback, useLayoutEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
 import type { AppSettings, AppSnapshot, ConnectionKey, SettingsSection, SourceStatusView, VoicevoxSpeaker } from '../../src/shared/types';
 import { initialSetupSteps, type InitialSetupCommand } from '../../src/shared/initial-setup';
+import type { ObsSourceTarget } from '../../src/shared/obs-source-registration';
+import type { ObsSourceTestRequest } from '../../src/shared/obs-source-test';
+import { obsRegistrationContext } from './obs-registration-state';
 
 type Trace = { kind: string; source?: ConnectionKey; action?: string; section?: SettingsSection; value?: unknown; path?: string; body?: unknown };
 const trace: Trace[] = [];
+const obsSourceContext = async (target: ObsSourceTarget) => ({ ...obsRegistrationContext(target), candidates: [{ uuid: 'test-source', name: 'テスト用OBSソース' }], presentInputUuids: ['test-source'] });
 let nextSaveError: { message: string; code?: string } | undefined;
 let nextAiTestError: string | undefined;
 let nextSaveWait: Promise<void> | undefined;
@@ -102,6 +106,13 @@ export function useApplicationState() {
     };
   }, [snapshot]);
   return { snapshot, connected: true, error: null, updateSettings, sourceAction, mutate,
+    obsSourceContext, obsSourceContextRevision: 0, obsTestContext: async () => ({ available: true, message: '' }),
+    obsTestAction: async (action: 'start' | 'stop', body: ObsSourceTestRequest | { testId: string }) => {
+      flushSync(() => setSnapshot(current => ({ ...current, obsSourceTest: action === 'start'
+        ? { busy: !('target' in body && body.target.overlay === 'comments'), warnings: [], current: { ...body as ObsSourceTestRequest, id: 'layout-test', title: 'コメント', phase: 'target' in body && body.target.overlay === 'comments' ? 'complete' : 'sending', startedAt: Date.now(), expiresAt: Date.now() + 5000, needsAttention: false, message: 'テストコメントを1件投入しました' } }
+        : { busy: false, warnings: [], current: current.obsSourceTest?.current ? { ...current.obsSourceTest.current, phase: 'complete', message: '' } : null } })));
+      return undefined;
+    },
     uploadAsset: async () => {}, listSpeechVoices: async () => listSpeechVoices() };
 }
 

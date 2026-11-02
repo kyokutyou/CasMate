@@ -43,7 +43,7 @@ export class SettingsStore {
     if (migrated && !retired) {
       const replacement = Buffer.from(JSON.stringify({ ...settings, ...(voicevoxExecutablePath ? { voicevoxExecutablePath } : {}) }, null, 2) + '\n');
       compatibilityBackupPath = await replaceRetiredBytes(this.filePath, original, replacement,
-        '音声認識の入力設定とjpnknのAI設定に対応しました。既存の設定は保持しています。');
+        'OBSコメントの積み上げを時間で消えない表示へ更新しました。表示件数と上下の配置を設定できます。旧設定の原本を退避しています。');
     }
     if (retired) compatibilityBackupPath = await replaceRetiredBytes(this.filePath, original,
       Buffer.from(JSON.stringify({ ...settings, ...(voicevoxExecutablePath ? { voicevoxExecutablePath } : {}) }, null, 2) + '\n'),

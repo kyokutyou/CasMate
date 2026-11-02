@@ -1,3 +1,4 @@
+import { legacySettingsJson } from './fixtures/legacy-settings';
 import { mkdtemp, readFile, readdir, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -10,6 +11,52 @@ import {
 } from '../src/main/core/settings';
 
 describe('アプリ設定', () => {
+  it.each([13, 14, 15, 16])('版%sの積み上げを常設表示へ移行し原本・外観・方向を保持する', async schemaVersion => {
+    const root = await mkdtemp(join(tmpdir(), 'casmate-stack-migration-'));
+    const file = join(root, 'settings.json');
+    const expected = createDefaultSettings();
+    Object.assign(expected.commentOverlay, { mode: 'stack', stackDirection: 'newestTop', fontSizePx: 48 });
+    const appearance = Object.fromEntries(Object.entries(expected.commentOverlay).filter(([key]) => !['stackMaxComments', 'stackAlignment'].includes(key)));
+    const original = JSON.stringify({ ...expected, schemaVersion, commentOverlay: { ...appearance, stackDurationSeconds: 23 } });
+    await writeFile(file, original);
+    const loaded = await new SettingsStore(file).load();
+    expect(loaded.settings.schemaVersion).toBe(17);
+    expect(loaded.settings.commentOverlay).toEqual(expected.commentOverlay);
+    expect(loaded.settings.commentOverlay).toMatchObject({ stackMaxComments: 10, stackAlignment: 'top' });
+    expect(loaded.settings.commentOverlay).not.toHaveProperty('stackDurationSeconds');
+    expect(loaded.warning).toContain('時間で消えない表示');
+    expect(await readFile(loaded.compatibilityBackupPath!, 'utf8')).toBe(original);
+    expect(JSON.parse(await readFile(file, 'utf8')).commentOverlay).toEqual(expected.commentOverlay);
+    const reopened = await new SettingsStore(file).load();
+    expect(reopened.settings.commentOverlay).toEqual(expected.commentOverlay);
+    expect(reopened.compatibilityBackupPath).toBeUndefined();
+  });
+  it.each([undefined, null, 0, 61, '10'])('不正な旧積み上げ表示時間%sは移行せず原本を保持する', async stackDurationSeconds => {
+    const root = await mkdtemp(join(tmpdir(), 'casmate-stack-invalid-old-'));
+    const file = join(root, 'settings.json');
+    const settings = createDefaultSettings();
+    const original = JSON.stringify({ ...settings, schemaVersion: 16, commentOverlay: { ...settings.commentOverlay, stackDurationSeconds } });
+    await writeFile(file, original);
+    await expect(new SettingsStore(file).load()).rejects.toThrow('積み上げ表示時間');
+    expect(await readFile(file, 'utf8')).toBe(original);
+    expect(await readdir(root)).toEqual(['settings.json']);
+  });
+  it.each([0, 51, 2.5, '10', null, undefined, NaN, Infinity])('不正な最大表示件数%sは保存しない', stackMaxComments => {
+    expect(() => validateSettingsSection('commentOverlay', { ...createDefaultSettings().commentOverlay, stackMaxComments })).toThrow('1～50');
+  });
+  it.each([1, 10, 50])('最大表示件数%sと上下配置を保存し再起動で復元する', async stackMaxComments => {
+    const root = await mkdtemp(join(tmpdir(), 'casmate-stack-save-'));
+    const file = join(root, 'settings.json');
+    for (const stackAlignment of ['top', 'bottom'] as const) {
+      const settings = createDefaultSettings();
+      settings.commentOverlay = validateSettingsSection('commentOverlay', { ...settings.commentOverlay, stackMaxComments, stackAlignment });
+      await new SettingsStore(file).save(settings);
+      expect((await new SettingsStore(file).load()).settings).toEqual(settings);
+    }
+  });
+  it.each([undefined, null, 'left', 1])('不正な上下配置%sは保存しない', stackAlignment => {
+    expect(() => validateSettingsSection('commentOverlay', { ...createDefaultSettings().commentOverlay, stackAlignment })).toThrow('上下の配置');
+  });
   it('初期画像を保存済みの独自素材や解除済み状態へ再適用しない', async () => {
     const root = await mkdtemp(join(tmpdir(), 'casmate-character-defaults-'));
     const store = new SettingsStore(join(root, 'settings.json'));
@@ -84,7 +131,7 @@ describe('アプリ設定', () => {
       const settings = createDefaultSettings(); settings.schemaVersion = schemaVersion;
       delete settings.application.managementTextSize;
       settings.application.managementTheme = 'ivory'; settings.application.port = 4321;
-      const file = join(root, `existing-${schemaVersion}.json`); const bytes = JSON.stringify(settings);
+      const file = join(root, `existing-${schemaVersion}.json`); const bytes = legacySettingsJson(settings);
       await writeFile(file, bytes);
       const loaded = await new SettingsStore(file).load();
       expect(loaded.settings.application).toMatchObject({ managementTextSize:'medium', managementTheme:'ivory', port:4321 });
@@ -93,7 +140,7 @@ describe('アプリ設定', () => {
   });
   it.each(['unknown', '16', 16, null, {}, false])('不正な管理文字サイズ %s の保存原本を保持する', async managementTextSize => {
     const root = await mkdtemp(join(tmpdir(), 'casmate-invalid-text-size-')); const file = join(root, 'settings.json');
-    const bytes = JSON.stringify({ ...createDefaultSettings(), application:{ ...createDefaultSettings().application, managementTextSize } });
+    const bytes = legacySettingsJson({ ...createDefaultSettings(), application:{ ...createDefaultSettings().application, managementTextSize } });
     await writeFile(file, bytes);
     await expect(new SettingsStore(file).load()).rejects.toThrow('管理画面の文字サイズ');
     expect(await readFile(file, 'utf8')).toBe(bytes); expect(await readdir(root)).toEqual(['settings.json']);
@@ -112,7 +159,7 @@ describe('アプリ設定', () => {
     delete settings.application.managementTheme;
     settings.application.port = 4321;
     const file = join(root, 'existing.json');
-    const bytes = JSON.stringify(settings);
+    const bytes = legacySettingsJson(settings);
     await writeFile(file, bytes);
     expect((await new SettingsStore(file).load()).settings.application).toMatchObject({ port: 4321, managementTheme: 'ocean' });
     expect(await readFile(file, 'utf8')).toBe(bytes);
@@ -126,7 +173,7 @@ describe('アプリ設定', () => {
     const settings = createDefaultSettings(); settings.schemaVersion = schemaVersion;
     delete settings.application.managementTheme;
     settings.application.port = 4321; settings.commentList.fontSizePx = 28;
-    const file = join(root, 'settings.json'); const original = JSON.stringify(settings);
+    const file = join(root, 'settings.json'); const original = legacySettingsJson(settings);
     await writeFile(file, original);
     const loaded = await new SettingsStore(file).load();
     expect(loaded.settings.application).toMatchObject({ port: 4321, managementTheme: 'ocean' });
@@ -136,7 +183,7 @@ describe('アプリ設定', () => {
   });
   it('保存済み配色が不正なら原本を維持して起動エラーにする', async () => {
     const root = await mkdtemp(join(tmpdir(), 'casmate-invalid-theme-')); const file = join(root, 'settings.json');
-    const settings = createDefaultSettings(); const original = JSON.stringify({ ...settings, application: { ...settings.application, managementTheme: 'unknown' } });
+    const settings = createDefaultSettings(); const original = legacySettingsJson({ ...settings, application: { ...settings.application, managementTheme: 'unknown' } });
     await writeFile(file, original);
     await expect(new SettingsStore(file).load()).rejects.toThrow('管理画面の配色');
     expect(await readFile(file, 'utf8')).toBe(original); expect(await readdir(root)).toEqual(['settings.json']);
@@ -144,7 +191,7 @@ describe('アプリ設定', () => {
   it('新しいバージョンの設定は書き換えず起動エラーにする', async () => {
     const root = await mkdtemp(join(tmpdir(), 'casmate-future-settings-'));
     const file = join(root, 'settings.json');
-    const content = JSON.stringify({ ...createDefaultSettings(), schemaVersion: 999 });
+    const content = legacySettingsJson({ ...createDefaultSettings(), schemaVersion: 999 });
     await writeFile(file, content);
 
     await expect(new SettingsStore(file).load()).rejects.toBeInstanceOf(UnsupportedSettingsVersionError);
@@ -158,7 +205,7 @@ describe('アプリ設定', () => {
         const settings = createDefaultSettings(); settings.schemaVersion = schemaVersion;
         settings.textEffects.rules = empty ? [] : [{ ...settings.textEffects.rules[0], trigger: 'a', displayText: '葉' }];
         const file = join(root, `v${schemaVersion}-${empty}.json`);
-        await writeFile(file, JSON.stringify(settings));
+        await writeFile(file, legacySettingsJson(settings));
         expect((await new SettingsStore(file).load()).settings.textEffects).toEqual(settings.textEffects);
       }
     }
@@ -171,13 +218,13 @@ describe('アプリ設定', () => {
       const settings = createDefaultSettings(); settings.schemaVersion = schemaVersion;
       settings.commentOverlay.mode = 'stack';
       const path = join(root, `v${schemaVersion}.json`);
-      await writeFile(path, JSON.stringify(settings));
+      await writeFile(path, legacySettingsJson(settings));
       expect((await new SettingsStore(path).load()).settings.commentOverlay.mode).toBe('stack');
     }
   });
   it('同梱キャラクター画像と標準の微動を新規設定へ適用する', () => {
     expect(createDefaultSettings()).toMatchObject({
-      schemaVersion: 16,
+      schemaVersion: 17,
       aiListener: { contextCharacters: 3000, model: 'gemini-3.1-flash-lite' },
       character: {
         mode: 'simple',
@@ -203,7 +250,7 @@ describe('アプリ設定', () => {
     const settings = createDefaultSettings();
 
     expect(settings).toMatchObject({
-      schemaVersion: 16,
+      schemaVersion: 17,
       textEffects: {
         enabled: true,
         fontSizePx: 64,
@@ -257,7 +304,8 @@ describe('アプリ設定', () => {
       },
       commentOverlay: {
         mode: 'single',
-        stackDurationSeconds: 10,
+        stackMaxComments: 10,
+        stackAlignment: 'top',
         singleDurationSeconds: 10,
         showSource: false,
         showAuthor: true,
@@ -316,7 +364,7 @@ describe('アプリ設定', () => {
     const loaded = await new SettingsStore(filePath).load();
 
     expect(loaded.settings).toMatchObject({
-      schemaVersion: 16,
+      schemaVersion: 17,
       application: { port: 4321 },
     });
     expect(loaded.warning).toBeUndefined();
@@ -369,7 +417,7 @@ describe('アプリ設定', () => {
       Reflect.deleteProperty(legacy.speechRecognition, 'smartphoneDeviceId');
     }
     const voicevoxExecutablePath = 'C:\\VOICEVOX\\vv-engine\\run.exe';
-    const original = JSON.stringify({ ...legacy, voicevoxExecutablePath }, null, 2) + '\n';
+    const original = legacySettingsJson({ ...legacy, voicevoxExecutablePath }, 2) + '\n';
     await writeFile(filePath, original);
 
     const migrated = await new SettingsStore(filePath).load();
@@ -404,7 +452,7 @@ describe('アプリ設定', () => {
     if (invalid === 'invalidEmail') Reflect.set(settings.aiListener, 'jpnknEmail', null);
     if (invalid === 'invalidParticipant') Reflect.set(settings.aiListener.participants.jpnkn, 'enabled', 'true');
     if (invalid === 'unknownPersona') settings.aiListener.participants.jpnkn.personaId = 'missing';
-    const original = JSON.stringify(settings, null, 2) + '\n';
+    const original = legacySettingsJson(settings, 2) + '\n';
     await writeFile(filePath, original);
 
     await expect(new SettingsStore(filePath).load()).rejects.toThrow('AIリスナー設定');
@@ -620,7 +668,7 @@ describe('アプリ設定', () => {
     expect(() =>
       validateSettingsSection('commentOverlay', {
         ...current.commentOverlay,
-        stackDurationSeconds: 61,
+        singleDurationSeconds: 61,
       }),
     ).toThrow('1～60');
     expect(() =>

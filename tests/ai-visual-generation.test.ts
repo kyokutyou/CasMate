@@ -12,6 +12,62 @@ import type { AiCapture } from '../src/shared/ai-visual';
 import { readOnlyEvent } from '../src/main/server/local-view-projections';
 
 const cleanups: Array<() => Promise<void>> = [];
+it('人格の返答テストはテスト用入力だけを送り、画像・投稿・記憶・ログを変更しない', async () => {
+  const f = await fixture(false);
+  const post = vi.spyOn(f.connections, 'post');
+  vi.mocked(f.store.saveMemory).mockClear(); vi.mocked(f.store.log).mockClear(); vi.mocked(f.store.logPrompt).mockClear();
+  const response = await f.post('test-reply').send({ personaId: 'p', text: 'テストだけの話題' });
+  expect(response.status).toBe(200); expect(response.body.reply).toBe('大きな建物だ');
+  expect(f.fetcher).toHaveBeenCalledOnce(); const body = String(f.fetcher.mock.calls[0][1]?.body);
+  expect(body).toContain('テストだけの話題'); expect(body).not.toContain('ここ見て'); expect(body).not.toContain('unique-image-bytes');
+  expect(f.capture).not.toHaveBeenCalled(); expect(post).not.toHaveBeenCalled();
+  expect(f.store.saveMemory).not.toHaveBeenCalled(); expect(f.store.log).not.toHaveBeenCalled(); expect(f.store.logPrompt).not.toHaveBeenCalled();
+});
+it('人格の返答テストは認証と保存済み人格・有効な本文を必要とする', async () => {
+  const f = await fixture(false);
+  expect((await request(f.app).post('/api/ai-listener/test-reply').set('Host', '127.0.0.1:3000').send({ personaId: 'p', text: 'こんにちは' })).status).toBe(403);
+  expect((await f.post('test-reply').set('Origin', 'https://evil').send({ personaId: 'p', text: 'こんにちは' })).status).toBe(403);
+  for (const body of [{ personaId: 'p', text: '' }, { personaId: 'p', text: 'a'.repeat(2001) }, { personaId: 'p', text: 'こんにちは', post: true }]) expect((await f.post('test-reply').send(body)).status).toBe(400);
+  expect((await f.post('test-reply').send({ personaId: 'missing', text: 'こんにちは' })).status).toBe(409);
+  expect(f.fetcher).not.toHaveBeenCalled();
+});
+it('最小の文脈文字数でも2000文字のテスト入力を省略せず、保存設定を変更しない', async () => {
+  const f = await fixture(false);
+  await f.controller.configure({ ...f.settings.aiListener, contextCharacters: 1000 });
+  const text = '長'.repeat(1998) + '末尾';
+  const response = await f.post('test-reply').send({ personaId: 'p', text });
+  expect(response.status).toBe(200); expect(response.body.reply).toBe('大きな建物だ');
+  const body = JSON.parse(String(f.fetcher.mock.calls[0][1]?.body));
+  expect(body.contents[0].parts[0].text).toContain(text);
+  await f.controller.withIdleSettings(async settings => { expect(settings.contextCharacters).toBe(1000); });
+});
+it('Geminiの空応答は空白の成功結果ではなく、返答形式不正の見送りとして表示する', async () => {
+  const f = await fixture(false);
+  f.fetcher.mockResolvedValueOnce(new Response(JSON.stringify({ candidates: [] })));
+  const response = await f.post('test-reply').send({ personaId: 'p', text: 'こんにちは' });
+  expect(response.status).toBe(200);
+  expect(response.body.reply).toBe('今回は見送りました（返答形式不正）。');
+});
+it('返答テストは重複生成を拒否し、設定変更で古い返答を破棄する', async () => {
+  const f = await fixture(false); let finish!: (value: Response) => void;
+  f.fetcher.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+  const pending = f.post('test-reply').send({ personaId: 'p', text: 'テスト' }).then(response => response);
+  await vi.waitFor(() => expect(f.fetcher).toHaveBeenCalledOnce());
+  expect((await f.post('test-reply').send({ personaId: 'p', text: 'テスト' })).status).toBe(409);
+  f.controller.invalidate(); finish(new Response(JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"action":"reply","target":1,"text":"古い返答","reason":"none"}' }] } }] })));
+  expect((await pending).status).toBe(409); expect(f.fetcher).toHaveBeenCalledOnce();
+});
+it('返答テストは35秒の取消を通信へ伝え、秘密情報をエラーに含めず再試行できる', async () => {
+  const f = await fixture(false); const deadline = new AbortController();
+  const timeout = vi.spyOn(AbortSignal, 'timeout').mockReturnValue(deadline.signal);
+  try {
+    f.fetcher.mockImplementationOnce(async (_url, init) => new Promise((_resolve, reject) => { init?.signal?.addEventListener('abort', () => reject(new Error('private-key')), { once: true }); }));
+    const pending = f.post('test-reply').send({ personaId: 'p', text: 'テスト' }).then(response => response);
+    await vi.waitFor(() => expect(f.fetcher).toHaveBeenCalledOnce()); deadline.abort();
+    const response = await pending; expect(response.status).toBe(409); expect(response.body.message).toContain('35秒'); expect(JSON.stringify(response.body)).not.toContain('private-key');
+  } finally { timeout.mockRestore(); }
+  expect((await f.post('test-reply').send({ personaId: 'p', text: '再試行' })).status).toBe(200);
+});
 afterEach(async () => { for (const close of cleanups.splice(0)) await close(); });
 async function fixture(debugEnabled = true, withoutPersona = false) {
   const settings = createDefaultSettings();

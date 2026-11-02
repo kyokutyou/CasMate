@@ -15,7 +15,7 @@ window.fetch = async () => { throw new Error('No network in UI fixture'); };
 function Editor({ view, error, success, settings, change, record }: { view: AiView; error: string; success(message: string): void;
   settings: AiSettings; change(value: AiSettings): void; record(path: string): void }) {
   return <AiListenerPanel settings={settings} view={view} change={change} saveError={error}
-    mutate={async path => { record(path); return { sources: [], debugEnabled: false, model: settings.model, message: '文章応答を確認しました。' }; }} onSuccess={success} />;
+    mutate={async path => { record(path); return { sources: [], debugEnabled: false, model: settings.model, message: '文章応答を確認しました。', ...(path === '/api/ai-listener/test-reply' ? { reply: '人格のテスト返答です。' } : {}) }; }} onSuccess={success} />;
 }
 function Harness() {
   const [view, setView] = useState(initial), [error, setError] = useState(''), [notice, setNotice] = useState('');

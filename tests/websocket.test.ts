@@ -11,6 +11,40 @@ import type {
 import type { SpeechRecognitionWorker, SpeechRecognitionWorkerEvent } from '../src/main/speech-recognition/speech-recognition-worker';
 
 describe('WebSocketリアルタイム同期', () => {
+  it('常設コメントは複数OBS接続と再接続で一致し、バックエンド停止時にクリアを配信する', async () => {
+    const port = await freePort();
+    const settings = createDefaultSettings(); settings.commentOverlay.mode = 'stack';
+    const state = new AppState(settings);
+    const server = new LocalServer({ state, port });
+    await server.start();
+    const sockets: WebSocket[] = [];
+    const connect = () => {
+      const socket = new WebSocket(`ws://127.0.0.1:${port}/ws`, { origin: `http://127.0.0.1:${port}` });
+      sockets.push(socket); return socket;
+    };
+    try {
+      state.acceptComment({ externalId: 'history', source: 'youtube', authorName: '視聴者', content: [{ type: 'text', text: '過去' }], initialHistory: true });
+      state.acceptComment({ externalId: 'new', source: 'youtube', authorName: '視聴者', content: [{ type: 'text', text: '新着' }], initialHistory: false });
+      const firstSocket = connect();
+      const first = await nextMessage(firstSocket);
+      expect(first.payload).toHaveProperty('commentOverlay', state.snapshot().commentOverlay);
+      expect(state.snapshot().commentOverlay.active).toHaveLength(1);
+      expect(state.snapshot().commentOverlay.active[0].expiresAt).toBeNull();
+      const secondSocket = connect();
+      expect((await nextMessage(secondSocket)).payload).toHaveProperty('commentOverlay', state.snapshot().commentOverlay);
+      firstSocket.close();
+      const reconnected = connect();
+      expect((await nextMessage(reconnected)).payload).toHaveProperty('commentOverlay', state.snapshot().commentOverlay);
+      const cleared = messagesUntil(reconnected, 'commentOverlay.stateChanged');
+      await server.stop();
+      expect((await cleared).payload).toEqual({ active: [], queue: [] });
+      expect(state.snapshot().commentOverlay).toEqual({ active: [], queue: [] });
+      expect(state.snapshot().comments).toHaveLength(2);
+    } finally {
+      sockets.forEach(socket => socket.close());
+      await server.stop(); state.dispose();
+    }
+  });
   it('接続直後のスナップショットと以後の状態変更を同じ順序で配信する', async () => {
     const port = await freePort();
     const state = new AppState(createDefaultSettings());

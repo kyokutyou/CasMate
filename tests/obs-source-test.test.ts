@@ -12,8 +12,9 @@ import { join, resolve } from 'node:path';
 afterEach(() => vi.useRealTimers());
 async function setup() {
   const fixture = sourceSetup();
-  const registered = await fixture.add();
-  const request = { target: fixture.target, collection: fixture.obs.collection, sceneUuid: firstScene, inputUuid: registered.inputUuid! };
+  const target = { kind: 'overlay', overlay: 'effects' } as const;
+  const registered = await fixture.add({ target });
+  const request = { target, collection: fixture.obs.collection, sceneUuid: firstScene, inputUuid: registered.inputUuid! };
   const settings = createDefaultSettings();
   const acquire = vi.fn(() => fixture.obs.acquireSourceRegistration());
   const controller = new ObsSourceTestController({ sources: fixture.controller,
@@ -60,10 +61,10 @@ describe('OBS display test', () => {
     vi.useFakeTimers(); const f = await setup(); const before = structuredClone(f.settings);
     const operation = await f.controller.start(f.request);
     expect(f.obs.occupied).toBe(true);
-    expect(f.controller.display('comments').display?.testId).toBe(operation.id);
+    expect(f.controller.display('effects').display?.testId).toBe(operation.id);
     expect(f.controller.display('speech').display).toBeNull();
     await vi.advanceTimersByTimeAsync(5000);
-    expect(f.controller.display('comments').display).toBeNull();
+    expect(f.controller.display('effects').display).toBeNull();
     expect(f.controller.view().current?.phase).toBe('complete');
     expect(f.obs.occupied).toBe(false); expect(f.settings).toEqual(before);
   });
@@ -117,7 +118,7 @@ it('keeps a cancelled preparation from resurrecting its layer or changing a newe
   const second = await f.controller.start(f.request);
   resolve({ title: 'コメント', valid: () => true });
   expect(await starting).toMatchObject({ id: firstId, phase: 'complete', needsAttention: false });
-  expect(f.controller.display('comments').display?.testId).toBe(second.id);
+  expect(f.controller.display('effects').display?.testId).toBe(second.id);
   expect(f.controller.view().current?.id).toBe(second.id);
   await f.controller.stop(second.id);
 });
@@ -149,7 +150,7 @@ it('最終確認のシーン読取後に切り替わると表示層を開始せ�
       f.obs.calls.filter(call => call.type === 'GetSceneItemList').length >= 2) f.obs.currentScene = secondScene;
   };
   await expect(f.controller.start(f.request)).rejects.toMatchObject({ code: 'OBS_SOURCE_TARGET_CHANGED' });
-  expect(f.controller.display('comments').display).toBeNull(); expect(f.obs.occupied).toBe(false);
+  expect(f.controller.display('effects').display).toBeNull(); expect(f.obs.occupied).toBe(false);
   expect(f.controller.view().current).toMatchObject({ phase: 'complete', needsAttention: true });
 });
 
@@ -161,5 +162,5 @@ it('確認完了から表示層開始までの切替も検知し、元のシー�
     return result;
   });
   await expect(f.controller.start(f.request)).rejects.toMatchObject({ code: 'OBS_SOURCE_TARGET_CHANGED' });
-  expect(f.controller.display('comments').display).toBeNull(); expect(f.obs.occupied).toBe(false);
+  expect(f.controller.display('effects').display).toBeNull(); expect(f.obs.occupied).toBe(false);
 });

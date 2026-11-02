@@ -1,5 +1,5 @@
 import { smartphoneReceiverState } from './smartphone-status';
-import { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import QRCode from 'qrcode';
 import { smartphoneNetworkNames, type SmartphoneConfiguration, type SmartphoneNetwork, type SmartphoneInvitation, type SmartphoneView } from '../../shared/smartphone';
 import { LanAdapterSelect } from './LanAdapterSelect';
@@ -17,6 +17,7 @@ import type { ObsSourceRegistrationEntry } from './ObsSourceRegistrationDialog';
 import './smartphone-panel.css';
 
 interface Props {
+  renderTest?(active: boolean, invalid: boolean): ReactNode;
   listLanAdapters?: () => Promise<import('../../shared/direct-connection').DirectAdapterOption[]>;
   listAdapters?: () => Promise<import('../../shared/direct-connection').DirectAdapterOption[]>;
   view: SmartphoneView;
@@ -53,7 +54,7 @@ const speechPreviewMessages = {
   ready: 'PCでの再生完了は、スマホで聞こえたことの確認とは別です。',
 };
 
-export function SmartphonePanel({ view, mobile, audioSettings, saveError, registrationWarning, onRegisterSource, onRegistrationBlockedChange, changeAudio, configure, deviceAction, invitation, obsInput, onSuccess, directAction, listAdapters, listLanAdapters, previewSpeech, speechSettingsPending }: Props) {
+export function SmartphonePanel({ view, mobile, audioSettings, saveError, registrationWarning, onRegisterSource, onRegistrationBlockedChange, changeAudio, configure, deviceAction, invitation, obsInput, onSuccess, directAction, listAdapters, listLanAdapters, previewSpeech, speechSettingsPending, renderTest }: Props) {
   const navigation = useContext(ManagementNavigation);
   const setup = navigation?.initialSetup && navigation.setupPosition === 'smartphone';
   const { smartphoneCommentsReady, smartphoneSpeechEnabled, smartphoneSpeechReady, smartphoneUses = [], selectSmartphoneUses, selectionPending, confirmation, selectSmartphoneNetwork } = useContext(SetupPresentation);
@@ -352,7 +353,7 @@ export function SmartphonePanel({ view, mobile, audioSettings, saveError, regist
       </div>
     </section>
     <section className="sp-audio-quality sp-compact-row" aria-label="読み上げ音声の音質">
-      <div><h3>読み上げ音声の音質</h3><p className="sp-note" id="sp-audio-range">AAC目標ビットレート・16〜128・標準64 kbps</p></div>
+      <div><div className="settings-test-heading"><h3>読み上げ音声の音質</h3>{!setup && <>{renderTest?.(!navigation || navigation.editor === 'smartphone', busy || unsaved.size > 0 || Boolean(error))}</>}</div><p className="sp-note" id="sp-audio-range">AAC目標ビットレート・16〜128・標準64 kbps</p></div>
       <label className="sp-audio-input"><input aria-label="音質（kbps）" aria-describedby="sp-audio-range" type="number" min={16} max={128} value={rate} aria-invalid={!validRate} onChange={event => {
         const value = event.target.value; setBitrate(value);
         if (/^\d+$/u.test(value) && Number(value) >= 16 && Number(value) <= 128) changeAudio({ ...audioSettings, bitrateKbps: Number(value) });

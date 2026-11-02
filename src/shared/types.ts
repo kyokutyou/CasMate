@@ -33,7 +33,8 @@ export interface DisplayFields {
 export interface CommentOverlaySettings extends DisplayFields {
   design?: import('./obs-design').ObsCommentDesign;
   mode: CommentOverlayMode;
-  stackDurationSeconds: number;
+  stackMaxComments: number;
+  stackAlignment: 'top' | 'bottom';
   singleDurationSeconds: number;
   stackDirection: StackDirection;
   fontFamily: string;
@@ -46,7 +47,7 @@ export interface CommentOverlaySettings extends DisplayFields {
 
 export interface TimedOverlayComment {
   comment: CommonComment;
-  expiresAt: string;
+  expiresAt: string | null;
 }
 
 export interface CommentOverlayState {

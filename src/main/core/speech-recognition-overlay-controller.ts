@@ -2,6 +2,7 @@ import type {
   SpeechRecognitionOverlayState,
   SpeechRecognitionResult,
 } from '../../shared/types';
+import { randomUUID } from 'node:crypto';
 
 
 export class SpeechRecognitionOverlayController {
@@ -16,6 +17,14 @@ export class SpeechRecognitionOverlayController {
 
   accept(result: SpeechRecognitionResult): void {
     if (!this.enabled) return;
+    this.show(result);
+  }
+
+  test(): void {
+    this.show({ id: randomUUID(), text: 'OBS音声認識表示のテストです' });
+  }
+
+  private show(result: Pick<SpeechRecognitionResult, 'id' | 'text'>): void {
     if (!result.text.trim()) {
       this.clear();
       return;

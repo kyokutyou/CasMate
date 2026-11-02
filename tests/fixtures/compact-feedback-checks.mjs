@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { verifyObsOverlayTest } from './obs-overlay-test-checks.mjs';
 
 export async function verifyCompactFeedback({ evaluate, resize, capture }) {
   const settle = () => evaluate('new Promise(resolve=>setTimeout(resolve,20))');
@@ -42,6 +43,9 @@ export async function verifyCompactFeedback({ evaluate, resize, capture }) {
         const height = await evaluate("document.querySelector('.overlay-input-help').getBoundingClientRect().height");
         assert.ok(height < 90, `compact numeric hint: ${height}`);
         if (capture) await capture(`compact-overlay-${size}.png`);
+      }
+      if (entry === 'settings-commentOverlay') {
+        await verifyObsOverlayTest({ evaluate, selector: '.comment-overlay-panel .obs-overlay-test-panel', capture, name: `comments-${width}-${size}`, setMessage: message => evaluate(`(()=>{const s=boardManagementHarness.snapshot().obsSourceTest;boardManagementHarness.updateSnapshot({obsSourceTest:{...s,current:{...s.current,message:${JSON.stringify(message)}}}})})()`) });
       }
       if (entry === 'settings-speechRecognitionOverlay') {
         const panel='.speech-recognition-overlay-panel';
@@ -98,6 +102,28 @@ export async function verifyCompactFeedback({ evaluate, resize, capture }) {
         assert.deepEqual(await timingLayout(),beforeInvalid,`${width}/${size}: inline duration validation preserves geometry`);
         assert.equal(await evaluate("document.querySelector('.overlay-single-number-line input').getAttribute('aria-invalid')"),'true');
         await evaluate(`(()=>{const node=document.querySelector('.overlay-single-number-line input');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(node,${JSON.stringify(originalSeconds)});node.dispatchEvent(new Event('input',{bubbles:true}));})()`);await settle();
+        await click('.overlay-mode-choices button[aria-label="積み上げ"]');
+        assert.equal(await evaluate("document.querySelector('.overlay-mode-choices button[aria-label=\"積み上げ\"]').getAttribute('aria-pressed')"),'true');
+        const stackInput = '.comment-overlay-panel .overlay-field-grid input';
+        const setCount = async value => { await evaluate(`(()=>{const input=document.querySelector(${JSON.stringify(stackInput)});Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(input,${JSON.stringify(value)});input.dispatchEvent(new Event('input',{bubbles:true}));})()`);await settle(); };
+        const stackGeometry = () => evaluate(`(()=>{const body=document.querySelector('.management-body');return {height:body.scrollHeight,boxes:[...document.querySelectorAll('.comment-overlay-panel .overlay-setting-section,.comment-overlay-panel input,.comment-overlay-panel select')].filter(n=>n.checkVisibility()).map(n=>{const r=n.getBoundingClientRect();return [r.x,r.y,r.width,r.height]})};})()`);
+        const stackNormal = await stackGeometry();
+        for(const value of ['', '2.5', '51']) {
+          await setCount(value);
+          assert.equal(await evaluate(`document.querySelector(${JSON.stringify(stackInput)}).getAttribute('aria-invalid')`),'true');
+          assert.deepEqual(await stackGeometry(),stackNormal,`${width}/${size}: stack count validation preserves geometry`);
+        }
+        await setCount('10');
+        for(const direction of ['newestTop','newestBottom']) for(const alignment of ['top','bottom']) {
+          await evaluate(`(()=>{const selectors=[...document.querySelectorAll('.comment-overlay-panel .overlay-field-grid select')];for(const [input,value] of [[selectors[0],${JSON.stringify(direction)}],[selectors[1],${JSON.stringify(alignment)}]]){Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(input,value);input.dispatchEvent(new Event('change',{bubbles:true}));}})()`);await settle();
+          const saved = await evaluate('boardManagementHarness.snapshot().settings.commentOverlay');
+          assert.equal(saved.mode,'stack');assert.equal(saved.stackDirection,direction);assert.equal(saved.stackAlignment,alignment);assert.equal(saved.stackMaxComments,10);
+        }
+        const overflow = await evaluate(`document.documentElement.scrollWidth > innerWidth || [...document.querySelectorAll('.comment-overlay-panel input,.comment-overlay-panel select')].filter(n=>n.checkVisibility()).some(n=>n.getBoundingClientRect().right > innerWidth)`);
+        assert.equal(overflow,false,`${width}/${size}: stack controls fit`);
+        await evaluate("document.querySelector('.comment-overlay-panel .overlay-field-grid').scrollIntoView({block:'center'})");await settle();
+        if(capture) await capture(`comment-stack-${size}-${width}.png`);
+        await click('.overlay-mode-choices button[aria-label="1件ずつ"]');
       }
     }
   }

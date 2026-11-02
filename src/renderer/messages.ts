@@ -1,7 +1,7 @@
 import type { ConnectionKey, SourceStatusView } from '../shared/types';
 export const messages = {
   appName: 'きゃすメイト',
-  version: 'v0.5.0',
+  version: 'v0.5.1',
   loading: '起動状態を読み込んでいます…',
   notifications: '通知',
   openDetails: '詳細を開く',

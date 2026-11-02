@@ -54,6 +54,7 @@ export interface CommentDesign extends CommonDesign {
   sourceBackgroundColor: string;
   sourceBackgroundOpacity: number;
   metaScale: number;
+  metaGap: number;
   gap: number;
   emoteScale: number;
   serviceColorsEnabled: boolean;
@@ -111,7 +112,7 @@ export function createDefaultDocument(): EditorDocument {
       comments: {
         ...defaultCommonDesign(), showSource: true, showAuthor: true,
         authorColor: '#a9e5ff', sourceColor: '#ffffff', sourceBackgroundColor: '#ffffff',
-        sourceBackgroundOpacity: 16, metaScale: 0.75, gap: 8, emoteScale: 1.45,
+        sourceBackgroundOpacity: 16, metaScale: 0.75, metaGap: 4, gap: 8, emoteScale: 1.45,
         serviceColorsEnabled: false,
         badgeColors: { youtube: '#f25d72', twitch: '#a37bff', shitaraba: '#58d6af' },
       },
@@ -206,11 +207,11 @@ const commonDesignKeys = [
   'paddingX', 'paddingY', 'radius', 'lineHeight', 'edge', 'border', 'textShadow', 'cardShadow', 'outline',
 ];
 
-function object(value: unknown, keys: readonly string[], path: string): Record<string, unknown> {
+function object(value: unknown, keys: readonly string[], path: string, optional: readonly string[] = []): Record<string, unknown> {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) throw new Error(`${path} の形式が正しくありません。`);
   const record = value as Record<string, unknown>;
   if (Object.keys(record).some((key) => !keys.includes(key))) throw new Error(`${path} に未対応の項目があります。`);
-  if (keys.some((key) => !Object.hasOwn(record, key))) throw new Error(`${path} に不足している項目があります。`);
+  if (keys.some((key) => !optional.includes(key) && !Object.hasOwn(record, key))) throw new Error(`${path} に不足している項目があります。`);
   return record;
 }
 
@@ -273,10 +274,10 @@ function commonDesign(data: Record<string, unknown>, path: string, application =
   };
 }
 
-export function parseCommentDesign(value: unknown, application = false): CommentDesign {
+export function parseCommentDesign(value: unknown, application = false, defaultMetaGap = 4): CommentDesign {
   const path = 'designs.comments';
   const data = object(value, [...commonDesignKeys, 'showSource', 'showAuthor', 'authorColor', 'sourceColor',
-    'sourceBackgroundColor', 'sourceBackgroundOpacity', 'metaScale', 'gap', 'emoteScale', 'serviceColorsEnabled', 'badgeColors'], path);
+    'sourceBackgroundColor', 'sourceBackgroundOpacity', 'metaScale', 'metaGap', 'gap', 'emoteScale', 'serviceColorsEnabled', 'badgeColors'], path, ['metaGap']);
   const badges = object(data.badgeColors, ['youtube', 'twitch', 'shitaraba'], `${path}.badgeColors`);
   return {
     ...commonDesign(data, path, application), showSource: boolean(data.showSource, `${path}.showSource`), showAuthor: boolean(data.showAuthor, `${path}.showAuthor`),
@@ -284,6 +285,7 @@ export function parseCommentDesign(value: unknown, application = false): Comment
     sourceBackgroundColor: color(data.sourceBackgroundColor, `${path}.sourceBackgroundColor`),
     sourceBackgroundOpacity: number(data.sourceBackgroundOpacity, 0, 100, `${path}.sourceBackgroundOpacity`),
     metaScale: number(data.metaScale, 0.5, 1.5, `${path}.metaScale`), gap: number(data.gap, 0, 64, `${path}.gap`),
+    metaGap: Object.hasOwn(data, 'metaGap') ? number(data.metaGap, 0, 64, `${path}.metaGap`) : defaultMetaGap,
     emoteScale: number(data.emoteScale, 0.5, 3, `${path}.emoteScale`), serviceColorsEnabled: boolean(data.serviceColorsEnabled, `${path}.serviceColorsEnabled`),
     badgeColors: { youtube: color(badges.youtube, `${path}.badgeColors.youtube`), twitch: color(badges.twitch, `${path}.badgeColors.twitch`), shitaraba: color(badges.shitaraba, `${path}.badgeColors.shitaraba`) },
   };

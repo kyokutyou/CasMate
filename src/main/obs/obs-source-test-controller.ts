@@ -9,6 +9,7 @@ export interface ObsSourceTestOptions {
   obs: { acquireSourceTest(): ObsSourceLease };
   settings(): AppSettings;
   assetReadable(asset: string): Promise<boolean>;
+  receiveComments?(testId: string): void;
   onState?(state: ObsSourceTestState): void;
 }
 interface Job {
@@ -21,7 +22,7 @@ interface Job {
   guardTimer?: ReturnType<typeof setInterval>;
 }
 
-/** Finite browser display layers; never injects a normal application event. */
+/** Comments use ordinary reception; other targets use finite display layers. */
 export class ObsSourceTestController {
   private job: Job | null = null;
   private current: ObsSourceTestOperation | null = null;
@@ -40,6 +41,7 @@ export class ObsSourceTestController {
     const request = parseRequest(value);
     try {
       await this.options.sources.validateDisplayTest(request);
+      if (request.target.overlay === 'comments' && !this.options.receiveComments) throw failure(503, 'OBS_TEST_UNAVAILABLE', 'コメント受信テストを準備できません。');
       await this.data(request);
       return { available: !this.shuttingDown && !this.job, message: this.job ? '別の表示テストを処理中です。' :
         request.target.overlay === 'character' && !this.options.settings().character.simple.openAsset
@@ -62,6 +64,13 @@ export class ObsSourceTestController {
       const data = await bounded(this.data(request), 3000);
       if (!job.cancelled && this.job === job) await bounded(this.options.sources.validateDisplayTest(request, lease.session), 3000);
       if (job.cancelled || this.job !== job || !job.valid() || lease.session.destinationRevision() !== destinationRevision) throw failure(409, 'OBS_SOURCE_TARGET_CHANGED', 'テスト対象が変更されました。');
+      if (request.target.overlay === 'comments') {
+        if (!this.options.receiveComments) throw failure(503, 'OBS_TEST_UNAVAILABLE', 'コメント受信テストを準備できません。');
+        this.options.receiveComments(operation.id);
+        operation.startedAt = Date.now();
+        await this.finish(job, undefined, 'テストコメントを1件投入しました。読み上げ・表示は通常の設定に従います。');
+        return structuredClone(operation);
+      }
       operation.startedAt = Date.now(); operation.expiresAt = operation.startedAt + 5000;
       operation.phase = 'sending'; operation.message = 'テスト表示を送信しました。';
       this.layer = { testId: operation.id, startedAt: operation.startedAt, expiresAt: operation.expiresAt, data };
@@ -105,7 +114,7 @@ export class ObsSourceTestController {
       }
     }
   }
-  private async finish(job: Job, message?: string): Promise<void> {
+  private async finish(job: Job, message?: string, successMessage?: string): Promise<void> {
     if (job.cancelled) return;
     job.cancelled = true;
     clearTimeout(job.timer); clearInterval(job.guardTimer);
@@ -113,7 +122,7 @@ export class ObsSourceTestController {
     job.lease.release(); if (this.job === job) this.job = null;
     job.operation.phase = 'complete';
     job.operation.needsAttention = Boolean(message);
-    job.operation.message = message ?? '';
+    job.operation.message = message ?? successMessage ?? '';
     if (message) this.warnings.set(job.operation.id, structuredClone(job.operation));
     this.publish();
   }
