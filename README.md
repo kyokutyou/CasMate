@@ -4,6 +4,8 @@
 
 **YouTube Live・Twitch・したらば・jpnkn掲示板**に対応しています。Androidスマホと連携すると、手元でコメントを聞いたり、スマホのカメラ映像やマイク音声をPCへ送ったりできます。
 
+[きゃすメイトの紹介ページ](https://kyokutyou.com/casmate.html)
+
 ## ダウンロード
 
 Windows用インストーラーとAndroid用APKは、[v0.5.0のリリースページ](https://github.com/kyokutyou/CasMate/releases/tag/v0.5.0)からダウンロードできます。
