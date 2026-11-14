@@ -7,10 +7,12 @@ async function verifySettingsCategories(evaluate, width) {
       x: box.x, y: box.y, height: box.height };
   }))()`);
   assert.deepEqual(cards.map(card => [card.name, card.count]), [
-    ['コメント', 3], ['音声・AI', 3], ['表示・演出', 3], ['OBS', 4], ['スマホ連携', 1], ['アプリ', 1],
-  ], `${width}: six settings categories`);
-  assert.ok(Math.max(cards[4].height, cards[5].height) < Math.min(...cards.slice(0, 4).map(card => card.height)) * .75,
-    `${width}: single-entry cards remain compact`);
+    ['コメント', 3], ['音声・AI', 3], ['表示・演出', 3], ['OBS', 4], ['スマホ連携', 1], ['リスナー参加', 2], ['アプリ', 1],
+  ], `${width}: seven settings categories`);
+  const largeHeight = Math.min(...cards.slice(0, 4).map(card => card.height));
+  assert.ok(cards.at(-1).height < largeHeight * .75, `${width}: single-entry app card remains compact`);
+  assert.ok(Math.max(...cards.slice(4).map(card => card.height)) < largeHeight,
+    `${width}: one/two-entry categories remain shorter than three-entry categories`);
   if (width > 600) {
     for (const index of [0, 2, 4]) {
       assert.equal(cards[index].y, cards[index + 1].y, `${width}: paired category tops`);
@@ -184,7 +186,7 @@ async function verifyManagementTextSizes({ evaluate, resize, capture, pressRight
         for (const item of clipped) clippedGuidance.set(item.className,{size,width,id,...item});
         if(capture && size==='large' && width===320 && ['settings-sources','settings-commentFilter','settings-commentOverlay','settings-obsControl','settings-speechRecognition','settings-smartphone'].includes(id)) await capture(`guidance-${id}-320-large.png`);
         if(id==='settings-urls' && width===1200){
-          assert.equal(await evaluate("document.querySelectorAll('.obs-urls-row').length"),4,'all source cards are present');
+          assert.equal(await evaluate("document.querySelectorAll('.obs-urls-row').length"),6,'all source cards are present');
           assert.equal(await evaluate("document.querySelectorAll('.obs-urls-preview,.obs-urls-choices').length"),0,'card layout has no previews or selector');
         }
         await click('.editor-heading-row .back-button'); count++;
@@ -242,7 +244,7 @@ export async function verifyManagementStudio({ evaluate, resize, capture, pressR
       count++;
     }
     const entries = await evaluate("[...document.querySelectorAll('.management-categories .management-entry')].map(entry => entry.id)");
-    assert.equal(entries.length, 15);
+    assert.equal(entries.length, 17);
     for (const id of entries) {
       await click(`#${id}`);
       assert.equal(await evaluate('document.activeElement.id'), 'editor-heading', `${width}/${id}: heading focus`);

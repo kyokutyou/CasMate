@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
 import {
   defaultObsControlPhrases,
@@ -7,6 +8,7 @@ import { ObsControlController } from '../src/main/obs/obs-control-controller';
 import type { ObsRequestResponse, ObsStreamStatus, ObsWebsocketConnection, ObsWebsocketEvent, ObsWebsocketTransport } from '../src/main/obs/obs-websocket-client';
 import { defaultObsControlSettings, validateObsControlRecord, type ObsControlRecord as StoredObsControlRecord } from '../src/main/obs/obs-control-store';
 import type { SpeechRecognitionResult } from '../src/shared/types';
+import { obsOverlayDefinitions } from '../src/shared/obs-source-registration';
 
 class FakeConnection implements ObsWebsocketConnection {
   private readonly eventListeners = new Set<(event: ObsWebsocketEvent) => void>();
@@ -15,7 +17,7 @@ class FakeConnection implements ObsWebsocketConnection {
   startCalls = 0;
   stopCalls = 0;
   requestResult: ObsRequestResponse = { requestStatus: { result: true, code: 100 } };
-  request = vi.fn(async (requestType: string): Promise<ObsRequestResponse> => {
+  request = vi.fn(async (requestType: string, _requestData?: Record<string, unknown>): Promise<ObsRequestResponse> => {
     if (requestType === 'StartStream') this.startCalls += 1;
     if (requestType === 'StopStream') this.stopCalls += 1;
     return this.requestResult;
@@ -75,7 +77,274 @@ async function connectedController(connection = new FakeConnection()) {
   return { controller, store, connection };
 }
 
+describe('OBSブラウザソースの起動時復旧', () => {
+  const origin = 'http://127.0.0.1:3100';
+  const refresh = 'PressInputPropertiesButton';
+
+  it.each([true, false])('待受とOBS接続が揃ってから正式URLの入力だけを一度ずつ再読み込みする（OBS先行 %s）', async obsFirst => {
+    const connection = new FakeConnection();
+    const overlays = Object.entries(obsOverlayDefinitions).map(([inputUuid, { path }]) => ({
+      inputUuid, kind: 'browser_source', settings: { url: origin + path },
+    }));
+    const inputs = [...overlays,
+      { inputUuid: 'other', kind: 'browser_source', settings: { url: 'https://example.com/overlay/comments' } },
+      { inputUuid: 'old-port', kind: 'browser_source', settings: { url: 'http://127.0.0.1:3000/overlay/comments' } },
+      { inputUuid: 'file', kind: 'browser_source', settings: { url: origin + '/overlay/comments', is_local_file: true } },
+      { inputUuid: 'media', kind: 'ffmpeg_source', settings: { url: origin + '/overlay/comments' } },
+    ];
+    connection.request.mockImplementation(async (type, data) => {
+      const input = inputs.find(item => item.inputUuid === data?.inputUuid);
+      if (type === 'GetInputList') return { ...connection.requestResult, responseData: {
+        inputs: inputs.map(item => ({ inputUuid: item.inputUuid, unversionedInputKind: item.kind })),
+      } };
+      if (type === 'GetInputSettings') return { ...connection.requestResult, responseData: {
+        inputKind: input?.kind, inputSettings: input?.settings,
+      } };
+      if (type === refresh && input?.inputUuid === 'reactions') throw new Error('input unavailable');
+      return connection.requestResult;
+    });
+    const controller = new ObsControlController({ store: new FakeStore(), transport: new FakeTransport(connection) });
+    try {
+      if (!obsFirst) controller.setOverlayServerOrigin(origin);
+      await controller.start();
+      if (obsFirst) {
+        await vi.waitFor(() => expect(controller.view().connection).toBe('connected'));
+        expect(connection.request).not.toHaveBeenCalled();
+        controller.setOverlayServerOrigin(origin);
+      }
+      await vi.waitFor(() => expect(connection.request).toHaveBeenCalledWith('GetInputSettings', { inputUuid: 'file' }));
+      expect(connection.request.mock.calls.filter(([type]) => type === refresh)).toEqual(
+        overlays.map(({ inputUuid }) => [refresh, { inputUuid, propertyName: 'refreshnocache' }]),
+      );
+      expect(connection.request).not.toHaveBeenCalledWith('GetInputSettings', { inputUuid: 'media' });
+      connection.emit('CurrentSceneCollectionChanged');
+      await controller.retry();
+      expect(connection.request.mock.calls.filter(([type]) => type === 'GetInputList')).toHaveLength(1);
+      expect(controller.view().connection).toBe('connected');
+    } finally { await controller.stop(); }
+  });
+
+  it.each(['quit', 'collection', 'disconnect'])('%sで確認中の入力への再読み込みを取り消す', async reason => {
+    const { controller, connection } = await connectedController();
+    const inputUuid = 'comments';
+    let resolveSettings!: (response: ObsRequestResponse) => void;
+    const pendingSettings = new Promise<ObsRequestResponse>(resolve => { resolveSettings = resolve; });
+    connection.request.mockImplementation(async type => type === 'GetInputSettings' ? pendingSettings : {
+      ...connection.requestResult, responseData: { inputs: [{ inputUuid, unversionedInputKind: 'browser_source' }] },
+    });
+    try {
+      controller.setOverlayServerOrigin(origin);
+      await vi.waitFor(() => expect(connection.request).toHaveBeenCalledWith('GetInputSettings', { inputUuid }));
+      if (reason === 'quit') controller.setOverlayServerOrigin(null);
+      if (reason === 'collection') connection.emit('CurrentSceneCollectionChanged');
+      if (reason === 'disconnect') await connection.close();
+      resolveSettings({ ...connection.requestResult, responseData: {
+        inputKind: 'browser_source', inputSettings: { url: origin + '/overlay/comments' },
+      } });
+      await new Promise<void>(resolve => setImmediate(resolve));
+      expect(connection.request.mock.calls.some(([type]) => type === refresh)).toBe(false);
+    } finally { await controller.stop(); }
+  });
+});
+
 describe('OBS静止画のAndroid操作許可', () => {
+  it.each(['missing completion', 'late old start'])('restores reaction reads after %s without reconnecting', async fault => {
+    let now = 10000;
+    const connection = new FakeConnection();
+    const controller = new ObsControlController({ store: new FakeStore(), transport: new FakeTransport(connection), monotonicNow: () => now });
+    await controller.start(); await controller.retry();
+    try {
+      if (fault === 'late old start') connection.emit('CurrentSceneCollectionChanged', { sceneCollectionName:'next' });
+      const previous = controller.visualReader('background', 'reaction');
+      connection.emit('CurrentSceneCollectionChanging', { sceneCollectionName:'next' });
+      expect(previous.valid()).toBe(false);
+      expect(() => controller.visualReader('background', 'reaction')).toThrow('BUSY');
+      connection.emit('CurrentProgramSceneChanged', { sceneName:'current' });
+      now += 2000;
+      await controller.visualReader('background', 'reaction').request('GetCurrentProgramScene');
+      expect(connection.request).toHaveBeenCalledWith('GetCurrentProgramScene', undefined);
+    } finally { await controller.stop(); }
+  });
+  it.each(['A', 'B', undefined])('waits from the latest collection start (%s) even without completion', async name => {
+    let now = 10000;
+    const connection = new FakeConnection();
+    const controller = new ObsControlController({ store: new FakeStore(), transport: new FakeTransport(connection), monotonicNow: () => now });
+    await controller.start(); await controller.retry();
+    try {
+      connection.emit('CurrentSceneCollectionChanging', { sceneCollectionName:'A' });
+      now += 750;
+      connection.emit('CurrentSceneCollectionChanging', name ? { sceneCollectionName:name } : undefined);
+      now += 250;
+      expect(() => controller.visualReader('background', 'reaction')).toThrow('BUSY');
+      now += 749;
+      expect(() => controller.visualReader('background', 'reaction')).toThrow('BUSY');
+      now++;
+      expect(controller.visualReader('background', 'reaction').valid()).toBe(true);
+    } finally { await controller.stop(); }
+  });
+  it.each(['B','older',undefined])('keeps the current collection wait when a completion reports %s', async destination => {
+    let now = 10000;
+    const connection = new FakeConnection();
+    const controller = new ObsControlController({ store: new FakeStore(), transport: new FakeTransport(connection), monotonicNow: () => now });
+    await controller.start(); await controller.retry();
+    try {
+      connection.emit('CurrentSceneCollectionChanging', { sceneCollectionName:'A' });
+      connection.emit('CurrentSceneCollectionChanging', { sceneCollectionName:'B' });
+      connection.emit('CurrentSceneCollectionChanged', destination ? { sceneCollectionName:destination } : undefined);
+      expect(() => controller.visualReader('background', 'reaction')).toThrow('BUSY');
+      connection.emit('CurrentSceneCollectionChanged', { sceneCollectionName:'C' });
+      now += 999;
+      expect(() => controller.visualReader('background', 'reaction')).toThrow('BUSY');
+      now++;
+      expect(controller.visualReader('background', 'reaction').valid()).toBe(true);
+    } finally { await controller.stop(); }
+  });
+  it('invalidates a resumed reader when a fresh start arrives without an earlier completion', async () => {
+    let now = 10000;
+    const connection = new FakeConnection();
+    const controller = new ObsControlController({ store: new FakeStore(), transport: new FakeTransport(connection), monotonicNow: () => now });
+    await controller.start(); await controller.retry();
+    try {
+      connection.emit('CurrentSceneCollectionChanging', { sceneCollectionName:'A' });
+      now += 1000;
+      const reader = controller.visualReader('background','reaction');
+      connection.emit('CurrentSceneCollectionChanging', { sceneCollectionName:'A' });
+      expect(() => controller.visualReader('background','reaction')).toThrow('BUSY');
+      now += 1000;
+      expect(reader.valid()).toBe(false);
+      expect(controller.visualReader('background','reaction').valid()).toBe(true);
+    } finally { await controller.stop(); }
+  });
+  it.each([-60000, 60000])('uses elapsed time to settle a collection change after a %d ms wall-clock correction', async offset => {
+    let elapsed = 10000, wall = 100000;
+    const monotonicClock = vi.spyOn(performance, 'now').mockImplementation(() => elapsed);
+    const wallClock = vi.spyOn(Date, 'now').mockImplementation(() => wall);
+    const connection = new FakeConnection();
+    const controller = new ObsControlController({ store: new FakeStore(), transport: new FakeTransport(connection) });
+    try {
+      await controller.start(); await controller.retry();
+      connection.emit('CurrentSceneCollectionChanging', { sceneCollectionName:'A' });
+      wall += offset;
+      elapsed += 999;
+      expect(() => controller.visualReader('background', 'reaction')).toThrow('BUSY');
+      elapsed++;
+      expect(controller.visualReader('background', 'reaction').valid()).toBe(true);
+    } finally {
+      await controller.stop();
+      monotonicClock.mockRestore(); wallClock.mockRestore();
+    }
+  });
+  it('blocks reaction reads during scene collection changes before notifying the reaction controller', async () => {
+    let now = 10000;
+    const connection = new FakeConnection();
+    const controller = new ObsControlController({ store: new FakeStore(), transport: new FakeTransport(connection),
+      monotonicNow: () => now,
+      onReactionContextChanged: type => {
+        if (type === 'CurrentSceneCollectionChanging') expect(() => controller.visualReader('background', 'reaction')).toThrow('BUSY');
+      } });
+    await controller.start(); await controller.retry();
+    try {
+      const previous = controller.visualReader('background', 'reaction');
+      connection.request.mockClear();
+      connection.emit('CurrentSceneCollectionChanging');
+      expect(previous.valid()).toBe(false);
+      await expect(previous.request('GetSourceScreenshot')).rejects.toThrow('OBS_CAPTURE_CHANGED');
+      expect(connection.request).not.toHaveBeenCalled();
+      connection.emit('CurrentSceneCollectionChanged');
+      now += 1000;
+      await controller.visualReader('background', 'reaction').request('GetSourceScreenshot');
+      expect(connection.request).toHaveBeenCalledWith('GetSourceScreenshot', undefined);
+    } finally { await controller.stop(); }
+  });
+  it('lets reaction readers verify their own source path without weakening ordinary readers',async()=>{
+    const {controller,connection}=await connectedController();
+    try {
+      const ordinary=controller.visualReader(), reaction=controller.visualReader('background','reaction');
+      connection.emit('SceneItemTransformChanged',{sceneName:'scene',sceneItemId:999});
+      expect(ordinary.valid()).toBe(false);expect(reaction.valid()).toBe(true);
+      await expect(reaction.request('SetSceneItemTransform')).rejects.toThrow('OBS_READ_ONLY');
+      connection.emit('CurrentProgramSceneChanged',{sceneName:'other'});expect(reaction.valid()).toBe(false);
+    } finally {await controller.stop();}
+  });
+  it('forwards geometry and rename events to reactions and invalidates outstanding visual readers', async () => {
+    const connection = new FakeConnection(), changed = vi.fn();
+    const controller = new ObsControlController({ store: new FakeStore(), transport: new FakeTransport(connection), delay: async () => undefined, onReactionContextChanged: changed });
+    await controller.start(); await controller.retry();
+    try {
+      const read = controller.visualReader();
+      const transform = { sceneUuid: 'scene-id', sceneName: 'scene', sceneItemId: 7, sceneItemTransform: { positionX: 100 } };
+      connection.emit('SceneItemTransformChanged', transform);
+      expect(changed).toHaveBeenCalledWith('SceneItemTransformChanged', transform); expect(read.valid()).toBe(false);
+      const renamed = { sceneUuid: 'scene-id', oldSceneName: 'scene', sceneName: 'renamed' };
+      connection.emit('SceneNameChanged', renamed); expect(changed).toHaveBeenCalledWith('SceneNameChanged', renamed);
+    } finally { await controller.stop(); }
+  });
+  it('notifies reactions on actual websocket disconnect, explicit reconnect and disable', async () => {
+    const connection=new FakeConnection(), changed=vi.fn();const controller=new ObsControlController({store:new FakeStore(),transport:new FakeTransport(connection),onReactionContextChanged:changed});
+    await controller.start();await controller.retry();changed.mockClear();
+    try { await connection.close();expect(changed).toHaveBeenCalledWith('Disconnected');expect(controller.view().connection).toBe('unavailable');
+      await controller.retry();changed.mockClear();await controller.configure({enabled:false});expect(changed).toHaveBeenCalledWith('Disabled');
+    } finally { await controller.stop(); }
+  });
+  it('shares the physical screenshot slot across background and foreground readers', async () => {
+    const { controller, connection } = await connectedController();
+    try {
+      let finish!: (value: ObsRequestResponse) => void;
+      connection.request.mockImplementationOnce(() => new Promise(resolve => { finish = resolve; }));
+      const background = controller.visualReader('background').request('GetSourceScreenshot', { imageCompressionQuality: 50 });
+      await expect(controller.visualReader().request('GetSourceScreenshot', { imageCompressionQuality: 75 })).rejects.toThrow('BUSY');
+      expect(connection.request).toHaveBeenCalledTimes(1);
+      finish({ requestStatus: { result: true, code: 100 }, responseData: { imageData: 'value' } }); await background;
+      await expect(controller.visualReader('background').request('GetSourceScreenshot')).rejects.toThrow('BUSY');
+      await controller.visualReader().request('GetSourceScreenshot', { imageCompressionQuality: 75 });
+      expect(connection.request).toHaveBeenCalledTimes(2);
+    } finally { await controller.stop(); }
+  });
+  it.each(['preview', 'connection', 'unregistered connection'])(
+    'handles Android retry priority during a physical capture (%s)', async route => {
+    const { controller, connection } = await connectedController();
+    let elapsed = 10000;
+    const clock = vi.spyOn(performance, 'now').mockImplementation(() => elapsed);
+    const imageData = `data:image/jpeg;base64,${readFileSync(new URL('./fixtures/obs-program-black.jpg', import.meta.url)).toString('base64')}`;
+    let release: (() => void) | undefined;
+    connection.request.mockImplementation(async (type, data) => {
+      let responseData: Record<string, unknown>;
+      switch (type) {
+        case 'GetSceneCollectionList': responseData = { currentSceneCollectionName:'collection' }; break;
+        case 'GetCurrentProgramScene': responseData = { currentProgramSceneName:'scene', currentProgramSceneUuid:'scene-id' }; break;
+        case 'GetVideoSettings': responseData = { baseWidth:32, baseHeight:18 }; break;
+        case 'GetVersion': responseData = { supportedImageFormats:['jpg'] }; break;
+        case 'GetSourceScreenshot':
+          if (data?.imageCompressionQuality === 75) await new Promise<void>(resolve => { release = resolve; });
+          responseData = { imageData };
+          break;
+        default: throw new Error(type);
+      }
+      return { requestStatus:{ result:true, code:100 }, responseData };
+    });
+    const android = () => controller.captureProgramAndroid(registration(), new AbortController().signal);
+    const background = () => controller.visualReader('background', 'reaction').request('GetSourceScreenshot', { imageCompressionQuality:50 });
+    try {
+      const first = android();
+      await vi.waitFor(() => expect(release).toBeTypeOf('function'));
+      if (route === 'preview') await expect(android()).rejects.toMatchObject({ status:409 });
+      else controller.noteAndroidCaptureContention(route === 'connection' ? registration() : { ...registration(), token:'revoked' });
+      release?.();
+      await expect(first).resolves.toMatchObject({ width:32, height:18 });
+      if (route !== 'unregistered connection') {
+        elapsed += 4999;
+        await expect(background()).rejects.toThrow('BUSY');
+        elapsed++;
+      }
+      // A transfer-only conflict has no physical capture to reserve a retry for.
+      controller.noteAndroidCaptureContention(registration());
+      await expect(background()).resolves.toEqual({ imageData });
+    } finally {
+      release?.();
+      clock.mockRestore();
+      await controller.stop();
+    }
+  });
   it('現在の登録・OBS連携・Android操作許可を必須にし、撮影だけで配信を操作しない', async () => {
     const { controller, connection } = await connectedController();
     try {

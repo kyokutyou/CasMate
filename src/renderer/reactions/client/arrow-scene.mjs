@@ -1,0 +1,54 @@
+// The approved “一筆で描く” sample, evaluated at the shared event age.
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const ease=value=>{const t=clamp(value,0,1);return 1-Math.pow(1-t,3);};
+const mix=(a,b,t)=>({x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t});
+export function drawArrowFrame(c,label,root,from,to,W,H,ms,{preview=false,reducedMotion=false,dpr=1}={}){
+ const fx={getContext:()=>c},ghost=preview?{from,to}:null,active={from,to},reduced={matches:reducedMotion},palette={color:'#237b90'};
+ const arrowGeometry=record=>{const start={x:record.from.x*W,y:record.from.y*H},end={x:record.to.x*W,y:record.to.y*H},length=Math.hypot(end.x-start.x,end.y-start.y)||1;return {start,end,v:{x:(end.x-start.x)/length,y:(end.y-start.y)/length}};};
+  function setLabel(ms,opacity,still,record){
+    const {start,end,v}=arrowGeometry(record);let n={x:-v.y,y:v.x};
+    if(Math.abs(v.y)<.35)n={x:0,y:(start.y+end.y)/2>92?-1:1};else if(n.x<0)n={x:-n.x,y:-n.y};
+    const center=mix(start,end,.42),bw=82,bh=27,offset=Math.max(33,Math.abs(n.x)*bw/2+Math.abs(n.y)*bh/2+10);
+    const lx=clamp(center.x+n.x*offset-bw/2,10,W-bw-10),ly=clamp(center.y+n.y*offset-bh/2,42,H-bh-36),enter=still?1:ease((ms-650)/260);
+    label.textContent='こっち！';label.style.left=lx+'px';label.style.top=ly+'px';label.style.width=bw+'px';label.style.opacity=opacity*enter;
+    label.style.transform='translateY('+((1-enter)*5)+'px)';
+  }
+function draw(ms){
+  const c=fx.getContext('2d');
+  c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,W,H);label.style.opacity='0';
+  const preview=!!ghost,record=ghost||active,still=preview||reduced.matches;
+  if(!record)return;
+  const elapsed=Number.isFinite(ms)?clamp(ms,0,4000):0,age=still?1600:elapsed;
+  const opacity=preview?.48:1-ease((elapsed-3400)/600);
+  root.dataset.elapsed=String(Math.round(elapsed));
+  root.dataset.phase=preview?'preview':age<100?'poise':age<820?'draw':age<1240?'open':age<1500?'settle':elapsed<3400?'hold':elapsed<4000?'erase':'done';
+  root.dataset.visible=String(opacity>0);setLabel(ms,opacity,still,record);
+  if(opacity<=0)return;
+  const {start,end}=arrowGeometry(record);
+  if(!Number.isFinite(start.x)||!Number.isFinite(start.y)||!Number.isFinite(end.x)||!Number.isFinite(end.y))return;
+  const dx=end.x-start.x,dy=end.y-start.y,length=Math.hypot(dx,dy);
+  if(length<.001)return;
+  const v={x:dx/length,y:dy/length},n={x:-v.y,y:v.x};
+  const smooth=x=>{const t=clamp(x,0,1);return t*t*t*(10+t*(-15+6*t));};
+  const drawn=still?1:smooth((age-100)/720);
+  const erased=still?0:smooth((elapsed-3400)/340);
+  const top=still?1:smooth((age-820)/280),bottom=still?1:smooth((age-950)/290);
+  const settle=still?1:clamp((age-1140)/330,0,1);
+  const quiet=still?1:1+.035*Math.sin(settle*Math.PI*2)*(1-settle);
+  const head=Math.min(18,length*.27),spread=head*.53*quiet;
+  const headErase=still?0:smooth((elapsed-3650)/330);
+  const wing=(side,amount)=>({x:end.x-v.x*head*amount+n.x*side*spread*amount,y:end.y-v.y*head*amount+n.y*side*spread*amount});
+  c.save();c.globalAlpha=opacity;c.strokeStyle=palette.color;c.lineWidth=2.4;c.lineCap='round';c.lineJoin='round';c.beginPath();
+  if(drawn>erased){
+    const a=mix(start,end,erased),b=drawn>=1?end:mix(start,end,drawn);
+    c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);
+  }
+  // Both strokes keep their shared vertex fixed at the requested destination.
+  const upper=top*(1-headErase),lower=bottom*(1-headErase);
+  if(upper>0){const p=wing(-1,upper);c.moveTo(p.x,p.y);c.lineTo(end.x,end.y);}
+  if(lower>0){const p=wing(1,lower);c.moveTo(end.x,end.y);c.lineTo(p.x,p.y);}
+  c.stroke();c.restore();
+}
+
+ draw(ms);
+}

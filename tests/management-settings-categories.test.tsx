@@ -12,17 +12,18 @@ const categories = [
   ['表示・演出', [['textEffects', 'コメント文字演出'], ['character', 'キャラクター'], ['commentList', 'コメント一覧']]],
   ['OBS', [['commentOverlay', 'OBSコメント表示'], ['speechRecognitionOverlay', 'OBS音声認識表示'], ['obsControl', 'OBS操作'], ['urls', 'OBSにソースを追加']]],
   ['スマホ連携', [['smartphone', 'スマホ連携']]],
+  ['リスナー参加', [['listenerReactions', 'リスナーリアクション'], ['listenerPoll', 'リスナー投票']]],
   ['アプリ', [['application', 'アプリ設定']]],
 ] as const;
 
-it('設定の6分類に15の入口を重複なく並べ、移動した項目の警告も表示する', () => {
+it('設定の7分類に17の入口を重複なく並べ、移動した項目の警告も表示する', () => {
   render(<ManagementShell home={null} connected pcStatus={null} windows={null}
     warnings={[{ id: 'aiListener', message: '再開が必要です。' }, { id: 'obsControl', message: 'OBS接続を確認してください。' }]} activities={[]}>
     {null}
   </ManagementShell>);
   fireEvent.click(within(screen.getByRole('navigation')).getByRole('button', { name: '設定', exact: true }));
   const cards = [...document.querySelectorAll('.management-categories .management-category')];
-  expect(cards).toHaveLength(6);
+  expect(cards).toHaveLength(7);
   expect(screen.queryByRole('button', { name: 'AIリスナーの人格 ›' })).toBeNull();
   categories.forEach(([group, items], index) => {
     expect(within(cards[index] as HTMLElement).getByRole('heading', { level: 2 })).toHaveTextContent(group);

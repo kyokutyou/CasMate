@@ -104,7 +104,7 @@ app.whenReady().then(async () => {
         await evaluate("document.querySelector('.management-nav button:nth-child(2)').click(); document.getElementById('settings-urls').click()");
         for (const textSize of ['small', 'medium', 'large']) {
           await evaluate(`window.obsRegistrationHarness.update({textSize:${JSON.stringify(textSize)}})`);
-          for (const target of ['comments', 'speech', 'character', 'effects']) {
+          for (const target of ['comments', 'speech', 'character', 'effects', 'poll', 'reactions']) {
             await evaluate(`document.getElementById('obs-registration-entry-${target}').click()`);
             await ready("document.querySelector('.obs-registration-status').textContent.includes('OBSに接続していません')");
             const metrics = await evaluate(`(() => {
@@ -227,9 +227,9 @@ app.whenReady().then(async () => {
       await ready('Boolean(window.obsRegistrationHarness)');
       await evaluate("document.querySelector('.management-nav button:nth-child(2)').click(); document.getElementById('settings-urls').click()"); await settle();
       assert.equal(await evaluate("document.querySelector('.management-body').scrollWidth > document.querySelector('.management-body').clientWidth"), false, `${width}px entry overflow`);
-      assert.equal(await evaluate("document.querySelectorAll('.obs-urls-row .obs-urls-add').length"), 4);
+      assert.equal(await evaluate("document.querySelectorAll('.obs-urls-row .obs-urls-add').length"), 6);
       await capture(`${width}-entries`);
-      for (const target of ['comments', 'speech', 'character', 'effects']) {
+      for (const target of ['comments', 'speech', 'character', 'effects', 'poll', 'reactions']) {
         await evaluate(`document.getElementById('obs-registration-entry-${target}').scrollIntoView({block:'center'}); document.getElementById('obs-registration-entry-${target}').focus({preventScroll:true}); document.getElementById('obs-registration-entry-${target}').click()`);
           await ready("document.querySelector('[data-action=register]')?.getAttribute('aria-disabled') === 'false'");
         assert.deepEqual(await evaluate(geometry), { fits: true, overflow: false, close: true, footer: true }, `${width}px ${target} modal`);
@@ -330,7 +330,7 @@ app.whenReady().then(async () => {
       await capture(`${width}-phone-manual`); await key('Escape'); scenarios++;
     }
     console.log(`PASS: ${scenarios} OBS registration layout/state scenarios`);
-    console.log('PASS: four entries, manual phone fallback, recovery and keyboard');
+    console.log('PASS: five entries, manual phone fallback, recovery and keyboard');
   } catch (error) {
     console.error(error);
     console.error(await window.webContents.executeJavaScript(`JSON.stringify({focus:document.activeElement.id,editor:document.getElementById('editor-heading')?.textContent,dialog:document.getElementById('obs-source-registration-dialog').open,recovery:[...document.querySelectorAll('.obs-registration-focus-target')].map(value=>({id:value.id,hidden:Boolean(value.closest('[hidden]')),rect:value.getBoundingClientRect().toJSON()}))})`));

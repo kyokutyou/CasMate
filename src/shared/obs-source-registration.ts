@@ -1,4 +1,6 @@
 export const obsOverlayDefinitions = {
+  reactions: { title: 'リスナーリアクション', path: '/overlay/reactions' },
+  poll: { title: 'リスナー投票', path: '/overlay/poll' },
   comments: { title: 'コメント', path: '/overlay/comments' },
   speech: { title: '音声認識', path: '/overlay/speech-recognition' },
   character: { title: 'キャラクター', path: '/overlay/character' },

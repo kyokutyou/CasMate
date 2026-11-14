@@ -158,29 +158,6 @@ fun CasMateTabs(
                             style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
                     }
                 }
-                IconButton(onClick = { actionsOpen = false; settingsOpen = false; jp.casmate.app.obs.ObsControlRuntime.cancel(); onOpenConnection() },
-                    modifier = Modifier.size(48.dp).semantics {
-                        contentDescription = "スマホ連携"
-                        stateDescription = connectionLabel
-                    }) {
-                    Box(Modifier.size(28.dp)) {
-                        Icon(painterResource(jp.casmate.app.R.drawable.ic_smartphone_link), null,
-                            modifier = Modifier.size(24.dp).testTag("スマホ連携の入口"),
-                            tint = MaterialTheme.colorScheme.primary)
-                        if (connectionConfirmed) Text("✓",
-                            Modifier.align(Alignment.TopEnd).background(MaterialTheme.colorScheme.background),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary)
-                    }
-                }
-                IconButton(onClick = { openSettings(); restoreSettingsFocus = true },
-                    modifier = Modifier.size(48.dp).focusRequester(settingsFocus).focusProperties { canFocus = true }
-                        .testTag(if (selected == 0) "カメラ設定の入口" else "コメント設定の入口")
-                        .semantics { contentDescription = if (selected == 0) "映像・マイク" else "コメント設定と状態" }) {
-                    Icon(painterResource(if (selected == 0) jp.casmate.app.R.drawable.ic_camera_actions
-                        else jp.casmate.app.R.drawable.ic_comment_settings), null,
-                        tint = MaterialTheme.colorScheme.primary)
-                }
                 if (selected == 1) IconToggleButton(checked = readingActive, onCheckedChange = { onToggleReading() },
                     enabled = readingActive || readingRegistered,
                     colors = IconButtonDefaults.iconToggleButtonColors(contentColor = MaterialTheme.colorScheme.primary,
@@ -201,6 +178,30 @@ fun CasMateTabs(
                             color = if (commentsNeedAttention) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
                     }
                 }
+                IconButton(onClick = { actionsOpen = false; settingsOpen = false; jp.casmate.app.obs.ObsControlRuntime.cancel(); onOpenConnection() },
+                    modifier = Modifier.size(48.dp).semantics {
+                        contentDescription = "スマホ連携"
+                        stateDescription = connectionLabel
+                    }) {
+                    Box(Modifier.size(28.dp)) {
+                        Icon(painterResource(jp.casmate.app.R.drawable.ic_smartphone_link), null,
+                            modifier = Modifier.size(24.dp).testTag("スマホ連携の入口"),
+                            tint = MaterialTheme.colorScheme.primary)
+                        if (connectionConfirmed) Text("✓",
+                            Modifier.align(Alignment.TopEnd).background(MaterialTheme.colorScheme.background),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+                IconButton(onClick = { openSettings(); restoreSettingsFocus = true },
+                    modifier = Modifier.size(48.dp).focusRequester(settingsFocus).focusProperties { canFocus = true }
+                        .testTag(if (selected == 0) "カメラ設定の入口" else "コメント設定の入口")
+                        .semantics { contentDescription = if (selected == 0) "カメラ設定" else "コメント設定と状態" }) {
+                    Icon(painterResource(if (selected == 0) jp.casmate.app.R.drawable.ic_camera_actions
+                        else jp.casmate.app.R.drawable.ic_comment_settings), null,
+                        tint = MaterialTheme.colorScheme.primary)
+                }
+
             }
         }
         CompositionLocalProvider(LocalHorizontalFlick provides flick,

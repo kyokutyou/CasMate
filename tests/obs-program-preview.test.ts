@@ -20,6 +20,12 @@ function fixture(width = 1920, height = 1080) {
     disconnect: () => { current = false; }, setImage: (value: string) => { imageData = value; } };
 }
 describe('OBS本番シーンの静止画', () => {
+  it.each([[1920,1080,640,360],[1080,1920,360,640]])('リアクション撮影は長辺640・品質50に抑え元キャンバスを保持する（%s×%s）', async(width,height,scaledWidth,scaledHeight)=>{
+    const f=fixture(width,height);
+    const preview=new ObsProgramPreview(()=>({request:f.request,valid:()=>true}),()=>({width:scaledWidth,height:scaledHeight}),{maxDimension:640,quality:50});
+    expect(await preview.capture(new AbortController().signal)).toMatchObject({width:scaledWidth,height:scaledHeight,canvasWidth:width,canvasHeight:height});
+    expect(f.request).toHaveBeenCalledWith('GetSourceScreenshot',expect.objectContaining({imageWidth:scaledWidth,imageHeight:scaledHeight,imageCompressionQuality:50}));
+  });
   it('実JPEG解析で黒画像を正常として扱い、小さい画像を拡大しない', async () => {
     const f = fixture(32, 18);
     const bytes = readFileSync(new URL('./fixtures/obs-program-black.jpg', import.meta.url));
@@ -67,6 +73,16 @@ describe('OBS本番シーンの静止画', () => {
       return response;
     });
     await expect(f.preview.capture(new AbortController().signal)).rejects.toThrow();
+  });
+  it('撮影中の通知なしキャンバス変更で旧寸法の画像を破棄する', async () => {
+    const f = fixture(); const original = f.request.getMockImplementation()!;
+    let resized = false;
+    f.request.mockImplementation(async (type, data) => {
+      if (type === 'GetVideoSettings' && resized) return { baseWidth:1280, baseHeight:720 };
+      if (type === 'GetSourceScreenshot') resized = true;
+      return original(type, data);
+    });
+    await expect(f.preview.capture(new AbortController().signal)).rejects.toThrow('OBS_CAPTURE_CHANGED');
   });
   it.each(['data:image/png;base64,/9j/2Q==', 'data:image/jpeg;base64,AAAA', 'data:image/jpeg;base64,' + 'A'.repeat(2800001)])('不正・過大画像を拒否する', async data => {
     const f = fixture(); f.setImage(data); await expect(f.preview.capture(new AbortController().signal)).rejects.toThrow();

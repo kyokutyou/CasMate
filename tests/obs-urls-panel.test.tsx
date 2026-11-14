@@ -7,6 +7,7 @@ import { ManagementShell } from '../src/renderer/components/ManagementShell';
 const paths = [
   ['コメント', '/overlay/comments'], ['音声認識', '/overlay/speech-recognition'],
   ['キャラクター', '/overlay/character'], ['文字演出', '/overlay/text-effects'],
+  ['リスナー投票', '/overlay/poll'], ['リスナーリアクション', '/overlay/reactions'],
   ['管理画面', ''], ['コメント一覧', '/comments'],
 ];
 function setup() {
@@ -21,11 +22,11 @@ describe('OBSにソースを追加・用途別カード', () => {
     HTMLDialogElement.prototype.close = function () { this.removeAttribute('open'); };
   });
   afterEach(() => { cleanup(); vi.useRealTimers(); vi.restoreAllMocks(); });
-  it('4つのOBS表示と補助領域に分け、6つの現在URLをコピーする', async () => {
+  it('6つのOBS表示と補助領域に分け、8つの現在URLをコピーする', async () => {
     const { props } = setup();
     const cards = within(screen.getByRole('region', { name: 'OBSに追加する表示一覧' })).getAllByRole('article');
-    expect(cards).toHaveLength(4);
-    expect(cards.map(card => card.getAttribute('aria-label'))).toEqual(paths.slice(0, 4).map(([title]) => title));
+    expect(cards).toHaveLength(6);
+    expect(cards.map(card => card.getAttribute('aria-label'))).toEqual(paths.slice(0, 6).map(([title]) => title));
     expect(screen.queryByText('アプリ設定')).not.toBeInTheDocument();
     fireEvent.click(screen.getByText('ブラウザで使う画面'));
     for (const [title, path] of paths) {
@@ -57,9 +58,9 @@ describe('OBSにソースを追加・用途別カード', () => {
     fireEvent.click(screen.getByRole('button', { name: 'コメント一覧をブラウザで開く' }));
     expect(open).toHaveBeenLastCalledWith('http://127.0.0.1:3000/comments', '_blank', 'noopener');
   });
-  it('4枚のカードに操作を残し、URL文字列は手動追加の詳細で確認できる', () => {
+  it('6枚のカードに操作を残し、URL文字列は手動追加の詳細で確認できる', () => {
     setup();
-    for (const [title, path] of paths.slice(0, 4)) {
+    for (const [title, path] of paths.slice(0, 6)) {
       const card = screen.getByRole('article', { name: title });
       expect(card).toBeVisible();
       expect(within(card).getByRole('heading', { name: title })).toBeVisible();
@@ -69,7 +70,7 @@ describe('OBSにソースを追加・用途別カード', () => {
       expect(within(card).getByRole('button', { name: `${title}のURLをコピー` })).toHaveTextContent('URLをコピー');
     }
     fireEvent.click(screen.getByText('手動でOBSに追加する'));
-    for (const [, path] of paths.slice(0, 4)) expect(screen.getByText(`http://127.0.0.1:3000${path}`)).toBeVisible();
+    for (const [, path] of paths.slice(0, 6)) expect(screen.getByText(`http://127.0.0.1:3000${path}`)).toBeVisible();
     expect(screen.queryByRole('group', { name: 'OBSに追加する表示を選択' })).not.toBeInTheDocument();
     expect(screen.queryByRole('img')).not.toBeInTheDocument();
     expect(screen.queryByText('実際の表示はOBSで確認してください。')).not.toBeInTheDocument();
@@ -78,7 +79,7 @@ describe('OBSにソースを追加・用途別カード', () => {
     expect(screen.queryByText(/起動しておいて|起動したまま/)).not.toBeInTheDocument();
     expect(navigator.clipboard.writeText).not.toHaveBeenCalled();
   });
-  it('画面を往復しても4枚のカードと補助領域の開閉を保持する', () => {
+  it('画面を往復しても6枚のカードと補助領域の開閉を保持する', () => {
     render(<ManagementShell home={null} connected pcStatus={null} windows={null} warnings={[]} activities={[]}>
       <ObsUrlsPanel baseUrl="http://127.0.0.1:3000" onSuccess={vi.fn()} onError={vi.fn()} onOperationStart={vi.fn()}/>
     </ManagementShell>);
@@ -91,7 +92,7 @@ describe('OBSにソースを追加・用途別カード', () => {
     fireEvent.click(screen.getByText('手動でOBSに追加する'));
     fireEvent.click(screen.getByRole('button', { name: '← 設定に戻る' }));
     fireEvent.click(document.getElementById('settings-urls')!);
-    expect(screen.getAllByRole('article')).toHaveLength(4);
+    expect(screen.getAllByRole('article')).toHaveLength(6);
     expect(browser.open).toBe(true); expect(manual.open).toBe(true);
   });
 });

@@ -162,11 +162,13 @@ describe('OBS画像の認証付き制御転送', () => {
   });
   it('同時要求を拒否し、転送途中の許可OFFでも他機能の接続を維持する', async () => {
     const f = captureFixture();
+    const noteContention = vi.spyOn(f.obs, 'noteAndroidCaptureContention');
     f.ws.bufferedAmount = 40000;
     f.ws.receive({ type: 'obs.captureProgram', id: 'image', generation: 1, payload: {} });
     await vi.waitFor(() => expect(f.ws.sent.some(e => e.type === 'control.result' && e.payload.id === 'image')).toBe(true));
     f.ws.receive({ type: 'obs.captureProgram', id: 'busy', generation: 1, payload: {} });
     await vi.waitFor(() => expect(f.ws.sent.find(e => e.payload.id === 'busy')!.payload.status).toBe(409));
+    expect(noteContention).toHaveBeenCalledExactlyOnceWith(f.principal.obs);
     vi.mocked(f.obs.canCaptureProgramAndroid).mockReturnValue(false);
     await vi.waitFor(() => expect(f.ws.sent.some(e => e.type === 'obs.captureFailed')).toBe(true));
     expect(f.ws.binary).toHaveLength(0); expect(f.ws.readyState).toBe(1);

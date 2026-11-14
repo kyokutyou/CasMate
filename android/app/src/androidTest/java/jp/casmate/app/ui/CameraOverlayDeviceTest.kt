@@ -40,10 +40,10 @@ class CameraOverlayDeviceTest {
             for (mode in AppearanceMode.entries) {
                 ui.onNodeWithTag("カメラ設定の入口").performClick()
                 ui.onNodeWithTag("機能操作メニュー").assertIsDisplayed()
-                ui.onNodeWithTag("映像・マイク分類・送信品質").performScrollTo().performClick()
-                ui.onNodeWithText("送信品質：", substring = true).performScrollTo().assertIsDisplayed()
+                ui.onNodeWithTag("映像・マイク分類・画質と向き").performScrollTo().performClick()
+                ui.onNodeWithText("品質プリセット：", substring = true).performScrollTo().assertIsDisplayed()
                 ui.onNodeWithText("戻る").performClick()
-                ui.onNodeWithTag("映像・マイク分類・その他").performScrollTo().performClick()
+                ui.onNodeWithTag("映像・マイク分類・アプリと連携").performScrollTo().performClick()
                 ui.onNodeWithText(if (mode == AppearanceMode.LIGHT) "ライトモード" else "ダークモード")
                     .performScrollTo().performClick()
                 ui.waitUntil(5_000) { runBlocking { preferences.appearance.first() == mode } }
@@ -61,7 +61,7 @@ class CameraOverlayDeviceTest {
                 java.io.File(context.getExternalFilesDir(null), "camera-transparent-${mode.storedValue}.png")
                     .outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
                 ui.onNodeWithTag("画面切替・コメント").performClick()
-                assertEquals(cameraGear, ui.onNodeWithTag("コメント・読み上げ操作").fetchSemanticsNode().boundsInRoot)
+                assertEquals(cameraGear, ui.onNodeWithTag("コメント設定の入口").fetchSemanticsNode().boundsInRoot)
                 assertTrue(cameraAction.right <= cameraGear.left)
                 ui.onNodeWithTag("画面切替・カメラ").performClick()
             }

@@ -18,8 +18,10 @@ import {
   type ObsStreamState,
 } from '../../shared/obs-control';
 import type { SpeechRecognitionResult } from '../../shared/types';
+import { obsOverlayDefinitions } from '../../shared/obs-source-registration';
 import { ObsControlStore, ObsControlStorageError, defaultObsControlSettings, type ObsControlRecord } from './obs-control-store';
 import { ObsProgramPreview, type ObsProgramImage } from './obs-program-preview';
+import { ObsCaptureCoordinator } from './obs-capture-coordinator';
 import {
   DefaultObsWebsocketTransport,
   obsStreamStateFromStatus,
@@ -30,6 +32,7 @@ import {
 const CONFIRMATION_WINDOW_MS = 10_000;
 const ANDROID_CONFIRMATION_WINDOW_MS = 10_000;
 const OPERATION_TIMEOUT_MS = 30_000;
+const REACTION_COLLECTION_SETTLE_MS = 1_000;
 const RECONNECT_DELAYS_MS = [1_000, 2_000, 4_000, 8_000, 16_000, 30_000];
 
 const SOURCE_READ_REQUESTS = new Set([
@@ -56,9 +59,11 @@ export interface ObsControlControllerOptions {
   store: ObsControlStore;
   transport?: ObsWebsocketTransport;
   now?: () => number;
+  monotonicNow?: () => number;
   delay?: (milliseconds: number) => Promise<void>;
   onState?: (view: ObsControlView) => void;
   onSourceContextChanged?: () => void;
+  onReactionContextChanged?: (type: string, data?: Record<string, unknown>) => void;
 }
 
 export interface AndroidPrepareRequest {
@@ -106,16 +111,21 @@ interface RequestRetention<T> {
 }
 
 export class ObsControlController {
+  private readonly captures = new ObsCaptureCoordinator();
   private readonly programPreview = new ObsProgramPreview(() => this.visualReader());
 
   canCaptureProgramAndroid(principal: ObsControlRegistration): boolean {
     return this.validAndroidRegistration(principal) && this.connectionState === 'connected';
   }
 
+  noteAndroidCaptureContention(principal: ObsControlRegistration): void {
+    if (this.canCaptureProgramAndroid(principal)) this.captures.noteForegroundContention();
+  }
+
   async captureProgramAndroid(principal: ObsControlRegistration, signal: AbortSignal): Promise<ObsProgramImage> {
     if (!this.canCaptureProgramAndroid(principal)) throw new ObsControlHttpError(403, 'ANDROID_CONTROL_DISABLED');
     try {
-      const image = await this.programPreview.capture(signal);
+      const image = await this.programPreview.capture(signal, () => this.captures.noteForegroundContention());
       if (!this.canCaptureProgramAndroid(principal) || !image.current()) throw new Error('OBS_CAPTURE_CHANGED');
       return image;
     } catch (error) {
@@ -126,16 +136,62 @@ export class ObsControlController {
   }
   private readonly transport: ObsWebsocketTransport;
   private readonly now: () => number;
+  private readonly monotonicNow: () => number;
   private readonly delay: (milliseconds: number) => Promise<void>;
   private record: ObsControlRecord | null = null;
   private protectedUnavailable = false;
   private connection: ObsWebsocketConnection | null = null;
   private visualRevision = 0;
+  private reactionVisualRevision = 0;
   private streamRevision = 0;
   private sourceOwner: symbol | null = null;
   private sourceCollectionRevision = 0;
   private sourceDestinationRevision = 0;
   private sourceCollectionChanging = false;
+  private reactionCollectionReadAfter = 0;
+  private overlayServerOrigin: string | null = null;
+  private startupOverlayReloadAttempted = false;
+
+  setOverlayServerOrigin(origin: string | null): void {
+    this.overlayServerOrigin = origin;
+    this.maybeReloadStartupOverlays();
+  }
+
+  private maybeReloadStartupOverlays(): void {
+    const origin = this.overlayServerOrigin;
+    const connection = this.connection;
+    if (!origin || !connection || this.stopped || this.connectionState !== 'connected' ||
+      !this.settings().enabled || this.sourceCollectionChanging || this.startupOverlayReloadAttempted) return;
+
+    const reader = this.sourceSession();
+    const valid = () => this.overlayServerOrigin === origin && !this.stopped && reader.valid();
+    const urls = new Set(Object.values(obsOverlayDefinitions).map(({ path }) => origin + path));
+    this.startupOverlayReloadAttempted = true;
+    // A failed initial navigation never loaded the overlay's WebSocket reconnect code.
+    void this.reloadStartupOverlays(connection, reader, valid, urls).catch(() => undefined);
+  }
+
+  private async reloadStartupOverlays(connection: ObsWebsocketConnection, reader: ObsSourceSession,
+    valid: () => boolean, urls: ReadonlySet<string>): Promise<void> {
+    const { inputs } = await reader.request('GetInputList', { inputKind: 'browser_source' });
+    if (!Array.isArray(inputs)) return;
+    for (const input of inputs) {
+      if (!valid()) return;
+      if (input?.unversionedInputKind !== 'browser_source' || typeof input.inputUuid !== 'string' || !input.inputUuid) continue;
+      const { inputUuid } = input;
+      try {
+        const { inputKind, inputSettings } = await reader.request('GetInputSettings', { inputUuid });
+        const settings = inputSettings as { url?: unknown; is_local_file?: unknown } | null | undefined;
+        if (valid() && inputKind === 'browser_source' &&
+          (settings?.is_local_file === undefined || settings.is_local_file === false) &&
+          typeof settings?.url === 'string' && urls.has(settings.url)) {
+          await connection.request('PressInputPropertiesButton', { inputUuid, propertyName: 'refreshnocache' });
+        }
+      } catch {
+        // A removed or unavailable input must not prevent the other overlays from recovering.
+      }
+    }
+  }
 
   sourceReader(): ObsSourceSession { return this.sourceSession(); }
 
@@ -193,14 +249,24 @@ export class ObsControlController {
     this.setStreamState(stream);
     return { connected: true, stream };
   }
-  visualReader(): import('./obs-visual').ObsVisualReader {
-    const connection = this.connection; const revision = this.visualRevision;
+  visualReader(priority: 'foreground' | 'background' = 'foreground', scope: 'all' | 'reaction' = 'all'): import('./obs-visual').ObsVisualReader {
+    const connection = this.connection;
+    const currentRevision = () => scope === 'reaction' ? this.reactionVisualRevision : this.visualRevision;
+    const revision = currentRevision();
     if (!connection || this.connectionState !== 'connected' || !this.settings().enabled) throw new Error('OBS_UNAVAILABLE');
-    const allowed = new Set(['GetSceneCollectionList', 'GetSceneList', 'GetCurrentProgramScene', 'GetSceneItemList', 'GetGroupSceneItemList', 'GetVersion', 'GetSourceScreenshot', 'GetVideoSettings']);
-    return { valid: () => this.connection === connection && this.visualRevision === revision && this.settings().enabled,
+    // Reaction reads verify OBS context before and after capture. Let them recover
+    // independently of the completion event required by source registration.
+    const collectionChanging = () => scope === 'reaction' && this.monotonicNow() < this.reactionCollectionReadAfter;
+    if (collectionChanging()) throw new Error('BUSY');
+    const valid = () => this.connection === connection && currentRevision() === revision && this.settings().enabled && !collectionChanging();
+    const allowed = new Set(['GetSceneCollectionList', 'GetSceneList', 'GetCurrentProgramScene', 'GetSceneItemList', 'GetGroupSceneItemList', 'GetVersion', 'GetSourceScreenshot', 'GetVideoSettings', 'GetInputSettings', 'GetSourceFilterList']);
+    return { valid,
       request: async (type, data) => {
         if (!allowed.has(type)) throw new Error('OBS_READ_ONLY');
-        const response = await connection.request(type, data);
+        if (!valid()) throw new Error('OBS_CAPTURE_CHANGED');
+        const response = type === 'GetSourceScreenshot'
+          ? await this.captures.run(priority, () => connection.request(type, data))
+          : await connection.request(type, data);
         if (!response.requestStatus.result) throw new Error('OBS_VISUAL_UNAVAILABLE');
         return response.responseData ?? {};
       } };
@@ -263,6 +329,7 @@ export class ObsControlController {
     this.options = options;
     this.transport = options.transport ?? new DefaultObsWebsocketTransport();
     this.now = options.now ?? (() => Date.now());
+    this.monotonicNow = options.monotonicNow ?? (() => performance.now());
     this.delay = options.delay ?? ((milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)));
   }
 
@@ -276,12 +343,14 @@ export class ObsControlController {
     } catch (error) {
       this.record = null;
       this.protectedUnavailable = true;
-      this.connectionState = 'unavailable';
+      this.options.onReactionContextChanged?.('Disconnected');
+    this.connectionState = 'unavailable';
       this.error = error instanceof ObsControlStorageError ? error.message : obsControlUserError('OBS_SECRET_UNAVAILABLE');
       this.bump();
       return;
     }
     if (!this.record) {
+      this.options.onReactionContextChanged?.('Disabled');
       this.connectionState = 'disabled';
       this.streamState = 'unknown';
       this.bump();
@@ -732,12 +801,14 @@ export class ObsControlController {
         this.unsubscribeDisconnect = candidate.onDisconnect(() => this.handleDisconnect(candidate!));
         this.connectionState = 'connected';
         this.sourceCollectionChanging = false;
+        this.reactionCollectionReadAfter = 0;
         this.reconnectAttempt = 0;
         this.error = null;
         const status = await candidate.getStreamStatus();
         if (generation !== this.connectionGeneration) return;
         this.setStreamState(obsStreamStateFromStatus(status));
         this.bump();
+        this.maybeReloadStartupOverlays();
       } catch (error) {
         if (generation !== this.connectionGeneration) return;
         if (candidate && this.connection === candidate) {
@@ -763,11 +834,21 @@ export class ObsControlController {
   }
 
   private handleObsEvent(eventType: string, eventData?: Record<string, unknown>): void {
-    if (/Scene|Input|Source|Transition/.test(eventType)) this.visualRevision++;
-    if (eventType === 'CurrentSceneCollectionChanging' || eventType === 'CurrentSceneCollectionChanged') {
-      this.sourceCollectionRevision++;
-      this.sourceCollectionChanging = eventType === 'CurrentSceneCollectionChanging';
+    const collectionStarting = eventType === 'CurrentSceneCollectionChanging';
+    const collectionChanged = eventType === 'CurrentSceneCollectionChanged';
+    // Reactions validate the selected path themselves; other visual consumers remain strict.
+    if (collectionStarting || /CurrentProgramScene|VideoSettings/.test(eventType)) this.reactionVisualRevision++;
+    if (collectionStarting) {
+      // A retry can start from the same collection before a completion event arrives.
+      this.reactionCollectionReadAfter = this.monotonicNow() + REACTION_COLLECTION_SETTLE_MS;
     }
+    if (/Scene|Input|Source|Transition/.test(eventType)) this.visualRevision++;
+    if (collectionStarting || collectionChanged) {
+      this.sourceCollectionRevision++;
+      this.sourceCollectionChanging = collectionStarting;
+      this.maybeReloadStartupOverlays();
+    }
+    this.options.onReactionContextChanged?.(eventType, eventData);
     if (['CurrentSceneCollectionChanged', 'CurrentProgramSceneChanged', 'CurrentPreviewSceneChanged', 'StudioModeStateChanged'].includes(eventType)) {
       this.sourceDestinationRevision++;
       this.options.onSourceContextChanged?.();
@@ -780,6 +861,7 @@ export class ObsControlController {
 
   private handleDisconnect(connection: ObsWebsocketConnection): void {
     if (this.connection !== connection || this.stopped) return;
+    this.options.onReactionContextChanged?.('Disconnected');
     this.connection = null;
     this.unsubscribeConnection?.();
     this.unsubscribeConnection = null;
@@ -804,6 +886,7 @@ export class ObsControlController {
   }
 
   private async closeConnection(): Promise<void> {
+    this.options.onReactionContextChanged?.(this.settings().enabled ? 'Disconnected' : 'Disabled');
     this.connectionGeneration += 1;
     this.connectPromise = null;
     if (this.reconnectTimer) clearTimeout(this.reconnectTimer);

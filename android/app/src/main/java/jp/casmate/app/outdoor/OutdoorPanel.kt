@@ -25,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -189,32 +190,69 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
         onClose = closeSettings,
         onOpenDiagnostics = { closeSettings(); statisticsOpen = true },
         onOpenDrawing = { closeSettings(); OutdoorDrawingRuntime.controller.openMode(drawing.sessionId) },
-        drawingEnabled = state.active && drawing.active,
-        drawingDisabledReason = if (!state.active) "映像送信を開始すると利用できます" else "手書きの準備中です",
-    ) { category ->
+        drawingEnabled = state.active && drawing.active && state.camera.ready && !state.videoHidden &&
+            state.videoFaults.isEmpty() && state.camera.error.isEmpty() && !state.videoRecovering && !state.videoChanging,
+        drawingDisabledReason = when {
+            !state.active -> "映像送信を開始すると利用できます"
+            state.videoHidden -> "カメラに戻すと利用できます"
+            state.videoFaults.isNotEmpty() || state.camera.error.isNotEmpty() -> "カメラの確認が必要です"
+            state.videoRecovering -> "映像の復旧後に利用できます"
+            state.videoChanging || !state.camera.ready -> "準備完了後に利用できます"
+            else -> "手書きの準備中です"
+        },
+        summaries = mapOf(
+            OutdoorSettingsCategory.CAMERA to when {
+                state.videoFaults.isNotEmpty() || state.camera.error.isNotEmpty() -> "カメラの確認が必要"
+                state.videoRecovering -> "映像を復旧中"
+                state.videoChanging -> "カメラ切り替え中"
+                state.videoHidden -> "映像非表示"
+                state.active && state.status == "preparing" && !state.camera.ready -> "カメラ準備中"
+                state.active && !state.camera.ready -> "カメラ未準備"
+                else -> "${if (if (state.active) state.front else front) "前面" else "背面"}・${"%.1f".format(state.camera.zoom)}×"
+            },
+            OutdoorSettingsCategory.MICROPHONE to when {
+                state.inputNeedsAttention -> "入力なし・再開が必要"
+                state.active && state.manualMute -> "ミュート中"
+                state.microphoneChecking -> "マイク確認中"
+                else -> "${devices.firstOrNull { it.id == if (state.active) state.deviceId else device }?.let { microphoneTypeLabel(it.type) } ?: "マイク未選択"}・${if (state.active) state.volume else volume}%"
+            },
+            OutdoorSettingsCategory.QUALITY to "${if (visiblePortrait) "縦向き" else "横向き"}・${visibleQuality.height}p・${visibleQuality.fps}fps",
+            OutdoorSettingsCategory.DISPLAY to "プレビュー${if (showPreview) "ON" else "OFF"}・診断表示${if (diagnosticsVisible) "ON" else "OFF"}",
+            OutdoorSettingsCategory.OTHER to "${if (MaterialTheme.colorScheme.background.luminance() < .5f) "ダーク" else "ライト"}・連携・音声認識",
+        ),
+    ) { category, navigate ->
         when (category) {
             OutdoorSettingsCategory.CAMERA -> {
                 val visibleFront = if (state.active) state.front else front
+                Text("撮影を調整", style = MaterialTheme.typography.titleMedium)
+                Text("使用するカメラ")
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    FilterChip(selected = !visibleFront, enabled = !state.videoHidden && !state.videoChanging && !state.cameraLocked, onClick = {
+                    FilterChip(selected = !visibleFront, enabled = !state.videoHidden && !state.videoChanging && !state.cameraLocked && (!state.active || state.camera.ready), onClick = {
                         if (state.active) { if (visibleFront) OutdoorRuntime.service?.switchCamera() } else front = false
                     }, label = { Text("背面") }, modifier = Modifier.weight(1f))
-                    FilterChip(selected = visibleFront, enabled = !state.videoHidden && !state.videoChanging && !state.cameraLocked, onClick = {
+                    FilterChip(selected = visibleFront, enabled = !state.videoHidden && !state.videoChanging && !state.cameraLocked && (!state.active || state.camera.ready), onClick = {
                         if (state.active) { if (!visibleFront) OutdoorRuntime.service?.switchCamera() } else front = true
                     }, label = { Text("前面") }, modifier = Modifier.weight(1f))
                 }
-                OutdoorCameraSettings(state.camera, state.cameraLocked)
+                OutdoorCameraSettings(state.camera, state.cameraLocked, active = state.active)
+                Text("OBSへ送る映像", style = MaterialTheme.typography.titleMedium)
                 OutdoorSenderControls(state, preparationLabel, error,
                     onToggleMute = { OutdoorRuntime.service?.toggleManualMute() },
                     onToggleVideo = { OutdoorRuntime.service?.toggleVideoVisibility() },
                     showMute = false, showStatus = false)
-                OutdoorPlaceholderSettings(state.active)
-                Text("診断用の映像時刻", style = MaterialTheme.typography.titleMedium)
+                Text("映像を隠しても、マイク音声は送信します。", style = MaterialTheme.typography.bodySmall)
+                val placeholderImage = remember { OutdoorPlaceholderStore(context).usesImage() }
+                OutdoorCategoryEntry("映像を隠したとき", if (placeholderImage) "固定画像" else "黒画面") { navigate(OutdoorSettingsCategory.PLACEHOLDER) }
+                OutdoorCategoryEntry("映像への時刻表示", if (if (state.active) state.timestampOverlay else draft.timestampOverlay.value) "ON" else "OFF") {
+                    navigate(OutdoorSettingsCategory.TIMESTAMP)
+                }
+            }
+            OutdoorSettingsCategory.PLACEHOLDER -> OutdoorPlaceholderSettings(state.active)
+            OutdoorSettingsCategory.TIMESTAMP -> {
                 val timestampOverlayEnabled = if (state.active) state.timestampOverlay else draft.timestampOverlay.value
                 Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
-                        Text("診断用時刻を映像に表示")
-                        Text("端末の現地時刻を秒まで表示します。", style = MaterialTheme.typography.bodySmall)
+                        Text("映像に時刻を入れる")
                     }
                     Switch(
                         checked = timestampOverlayEnabled,
@@ -223,13 +261,34 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                         modifier = Modifier.testTag("診断用時刻スイッチ"),
                     )
                 }
-                Text("時刻は映像へ焼き込まれ、プレビュー・SRT映像とOBS録画・配信に表示されます。", style = MaterialTheme.typography.bodySmall)
-                if (state.active) Text("送信中は変更できません", style = MaterialTheme.typography.bodySmall)
+                Text("OBSの配信・録画にも時刻が表示されます。", style = MaterialTheme.typography.bodySmall)
+                if (state.active) Text("変更するには映像送信を停止してください。", style = MaterialTheme.typography.bodySmall)
+                Surface(Modifier.fillMaxWidth().height(96.dp).testTag("時刻表示の見本"),
+                    shape = MaterialTheme.shapes.medium, color = MaterialTheme.colorScheme.surfaceVariant) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(if (timestampOverlayEnabled) "表示例 14:32:08" else "時刻表示OFF")
+                    }
+                }
             }
             OutdoorSettingsCategory.MICROPHONE -> {
-                Text("配信マイク", style = MaterialTheme.typography.titleMedium)
-                Text("読み上げの回り込みを避けるためイヤホンを利用してください。", style = MaterialTheme.typography.bodySmall)
+                Text("マイク音声", style = MaterialTheme.typography.titleMedium)
                 val visibleDevice = if (state.active) state.deviceId else device
+                OutdoorSenderControls(state, preparationLabel, error,
+                    onToggleMute = { OutdoorRuntime.service?.toggleManualMute() },
+                    onToggleVideo = { OutdoorRuntime.service?.toggleVideoVisibility() },
+                    showVideo = false, showStatus = false, showMicrophoneStatus = false)
+                Row(Modifier.fillMaxWidth()) {
+                    Text("マイク音量", Modifier.weight(1f))
+                    Text("${if (state.active) state.volume else volume}%")
+                }
+                Slider(value = (if (state.active) state.volume else volume).toFloat(), valueRange = 0f..200f, steps = 199,
+                    modifier = Modifier.testTag("マイク音量スライダー"),
+                    onValueChange = { value ->
+                        if (state.active) OutdoorRuntime.service?.setVolume(value.roundToInt())
+                        else try { preferences.saveVolume(value.roundToInt()); volume = value.roundToInt() }
+                        catch (_: Exception) { error = "音量を保存できません" }
+                    })
+                Text("入力マイク")
                 Box(Modifier.fillMaxWidth()) {
                     OutlinedButton(onClick = { devices = SelectedMicrophone.inputs(context); microphoneMenu = true },
                         enabled = !state.inputPreparing, modifier = Modifier.fillMaxWidth()) {
@@ -246,32 +305,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                         }
                     }
                 }
-                OutdoorSenderControls(state, preparationLabel, error,
-                    onToggleMute = { OutdoorRuntime.service?.toggleManualMute() },
-                    onToggleVideo = { OutdoorRuntime.service?.toggleVideoVisibility() },
-                    showVideo = false, showStatus = false)
-                Row(Modifier.fillMaxWidth().height(64.dp * androidx.compose.ui.platform.LocalDensity.current.fontScale),
-                    verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState())) {
-                        Text(error ?: when {
-                            state.inputPreparing -> "マイクの接続を確認中…"
-                            state.active && state.inputLost -> "マイク入力を確認できません"
-                            else -> ""
-                        }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
-                    }
-                    if (state.active && state.inputLost && !state.inputPreparing) TextButton(onClick = {
-                        OutdoorRuntime.service?.reselectMicrophone(visibleDevice)
-                    }, modifier = Modifier.heightIn(min = 48.dp)) { Text("入力再開") }
-                }
-                Text("配信マイク音量：${if (state.active) state.volume else volume}%")
-                Slider(value = (if (state.active) state.volume else volume).toFloat(), valueRange = 0f..200f, steps = 199,
-                    onValueChange = { value ->
-                        if (state.active) OutdoorRuntime.service?.setVolume(value.roundToInt())
-                        else try { preferences.saveVolume(value.roundToInt()); volume = value.roundToInt() }
-                        catch (_: Exception) { error = "音量を保存できません" }
-                    })
+                OutdoorMicrophoneRecovery(state, error) { OutdoorRuntime.service?.reselectMicrophone(visibleDevice) }
+                Text("読み上げ音声の回り込みを防ぐには、イヤホンを使ってください。", style = MaterialTheme.typography.bodySmall)
             }
             OutdoorSettingsCategory.QUALITY -> {
+                if (state.active) Text("変更するには映像送信を停止してください。", style = MaterialTheme.typography.bodySmall)
                 Text("映像の向き")
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     FilterChip(selected = !visiblePortrait, enabled = !state.active, onClick = { portrait = false },
@@ -281,39 +319,41 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
                 }
                 Text(if (visiblePortrait) "縦${visibleQuality.height}×${visibleQuality.width}" else "横${visibleQuality.width}×${visibleQuality.height}",
                     style = MaterialTheme.typography.bodySmall)
-                if (state.active) Text("映像の向きは送信停止後に変更できます", style = MaterialTheme.typography.bodySmall)
-                Box(Modifier.fillMaxWidth().height(64.dp * androidx.compose.ui.platform.LocalDensity.current.fontScale)
-                    .verticalScroll(rememberScrollState())) {
-                    Text(listOfNotNull(qualityError, preferences.resetNotice).joinToString("\n"),
-                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.error)
-                }
-                OutdoorQualityControls(visibleQuality, state.active, if (state.active) state.front else front, visiblePortrait) { next ->
+                Text("スマホを縦・横どちらに持っても、選んだ向きで送信します。はみ出す部分は切り取ります。",
+                    style = MaterialTheme.typography.bodySmall)
+                OutdoorQualityControls(visibleQuality, state.active, if (state.active) state.front else front, visiblePortrait, showLockNotice = false) { next ->
                     try { preferences.saveQuality(next); quality = next; qualityError = null }
                     catch (_: Exception) { qualityError = "送信品質を保存できません" }
                 }
+                // Failures follow all setting targets; their arrival cannot move those targets.
+                val notice = listOfNotNull(qualityError, preferences.resetNotice).joinToString("\n")
+                if (notice.isNotEmpty()) Text(notice, style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error)
             }
             OutdoorSettingsCategory.DISPLAY -> {
-                Text("このスマホの画面", style = MaterialTheme.typography.titleMedium)
-                TextButton(onClick = { showPreview = !showPreview },
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-                    Text(if (showPreview) "プレビューを閉じる" else "プレビューを表示")
+                Text("スマホだけの表示", style = MaterialTheme.typography.titleMedium)
+                Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text("スマホに映像を表示", Modifier.weight(1f))
+                    Switch(checked = showPreview, onCheckedChange = { showPreview = it },
+                        modifier = Modifier.testTag("プレビュー表示切替"))
                 }
-                TextButton(onClick = { diagnosticsVisible = !diagnosticsVisible }, enabled = state.active,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag("診断表示切替")) {
-                    Text(if (diagnosticsVisible) "診断要約を隠す" else "診断表示")
+                Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text("診断情報を重ねて表示", Modifier.weight(1f))
+                    Switch(checked = diagnosticsVisible, onCheckedChange = { diagnosticsVisible = it }, enabled = state.active,
+                        modifier = Modifier.testTag("診断表示切替"))
                 }
                 Text("この画面の表示だけを変更します。OBSに送る映像は変わりません。",
                     style = MaterialTheme.typography.bodySmall)
             }
             OutdoorSettingsCategory.OTHER -> {
                 appearanceContent()
-                Text("スマホ連携", style = MaterialTheme.typography.titleMedium)
-                Text(preparationLabel, style = MaterialTheme.typography.bodySmall)
-                OutlinedButton(modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp), onClick = {
+                Text("連携", style = MaterialTheme.typography.titleMedium)
+                OutdoorCategoryEntry("スマホ連携", "登録・接続先の確認", icon = jp.casmate.app.R.drawable.ic_smartphone_link) {
                     closeSettings(); onOpenConnection()
-                }) { Text("スマホ連携を開く") }
-                TextButton(onClick = { actions.openRecognition(); settingsOpen = false; draft.revision.intValue++ },
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("配信者音声認識") }
+                }
+                OutdoorCategoryEntry("配信者の音声認識", "音声認識の設定を開く") {
+                    actions.openRecognition(); settingsOpen = false; draft.revision.intValue++
+                }
             }
         }
     }
@@ -372,7 +412,8 @@ private fun OutdoorDiagnosticPreview(
         val naturalHeight = maxWidth / aspect
         val previewHeight = if (fillAvailable) minOf(naturalHeight, maxHeight) else if (compact) minOf(naturalHeight, screenHeight * 0.5f) else naturalHeight
         val previewWidth = previewHeight * aspect
-        val surfaceModifier = if (drawingMode) Modifier.fillMaxSize() else Modifier.width(previewWidth).height(previewHeight)
+        val surfaceModifier = if (drawingMode || fillAvailable && !state.videoHidden) Modifier.fillMaxSize()
+            else Modifier.width(previewWidth).height(previewHeight)
         Box(if (fillAvailable) Modifier.fillMaxSize() else Modifier.fillMaxWidth().height(previewHeight), contentAlignment = Alignment.Center) {
             if (state.videoHidden) Box(surfaceModifier.background(Color.Black).testTag("映像表示面"), contentAlignment = Alignment.Center) {
                 Box(Modifier.width(previewWidth).height(previewHeight).testTag("非表示映像の表示枠")) {

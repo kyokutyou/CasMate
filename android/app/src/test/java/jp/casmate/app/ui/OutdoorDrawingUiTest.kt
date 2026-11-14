@@ -127,7 +127,7 @@ class OutdoorDrawingUiTest {
         val session = startSession()
         show()
         ui.onNodeWithTag("カメラ設定の入口").performClick()
-        ui.onNodeWithTag("映像・マイク分類・画面表示").performScrollTo().performClick()
+        ui.onNodeWithTag("映像・マイク分類・スマホの表示").performScrollTo().performClick()
         ui.onNodeWithTag("診断表示切替").performScrollTo().performClick()
         ui.onNodeWithText("閉じる").performClick()
         ui.onNodeWithTag("診断表示要約").assertExists()
@@ -162,8 +162,8 @@ class OutdoorDrawingUiTest {
         val restoration = StateRestorationTester(ui)
         restoration.setContent { Content() }
         ui.onNodeWithTag("カメラ設定の入口").performClick()
-        ui.onNodeWithTag("映像・マイク分類・画面表示").performScrollTo().performClick()
-        ui.onNodeWithText("プレビューを閉じる").performScrollTo().performClick()
+        ui.onNodeWithTag("映像・マイク分類・スマホの表示").performScrollTo().performClick()
+        ui.onNodeWithTag("プレビュー表示切替").performScrollTo().performClick()
         ui.onNodeWithText("閉じる").performClick()
         ui.onNodeWithText("プレビュー非表示").assertIsDisplayed()
         openDrawing()
@@ -384,7 +384,8 @@ class OutdoorDrawingUiTest {
     private fun startSession(portrait: Boolean = false): Long {
         val session = if (portrait) controller.beginSession(720, 1280) else controller.beginSession(1280, 720)
         controller.cameraReady(session)
-        OutdoorRuntime.update(OutdoorState(active = true, status = "sending", inputLost = false, portrait = portrait))
+        OutdoorRuntime.update(OutdoorState(active = true, status = "sending", inputLost = false, portrait = portrait,
+            camera = OutdoorCameraState(ready = true)))
         return session
     }
     private fun stroke(session: Long, x: Float = .2f) {

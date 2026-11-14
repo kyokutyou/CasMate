@@ -25,9 +25,12 @@ const startup = vi.hoisted(() => ({
   mkdir: vi.fn(),
   openPath: vi.fn(),
   smartphoneStart: vi.fn<() => Promise<void>>(),
+  reactionStartup: vi.fn<() => Promise<void>>(),
+  reactionStop: vi.fn<() => Promise<void>>(),
   smartphoneStop: vi.fn<() => Promise<void>>(),
   attachRecognitionInputs: vi.fn(),
   obsStart: vi.fn<() => Promise<void>>(),
+  obsOverlayOrigin: vi.fn<(origin: string | null) => void>(),
   aiConnectionsInitialize: vi.fn<() => Promise<void>>(),
   aiControllerInitialize: vi.fn<() => Promise<void>>(),
   showErrorBox: vi.fn(),
@@ -117,6 +120,7 @@ vi.mock('../src/main/speech/electron-audio-player', () => ({ ElectronAudioPlayer
 vi.mock('../src/main/obs/obs-control-controller', () => ({
   ObsControlController: class {
     start = startup.obsStart;
+    setOverlayServerOrigin = startup.obsOverlayOrigin;
     view() { return {}; }
     async stop() {}
   },
@@ -160,6 +164,13 @@ vi.mock('../src/main/smartphone/smartphone-controller', () => ({
     stop = startup.smartphoneStop;
   },
 }));
+vi.mock('../src/main/poll/poll-controller', () => ({ PollController: class { async initialize() {} async shutdown() {} } }));
+vi.mock('../src/main/poll/poll-publication', () => ({ PollPublication: class { async stop() {} } }));
+vi.mock('../src/main/reactions/reaction-controller', () => ({ ReactionController: class {
+  async initialize() {} isAvailable() { return true; } async shutdown() {}
+  publishAtStartup = startup.reactionStartup;
+} }));
+vi.mock('../src/main/reactions/reaction-publication', () => ({ ReactionPublication: class { stop = startup.reactionStop; } }));
 
 // All startup I/O is replaced above; draining promises reaches either a gate or
 // the real orchestration's window call without timing guesses or open handles.
@@ -186,7 +197,7 @@ beforeEach(() => {
   startup.loadURL.mockImplementation(async url => { startup.events.push(`window:${url}`); });
   startup.serverStart.mockImplementation(async () => { startup.events.push('loopback.ready'); });
   for (const operation of [startup.settingsLoad, startup.initialSetupLoad, startup.updateNoticesLoad, startup.smartphoneStart, startup.smartphoneStop,
-    startup.obsStart, startup.aiConnectionsInitialize, startup.aiControllerInitialize]) {
+    startup.obsStart, startup.aiConnectionsInitialize, startup.aiControllerInitialize, startup.reactionStartup, startup.reactionStop]) {
     operation.mockResolvedValue(undefined);
   }
 });
@@ -206,6 +217,16 @@ async function launch() {
 }
 
 describe('Electron startup readiness', () => {
+  it('begins optional reaction publication after loopback and management window readiness without blocking other startup',async()=>{
+    const gate=deferred();pending.push(gate);startup.reactionStartup.mockReturnValue(gate.promise);await launch();
+    expect(startup.reactionStartup).toHaveBeenCalledOnce();expect(startup.smartphoneStart).toHaveBeenCalledOnce();expect(startup.showErrorBox).not.toHaveBeenCalled();
+    expect(startup.reactionStartup.mock.invocationCallOrder[0]).toBeGreaterThan(startup.serverStart.mock.invocationCallOrder[0]);expect(startup.reactionStartup.mock.invocationCallOrder[0]).toBeGreaterThan(startup.loadURL.mock.invocationCallOrder[0]);
+    startup.handlers.get('before-quit')!({preventDefault(){}});await drainStartup();expect(startup.reactionStop).toHaveBeenCalledOnce();gate.resolve();await drainStartup();expect(startup.reactionStartup).toHaveBeenCalledOnce();
+  });
+  it('does not begin reaction publication after quitting during local server preparation',async()=>{
+    const gate=deferred();pending.push(gate);startup.serverStart.mockReturnValue(gate.promise);await launch();expect(startup.reactionStartup).not.toHaveBeenCalled();
+    startup.handlers.get('before-quit')!({preventDefault(){}});gate.resolve();await drainStartup();expect(startup.reactionStartup).not.toHaveBeenCalled();
+  });
   it('保存先リンクは実際のuserDataを開き、OS・フォルダー作成の失敗を通知できる', async () => {
     await launch();
     expect(startup.openPath).not.toHaveBeenCalled();
@@ -321,9 +342,11 @@ describe('Electron startup readiness', () => {
     await launch();
 
     expect(startup.serverStart).toHaveBeenCalledOnce();
+    expect(startup.obsOverlayOrigin).not.toHaveBeenCalled();
     expect(startup.loadURL).not.toHaveBeenCalled();
     gate.resolve();
     await drainStartup();
+    expect(startup.obsOverlayOrigin).toHaveBeenCalledExactlyOnceWith('http://127.0.0.1:3000');
     expect(startup.events).toEqual(['loopback.ready', 'window:http://127.0.0.1:3000']);
     expect(startup.showErrorBox).not.toHaveBeenCalled();
   });
@@ -342,6 +365,7 @@ describe('Electron startup readiness', () => {
     gate.resolve();
     await drainStartup();
     expect(startup.serverStart).toHaveBeenCalledOnce();
+    expect(startup.obsOverlayOrigin).toHaveBeenCalledExactlyOnceWith(null);
     expect(startup.smartphoneStart).not.toHaveBeenCalled();
     expect(startup.loadURL).not.toHaveBeenCalled();
     expect(startup.showErrorBox).not.toHaveBeenCalled();
@@ -363,6 +387,7 @@ describe('Electron startup readiness', () => {
 
     expect(preventDefault).toHaveBeenCalledOnce();
     expect(startup.serverPorts).toEqual([3000, 3001]);
+    expect(startup.obsOverlayOrigin).toHaveBeenCalledExactlyOnceWith('http://127.0.0.1:3001');
     expect(startup.settings!.application.port).toBe(3001);
     expect(startup.loadURL).toHaveBeenCalledWith('http://127.0.0.1:3001');
     expect(startup.smartphoneStart).toHaveBeenCalledOnce();

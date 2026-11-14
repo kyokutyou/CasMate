@@ -100,6 +100,8 @@ export class ObsSourceTestController {
   private async data(request: ObsSourceTestRequest): Promise<ObsTestDisplayData> {
     const settings = this.options.settings();
     switch (request.target.overlay) {
+      case 'reactions': throw failure(400, 'OBS_TEST_UNSUPPORTED_TARGET', 'リアクションの設定で表示を確認してください。');
+      case 'poll': throw failure(400, 'OBS_TEST_UNSUPPORTED_TARGET', '投票の設定でお題と結果の表示を確認してください。');
       case 'comments': return { kind: 'comments', appearance: structuredClone(settings.commentOverlay) };
       case 'speech': {
         const { fontFamily, fontSizePx, textColor, backgroundColor, paddingPx, borderRadiusPx, design } = settings.speechRecognitionOverlay;

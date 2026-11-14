@@ -1,0 +1,3 @@
+@import "./point.css";
+.reaction-overlay,.reaction-markers,.reaction-particles{position:fixed;inset:0;overflow:hidden;pointer-events:none}.reaction-markers{font:800 calc(20px * var(--marker-scale,1))/1.5 "Segoe UI","Yu Gothic UI",sans-serif}.reaction-particle{opacity:0;will-change:transform,opacity;position:absolute;bottom:4%;font-size:64px;line-height:1;filter:drop-shadow(0 4px 10px #0003)}
+.reaction-cheer{font-family:"Segoe UI","Yu Gothic UI",sans-serif;font-weight:800;white-space:nowrap;color:#fff;background:#d83570;border:.06em solid #fff9;border-radius:1em;padding:.3em .65em;line-height:1.4}

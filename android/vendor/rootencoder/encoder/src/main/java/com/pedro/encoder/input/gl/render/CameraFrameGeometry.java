@@ -15,7 +15,7 @@ public final class CameraFrameGeometry {
     this.sourceHeight = sourceHeight;
   }
 
-  /** Producer transform includes sensor rotation, mirroring and crop. Null means unavailable. */
+  /** Cover the fixed output with an upright, centered crop. Producer rotation/mirror/crop is preserved. */
   public float[] fit(int width, int height, float[] texture) {
     if (width <= 0 || height <= 0 || texture == null || texture.length != 16) return null;
     double horizontal = Math.hypot(texture[0] * sourceWidth, texture[1] * sourceHeight);
@@ -23,14 +23,14 @@ public final class CameraFrameGeometry {
     if (!Double.isFinite(horizontal) || !Double.isFinite(vertical) || horizontal <= 0 || vertical <= 0) return null;
     double aspect = rotation % 180 == 0 ? horizontal / vertical : vertical / horizontal;
     double target = (double) width / height;
-    return aspect <= target ? new float[]{(float) (aspect / target), 1f}
-        : new float[]{1f, (float) (target / aspect)};
+    return aspect <= target ? new float[]{1f, (float) (target / aspect)}
+        : new float[]{(float) (aspect / target), 1f};
   }
 
-  /** View-normalized, top-left point -> rotated quad; reject the fitted frame's padding. */
+  /** Output-normalized, top-left point -> visible part of the rotated quad before center cropping. */
   public float[] unfit(float x, float y, int width, int height, float[] texture) {
     float[] scale = fit(width, height, texture);
-    if (scale == null || !Float.isFinite(x) || !Float.isFinite(y)) return null;
+    if (scale == null || !Float.isFinite(x) || !Float.isFinite(y) || x < 0 || x > 1 || y < 0 || y > 1) return null;
     float u = (x - .5f) / scale[0] + .5f;
     float v = (y - .5f) / scale[1] + .5f;
     return u >= 0 && u <= 1 && v >= 0 && v <= 1 ? new float[]{u, v} : null;

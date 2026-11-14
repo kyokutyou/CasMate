@@ -41,7 +41,7 @@ describe('OBSソース登録', () => {
     const target = { kind: 'smartphone', deviceId };
     expect((await controller.context(target)).title).toContain('スマホA');
     expect(await controller.add({ target, collection: obs.collection, sceneUuid: firstScene })).toMatchObject({ status: 'succeeded' });
-    expect(obs.inputs[0].settings).toMatchObject({ input: 'udp://127.0.0.1:13001?localaddr=127.0.0.1&fifo_size=1024&overrun_nonfatal=1',
+    expect(obs.inputs[0].settings).toMatchObject({ input: 'udp://127.0.0.1:13001?localaddr=127.0.0.1&fifo_size=32768&overrun_nonfatal=1',
       is_local_file: false, input_format: 'mpegts', seekable: false, close_when_inactive: false });
     expect(obs.scene(firstScene).items[0].transform).toMatchObject({ boundsType: 'OBS_BOUNDS_SCALE_INNER', scaleX: 1, scaleY: 1 });
   });
@@ -83,7 +83,7 @@ describe('OBSソース登録', () => {
 
   it('登録中の経路切替やOFFでは配置を中断せず、旧経路別ソースは変更しない', async () => {
     const { controller, obs, phone } = sourceSetup(); const target = { kind: 'smartphone', deviceId };
-    const old = obs.input('ffmpeg_source', { input: 'udp://127.0.0.1:10003?localaddr=127.0.0.1&fifo_size=1024&overrun_nonfatal=1',
+    const old = obs.input('ffmpeg_source', { input: 'udp://127.0.0.1:10003?localaddr=127.0.0.1&fifo_size=32768&overrun_nonfatal=1',
       is_local_file: false, input_format: 'mpegts', seekable: false }, '旧Tailscale');
     const before = structuredClone(old);
     obs.intercept = async type => { if (type === 'GetSceneItemTransform') { phone.settings.activeNetwork = null; phone.devices[0].profiles.lan.revision += 1; } };
@@ -123,7 +123,7 @@ describe('OBSソース登録', () => {
 
   it('既定設定と未登録キーの実効値を重ねて手動メディアを再利用する', async () => {
     const { controller, obs } = sourceSetup();
-    const input = obs.input('ffmpeg_source', { input: 'udp://127.0.0.1:10001?localaddr=127.0.0.1&fifo_size=1024&overrun_nonfatal=1', is_local_file: false });
+    const input = obs.input('ffmpeg_source', { input: 'udp://127.0.0.1:10001?localaddr=127.0.0.1&fifo_size=32768&overrun_nonfatal=1', is_local_file: false });
     expect(await controller.add({ target: { kind: 'smartphone', deviceId }, collection: obs.collection,
       sceneUuid: firstScene })).toMatchObject({ status: 'succeeded', result: 'reused', inputUuid: input.uuid });
     expect(input.settings.seekable).toBeUndefined();
@@ -134,7 +134,7 @@ describe('OBSソース登録', () => {
     '同一入力の不適合メディアを修正・重複作成しない %j', async settings => {
       const { controller, obs } = sourceSetup();
       const input = obs.input('ffmpeg_source', {
-        input: 'udp://127.0.0.1:10001?localaddr=127.0.0.1&fifo_size=1024&overrun_nonfatal=1', ...settings,
+        input: 'udp://127.0.0.1:10001?localaddr=127.0.0.1&fifo_size=32768&overrun_nonfatal=1', ...settings,
       });
       const before = structuredClone(input);
       const target = { kind: 'smartphone', deviceId };
@@ -143,6 +143,26 @@ describe('OBSソース登録', () => {
         .toMatchObject({ status: 'failed', errorCode: 'OBS_SOURCE_INCOMPATIBLE' });
       expect(input).toEqual(before); expect(writes(obs)).toEqual([]);
     });
+
+  it('旧FIFOの同一UDP入力は手動更新を案内し、同じポートへ重複作成しない', async () => {
+    const { obs, controller } = sourceSetup();
+    const input = obs.input('ffmpeg_source', {
+      input: 'udp://127.0.0.1:10001?localaddr=127.0.0.1&fifo_size=1024&overrun_nonfatal=1',
+      is_local_file: false,
+    });
+    const target = { kind: 'smartphone' as const, deviceId };
+    expect((await controller.context(target)).incompatible).toEqual([
+      expect.objectContaining({ uuid: input.uuid, reason: expect.stringContaining('OBS入力をコピー') }),
+    ]);
+    expect(await controller.add({ target, collection: obs.collection, sceneUuid: firstScene }))
+      .toMatchObject({ status: 'failed', errorCode: 'OBS_SOURCE_INCOMPATIBLE' });
+    expect(writes(obs)).toEqual([]);
+    expect(obs.inputs).toHaveLength(1);
+    input.settings.input = String(input.settings.input).replace('fifo_size=1024', 'fifo_size=32768');
+    expect(await controller.add({ target, collection: obs.collection, sceneUuid: firstScene }))
+      .toMatchObject({ status: 'succeeded', result: 'reused', inputUuid: input.uuid });
+    expect(obs.inputs).toHaveLength(1);
+  });
 
   it('複数の適合候補は利用者のUUID選択を要求し、無関係なUUIDを受理しない', async () => {
     const { obs, controller, target, add } = sourceSetup();

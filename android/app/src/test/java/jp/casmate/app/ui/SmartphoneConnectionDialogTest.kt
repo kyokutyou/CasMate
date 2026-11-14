@@ -244,8 +244,8 @@ class SmartphoneConnectionDialogTest {
             if (settings) OutdoorPanel(onOpenConnection = { connection = true }, settingsOnly = true, onSettingsClosed = { settings = false })
             if (connection) SmartphoneConnectionDialog(null, false, null, null, state.active, false, null, false, {}, {}, { connection = false })
         } }
-        compose.onNodeWithTag("映像・マイク分類・その他").performScrollTo().performClick()
-        compose.onNodeWithText("スマホ連携を開く").performScrollTo().performClick()
+        compose.onNodeWithTag("映像・マイク分類・アプリと連携").performScrollTo().performClick()
+        compose.onNodeWithTag("映像・マイク分類・スマホ連携").performScrollTo().performClick()
         compose.onNodeWithText("外配信設定").assertDoesNotExist()
         compose.onNodeWithText("PCのQRを読み取る").assertIsDisplayed().assertIsNotEnabled()
         compose.runOnIdle { assertEquals(state, OutdoorRuntime.state.value) }

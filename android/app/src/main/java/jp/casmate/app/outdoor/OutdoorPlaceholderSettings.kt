@@ -40,24 +40,29 @@ import kotlinx.coroutines.withContext
             finally { busy = false }
         }
     }
-    Text("映像を隠したときの表示", style = MaterialTheme.typography.bodyMedium)
+    Text("隠している間に送る映像", style = MaterialTheme.typography.bodyMedium)
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         FilterChip(selected = !usesImage, enabled = !active && !busy, onClick = {
             runCatching { store.selectImage(false) }.onSuccess { usesImage = false; error = null }
                 .onFailure { error = "表示方法を保存できません" }
-        }, label = { Text("黒画面") })
+        }, label = { Text("黒画面") }, modifier = Modifier.weight(1f))
         FilterChip(selected = usesImage, enabled = !active && !busy, onClick = {
             if (bitmap == null) picker.launch("image/*")
             else runCatching { store.selectImage(true) }.onSuccess { usesImage = true; error = null }
                 .onFailure { error = "表示方法を保存できません" }
-        }, label = { Text("固定画像") })
+        }, label = { Text("固定画像") }, modifier = Modifier.weight(1f))
     }
     if (usesImage) {
+        OutlinedButton(enabled = !active && !busy, onClick = { picker.launch("image/*") },
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) { Text("画像を選択") }
         bitmap?.let { Image(it.asImageBitmap(), "固定画像の見本", Modifier.fillMaxWidth().height(96.dp), contentScale = ContentScale.Fit) }
-        OutlinedButton(enabled = !active && !busy, onClick = { picker.launch("image/*") }) { Text("画像を選択") }
+    } else {
+        Box(Modifier.fillMaxWidth().height(96.dp).background(Color.Black)
+            .semantics { contentDescription = "黒画面の見本" })
     }
+    Text("「映像を隠す」を押したときに使います。マイク音声は送信を続けます。", style = MaterialTheme.typography.bodySmall)
     if (busy) Text("画像を保存中…", style = MaterialTheme.typography.bodySmall)
-    if (active) Text("表示方法は配信終了後に変更できます", style = MaterialTheme.typography.bodySmall)
+    if (active) Text("変更するには映像送信を停止してください。", style = MaterialTheme.typography.bodySmall)
     error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 }
 

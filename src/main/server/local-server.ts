@@ -1,3 +1,5 @@
+import { registerReactionManagementRoutes, type ReactionManagementOptions } from '../reactions/reaction-management-routes';
+import { registerPollManagementRoutes, type PollManagementOptions } from '../poll/poll-management-routes';
 import { registerSmartphoneManagementRoutes, type SmartphoneManagementOptions } from './smartphone-management-routes';
 import { asyncHandler, errorBody, HttpError, isPlainRecord } from './http-handlers';
 import { LocalAccess } from './local-access';
@@ -41,6 +43,8 @@ export interface SpeechActions {
 }
 
 export interface HttpApplicationOptions extends SmartphoneManagementOptions {
+  polls?: PollManagementOptions;
+  reactions?: ReactionManagementOptions;
   readOnlyRevision?: () => number;
   obsSources?: import('../obs/obs-source-registration-controller').ObsSourceRegistrationController;
   obsTests?: import('../obs/obs-source-test-controller').ObsSourceTestController;
@@ -74,6 +78,8 @@ export function createHttpApplication(options: HttpApplicationOptions): Express 
     }
     next();
   });
+  registerReactionManagementRoutes(app, options.reactions, access.requireManagementRead, access.requireOperation);
+  registerPollManagementRoutes(app, options.polls, access.requireManagementRead, access.requireOperation);
   registerObsSourceRegistrationRoutes(app, {
     controller: options.obsSources, state: options.state,
     managementRead: access.requireManagementRead, operation: access.requireOperation,
@@ -425,6 +431,7 @@ export function createHttpApplication(options: HttpApplicationOptions): Express 
     app.use(express.static(options.staticDirectory));
     for (const path of [
       '/comments',
+      '/overlay/poll', '/overlay/reactions',
       '/overlay/comments',
       '/overlay/character',
       '/overlay/speech-recognition',
@@ -505,7 +512,7 @@ export class LocalServer {
     const sockets = new WebSocketServer({ noServer: true });
     const managementClients = new WeakSet<WebSocket>();
     const speechRecognitionOverlayClients = new WeakSet<WebSocket>();
-    const testClients = new WeakMap<WebSocket, keyof typeof obsOverlayDefinitions>();
+    const testClients = new WeakMap<WebSocket, Exclude<keyof typeof obsOverlayDefinitions, 'poll' | 'reactions'>>();
     const access = new LocalAccess(this.options.port, this.operationToken);
     let speechRecognitionOverlayRevision = 0;
     server.on('upgrade', (request, socket, head) => {
@@ -663,8 +670,9 @@ export class LocalServer {
   }
 }
 
-function parseTestOverlay(value: unknown): keyof typeof obsOverlayDefinitions | null {
-  return typeof value === 'string' && Object.hasOwn(obsOverlayDefinitions, value) ? value as keyof typeof obsOverlayDefinitions : null;
+function parseTestOverlay(value: unknown): Exclude<keyof typeof obsOverlayDefinitions, 'poll' | 'reactions'> | null {
+  if (value === 'poll' || value === 'reactions') return null;
+  return typeof value === 'string' && Object.hasOwn(obsOverlayDefinitions, value) ? value as Exclude<keyof typeof obsOverlayDefinitions, 'poll' | 'reactions'> : null;
 }
 
 function parseSection(value: string | string[] | undefined): SettingsSection {

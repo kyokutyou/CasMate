@@ -2,7 +2,11 @@
   "compilerOptions": {
     "target": "ES2022",
     "useDefineForClassFields": true,
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "allowJs": false,
     "allowImportingTsExtensions": true,
     "skipLibCheck": true,
@@ -16,7 +20,17 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["vite/client"]
+    "types": [
+      "vite/client"
+    ]
   },
-  "include": ["src/renderer/**/*.ts", "src/renderer/**/*.tsx", "src/shared/**/*.ts", "vite.config.mts", "vite.obs-style-editor.config.mts", "vitest.prototypes.config.mts"]
+  "include": [
+    "src/renderer/**/*.ts",
+    "src/renderer/**/*.tsx",
+    "src/shared/**/*.ts",
+    "vite.config.mts",
+    "vite.obs-style-editor.config.mts",
+    "vite.poll.config.mts",
+    "vite.reactions.config.mts"
+  ]
 }

@@ -9,6 +9,8 @@ const sources = [
   { id: 'speech', title: '音声認識', description: '配信者の発話を認識し、文字で表示。', path: '/overlay/speech-recognition' },
   { id: 'character', title: 'キャラクター', description: 'コメント読み上げに合わせて動くキャラクター。', path: '/overlay/character' },
   { id: 'effects', title: '文字演出', description: '反応ワードに合わせて、文字や絵文字を降らせます。', path: '/overlay/text-effects' },
+  { id: 'poll', title: 'リスナー投票', description: 'お題と、公開した投票結果を表示。', path: '/overlay/poll' },
+  { id: 'reactions', title: 'リスナーリアクション', description: 'ここ見て！・ハート・拍手を表示。', path: '/overlay/reactions' },
 ] as const;
 const browserLinks = [{ title: '管理画面', path: '' }, { title: 'コメント一覧', path: '/comments' }];
 interface Props {
@@ -39,7 +41,7 @@ export function ObsUrlsPanel({ baseUrl, registrationWarning, onRegisterSource, o
   const copyButton = (title: string, path: string) => <button type="button" className="secondary obs-urls-copy" disabled={copyBusy} aria-busy={copyBusy} aria-label={`${title}のURLをコピー`} onClick={() => void copy(title, path)}><SourceIcon name="copy"/>URLをコピー</button>;
 
   return <SettingsCard cardId="urls" title="OBSにソースを追加" eyebrow="OBS SOURCES" className="obs-urls-panel" navigationWarning={registrationWarning}>
-    <div className="obs-urls-section-title"><div><h3>OBSに追加する表示</h3><p>表示ごとに、1つのブラウザソースを追加します。</p></div><span className="obs-urls-count">4種類</span></div>
+    <div className="obs-urls-section-title"><div><h3>OBSに追加する表示</h3><p>表示ごとに、1つのブラウザソースを追加します。</p></div><span className="obs-urls-count">{sources.length}種類</span></div>
     <section className="obs-urls-list" aria-label="OBSに追加する表示一覧">{sources.map(source => <article className="obs-urls-row" key={source.id} aria-label={source.title}>
       <div className="obs-urls-info"><div className="obs-urls-card-heading"><span className="obs-urls-icon"><SourceIcon name={source.id}/></span><h4>{source.title}</h4></div><p>{source.description}</p></div>
       <div className="obs-urls-actions"><button type="button" id={`obs-registration-entry-${source.id}`} className="secondary obs-urls-add" aria-label={`${source.title}をOBSに追加`} aria-haspopup={onRegisterSource ? 'dialog' : undefined} aria-controls={onRegisterSource ? 'obs-source-registration-dialog' : `${id}-manual-guide`} onClick={event => {

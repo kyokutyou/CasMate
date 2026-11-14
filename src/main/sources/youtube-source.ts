@@ -196,6 +196,17 @@ export function createYouTubeSource(
   return new YouTubeSource(normalizeYouTubeInput(target), callbacks);
 }
 
+export async function resolveYouTubeLiveTarget(target: string, signal: AbortSignal, fetcher: typeof fetch = fetch): Promise<string> {
+  let input = normalizeYouTubeInput(target);
+  if (input.kind === 'handle') {
+    const page = await fetchText('https://www.youtube.com/' + encodeURIComponent(input.target), signal, fetcher);
+    const channel = page.match(/"externalId":"(UC[\w-]{22})"/)?.[1];
+    if (!channel) throw new Error('YouTubeチャンネルを特定できません。');
+    input = {kind:'channelId',target:channel};
+  }
+  return resolveVideoId(input, signal, fetcher);
+}
+
 async function resolveVideoId(
   input: NormalizedYouTubeInput,
   signal: AbortSignal,

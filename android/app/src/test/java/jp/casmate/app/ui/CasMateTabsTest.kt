@@ -4,6 +4,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.junit4.StateRestorationTester
@@ -26,6 +28,20 @@ import org.robolectric.annotation.Config
 @Config(sdk = [35])
 @org.robolectric.annotation.GraphicsMode(org.robolectric.annotation.GraphicsMode.Mode.NATIVE)
 class CasMateTabsTest {
+    @Test fun commentsHeaderOrdersReadingConnectionAndSettingsFromLeftToRight() {
+        compose.setContent { MaterialTheme {
+            Surface(Modifier.width(320.dp).height(760.dp)) {
+                CasMateTabs({ Text("コメント本文") }, { Text("カメラ本文") }, readingRegistered = true)
+            }
+        } }
+        compose.onNodeWithTag("画面切替・コメント").performClick()
+        val reading = compose.onNodeWithTag("コメント・読み上げ操作").fetchSemanticsNode().boundsInRoot
+        val phone = compose.onNodeWithContentDescription("スマホ連携").fetchSemanticsNode().boundsInRoot
+        val settings = compose.onNodeWithTag("コメント設定の入口").fetchSemanticsNode().boundsInRoot
+        assertEquals(true, reading.right <= phone.left)
+        assertEquals(true, phone.right <= settings.left)
+    }
+
     @Test fun cameraSettingsAndActionsMatchCommentsPositionsAndRestoreTheirOwnFocus() {
         compose.setContent { CasMateTheme(jp.casmate.app.data.AppearanceMode.LIGHT) {
             Surface(Modifier.width(320.dp).height(760.dp)) {
@@ -45,7 +61,7 @@ class CasMateTabsTest {
         compose.onNodeWithText("閉じる").performClick()
         cameraGear.assertIsFocused()
         compose.onNodeWithTag("画面切替・コメント").performClick()
-        assertEquals(gearBounds, compose.onNodeWithTag("コメント・読み上げ操作").fetchSemanticsNode().boundsInRoot)
+        assertEquals(gearBounds, compose.onNodeWithTag("コメント設定の入口").fetchSemanticsNode().boundsInRoot)
         assertEquals(true, actionBounds.right <= gearBounds.left)
     }
     @Test fun headerPaddingFlicksBothWaysWithoutOpeningFunctionActions() {
@@ -78,8 +94,8 @@ class CasMateTabsTest {
         compose.onNodeWithTag("機能操作の入口").performClick()
         compose.onNodeWithText("送信を停止").performScrollTo().assertIsDisplayed().assertHeightIsAtLeast(48.dp)
         compose.onNodeWithText("閉じる").performClick()
-        openCameraCategory("送信品質")
-        compose.onNodeWithText("送信品質：", substring = true).performScrollTo().assertIsDisplayed()
+        openCameraCategory("画質と向き")
+        compose.onNodeWithText("品質プリセット：", substring = true).performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("閉じる").performClick()
         compose.runOnIdle { assertEquals(sending, OutdoorRuntime.state.value) }
     }
@@ -486,7 +502,7 @@ class CasMateTabsTest {
         compose.setContent { MaterialTheme { OutdoorTestHost() } }
         compose.onNodeWithTag("画面切替・カメラ").performClick()
         compose.onNodeWithTag("カメラ設定の入口").performClick()
-        compose.onNodeWithText("通信・診断").performScrollTo().performClick()
+        compose.onNodeWithText("通信と診断").performScrollTo().performClick()
         compose.onNodeWithText("通信").performClick()
         fun row(label: String, value: String) = compose.onNodeWithTag("診断項目・$label")
             .performScrollTo().assertTextContains(value)
@@ -523,7 +539,7 @@ class CasMateTabsTest {
         compose.setContent { MaterialTheme { OutdoorTestHost() } }
         compose.onNodeWithTag("画面切替・カメラ").performClick()
         compose.onNodeWithTag("カメラ設定の入口").performClick()
-        compose.onNodeWithText("通信・診断").performScrollTo().performClick()
+        compose.onNodeWithText("通信と診断").performScrollTo().performClick()
         compose.onNodeWithText("通信").performClick()
         for (label in listOf("観測の有効性", "送信待ちキュー", "PC受信進行（増分）", "音声破棄（増分）", "映像送出（増分）")) {
             compose.onNodeWithTag("診断項目・$label").performScrollTo().assertTextContains("未計測")
@@ -541,21 +557,23 @@ class CasMateTabsTest {
         compose.setContent {
             var selection by remember { mutableStateOf(quality) }
             MaterialTheme {
-                androidx.compose.foundation.layout.Column {
+                androidx.compose.foundation.layout.Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                     jp.casmate.app.outdoor.OutdoorQualityControls(selection, active.value, false, false) {
                         selection = it; quality = it
                     }
                 }
             }
         }
-        compose.onNodeWithText("H.265（HEVC）").performClick()
+        compose.onNodeWithTag("通信と形式の詳細を開閉").performScrollTo().performClick()
+        compose.onNodeWithTag("映像形式選択欄").performScrollTo().performClick()
+        compose.onNodeWithText("H.265（HEVC）").performScrollTo().performClick()
         compose.runOnIdle {
             assertEquals(jp.casmate.app.outdoor.OutdoorVideoCodec.H265, quality.videoCodec)
             assertEquals("標準", quality.preset)
             active.value = true
         }
-        compose.onNodeWithText("H.264").assertIsNotEnabled()
-        compose.onNodeWithText("H.265（HEVC）").assertIsNotEnabled()
+        compose.onNodeWithTag("映像形式選択欄").assertTextContains("H.265（HEVC）").assertIsNotEnabled()
+        compose.onNodeWithText("H.264").assertDoesNotExist()
     }
     @Test fun cameraAndCommentsKeepTheirControlsInSeparatePages() {
         var cameraActions = 0
@@ -667,9 +685,9 @@ class CasMateTabsTest {
             prefs.saveVolume(173)
             OutdoorRuntime.update(OutdoorRuntime.state.value.copy(volume = 173))
         }
-        compose.onNodeWithText("配信マイク音量：173%").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("173%", substring = true).performScrollTo().assertIsDisplayed()
         compose.runOnIdle { OutdoorRuntime.update(OutdoorState()) }
-        compose.onNodeWithText("配信マイク音量：173%").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("173%", substring = true).performScrollTo().assertIsDisplayed()
     }
 
     @Test fun connectionUpdatesAndAppearanceKeepThePageGeometryAndServices() {
@@ -721,7 +739,7 @@ class CasMateTabsTest {
         }
         compose.onNodeWithTag("画面切替・カメラ").performClick()
         compose.onNodeWithText("横1280×720").assertDoesNotExist()
-        openCameraCategory("送信品質")
+        openCameraCategory("画質と向き")
         compose.onNodeWithText("縦向き").performScrollTo().performClick()
         compose.onNodeWithText("戻る").performClick()
         compose.onNodeWithTag("映像・マイク分類・カメラ").performClick()
@@ -729,7 +747,7 @@ class CasMateTabsTest {
         compose.onNodeWithText("閉じる").performClick()
         compose.onNodeWithTag("画面切替・コメント").performClick()
         compose.onNodeWithTag("画面切替・カメラ").performClick()
-        openCameraCategory("送信品質")
+        openCameraCategory("画質と向き")
         compose.onNodeWithText("縦720×1280").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("戻る").performClick()
         compose.onNodeWithTag("映像・マイク分類・カメラ").performClick()
@@ -737,21 +755,22 @@ class CasMateTabsTest {
     }
 
     @Test fun settingsCanOpenDuringStreamingWithoutChangingTransmission() {
-        val sending = OutdoorState(active = true, status = "sending", muted = false)
+        val sending = OutdoorState(active = true, status = "sending", muted = false,
+            camera = jp.casmate.app.outdoor.OutdoorCameraState(ready = true))
         OutdoorRuntime.update(sending)
         compose.setContent { MaterialTheme { OutdoorTestHost() } }
-        openCameraCategory("送信品質")
+        openCameraCategory("画質と向き")
         compose.onNodeWithText("横向き").assertIsNotEnabled()
         compose.onNodeWithText("戻る").performClick()
-        compose.onNodeWithTag("映像・マイク分類・その他").performScrollTo().performClick()
-        compose.onNodeWithText("スマホ連携を開く").assertIsEnabled()
+        compose.onNodeWithTag("映像・マイク分類・アプリと連携").performScrollTo().performClick()
+        compose.onNodeWithTag("映像・マイク分類・スマホ連携").assertIsEnabled()
         compose.onNodeWithText("戻る").performClick()
         compose.onNodeWithTag("映像・マイク分類・カメラ").performScrollTo().performClick()
         compose.onNodeWithText("前面").assertIsEnabled()
         compose.onNodeWithText("閉じる").performClick()
         compose.onNodeWithText("前面").assertDoesNotExist()
-        openCameraCategory("画面表示")
-        compose.onNodeWithText("プレビューを閉じる").assertIsDisplayed()
+        openCameraCategory("スマホの表示")
+        compose.onNodeWithTag("プレビュー表示切替").assertIsDisplayed()
         compose.runOnIdle { assertEquals(sending, OutdoorRuntime.state.value) }
     }
 
@@ -760,7 +779,7 @@ class CasMateTabsTest {
         compose.setContent { MaterialTheme { OutdoorTestHost() } }
         compose.onNodeWithTag("画面切替・カメラ").performClick()
         compose.onNodeWithTag("カメラ設定の入口").performClick()
-        compose.onNodeWithText("通信・診断").performScrollTo().performClick()
+        compose.onNodeWithText("通信と診断").performScrollTo().performClick()
         compose.runOnIdle { }
         compose.onNodeWithText("通信・診断").assertIsDisplayed()
         listOf("概要", "自動調整", "通信", "履歴").forEach { compose.onNodeWithText(it).assertIsDisplayed() }
@@ -768,7 +787,7 @@ class CasMateTabsTest {
         compose.onNodeWithText("診断を閉じる").performClick()
         compose.onNodeWithText("通信・診断").assertDoesNotExist()
         compose.onNodeWithTag("カメラ設定の入口").performClick()
-        compose.onNodeWithText("通信・診断").assertExists()
+        compose.onNodeWithText("通信と診断").assertExists()
     }
 
     @Test
@@ -786,7 +805,7 @@ class CasMateTabsTest {
             }
         }
         compose.onNodeWithTag("画面切替・カメラ").performClick()
-        openCameraCategory("画面表示")
+        openCameraCategory("スマホの表示")
         compose.onNodeWithTag("診断表示切替").performScrollTo().performClick()
         compose.onNodeWithText("閉じる").performClick()
 
@@ -818,13 +837,13 @@ class CasMateTabsTest {
         val landscapeSummary = compose.onNodeWithTag("診断表示要約").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
         assertEquals(true, landscapePreview.bottom <= landscapeSummary.top)
 
-        openCameraCategory("画面表示")
-        compose.onNodeWithText("プレビューを閉じる").performScrollTo().performClick()
+        openCameraCategory("スマホの表示")
+        compose.onNodeWithTag("プレビュー表示切替").performScrollTo().performClick()
         compose.onNodeWithText("閉じる").performClick()
-        openCameraCategory("画面表示")
-        compose.onNodeWithText("プレビューを表示").performScrollTo().assertIsDisplayed()
+        openCameraCategory("スマホの表示")
+        compose.onNodeWithTag("プレビュー表示切替").performScrollTo().assertIsDisplayed()
         compose.onNodeWithTag("診断表示要約").assertDoesNotExist()
-        compose.onNodeWithText("プレビューを表示").performClick()
+        compose.onNodeWithTag("プレビュー表示切替").performClick()
         compose.onNodeWithText("閉じる").performClick()
         compose.onNodeWithTag("診断表示要約").assertExists()
 

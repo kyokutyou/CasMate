@@ -414,6 +414,23 @@ describe('排他的なスマホ公開と端末認証', () => {
     expect(controller.snapshot().devices.at(-1)!.profiles.lan.obsPort).not.toBe(qa.outdoor!.obsPort);
   });
 
+  it('OBS入力は送信待ち上限4MiBの映像バーストを収めるFIFOを持ち、経路切替で保持する', async () => {
+    const { controller } = await setup();
+    await controller.configure({ activeNetwork: 'lan' });
+    await controller.add('A'); const id = controller.snapshot().devices[0].id;
+    const input = controller.obsInput(id);
+    const url = new URL(input);
+    // FFmpeg counts FIFO capacity in 188-byte transport packets, not bytes.
+    expect(Number(url.searchParams.get('fifo_size')) * 188).toBeGreaterThanOrEqual(4 * 1024 * 1024);
+    expect(url.hostname).toBe('127.0.0.1');
+    expect(url.searchParams.get('localaddr')).toBe('127.0.0.1');
+    expect(url.searchParams.get('overrun_nonfatal')).toBe('1');
+    await controller.configure({ activeNetwork: 'tailscale' });
+    expect(controller.obsInput(id)).toBe(input);
+    await controller.configure({ activeNetwork: null });
+    expect(controller.obsInput(id)).toBe(input);
+  });
+
   it('待受失敗では選択を保持し、自動的に旧経路へ戻さない', async () => {
     const { controller, listen } = await setup();
     await controller.configure({ activeNetwork: 'lan' });

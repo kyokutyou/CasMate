@@ -1,6 +1,8 @@
+import { ListenerReactionsPanel } from '../components/ListenerReactionsPanel';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { connectionKeys, type AppSettings, type SettingsSection, type VoicevoxSpeaker } from '../../shared/types';
 import { useApplicationState } from '../api';
+import { ListenerPollPanel } from '../components/ListenerPollPanel';
 import { SmartphonePanel } from '../components/SmartphonePanel';
 import { CommentListPanel } from '../components/CommentListPanel';
 import { CommentOverlayPanel } from '../components/CommentOverlayPanel';
@@ -265,6 +267,8 @@ export function Dashboard() {
     smartphoneStatus={<SmartphoneWorkspaceStatus snapshot={snapshot} />} obsStatus={<ObsWorkspaceStatus snapshot={snapshot} />}
     live={<ManagementLive homeProps={homeProps} windows={windows(true)} commentWindow={{ visible: snapshot.settings.application.commentListWindowVisible, busy: shortcutsBusy.commentListWindow, toggle: toggleCommentListWindow }} />}
     home={<ManagementHome {...homeProps} />}>
+      <ListenerReactionsPanel request={api.reactionRequest} image={api.reactionImage} onNotice={(message, tone) => setNotice({ message, tone })} onRegisterSource={setObsRegistrationRequest}/>
+      <ListenerPollPanel request={api.pollRequest} baseUrl={location.origin} onNotice={(message, tone) => setNotice({ message, tone })} onRegisterSource={setObsRegistrationRequest} />
       <CommentAcquisitionPanel settings={draft.sources} savedSettings={snapshot.settings.sources} statuses={snapshot.sourceStatuses}
         operation={sources.operation} operationError={notice?.tone === 'error' && notice.message === sources.error ? sources.error : undefined} saveError={saveErrors.sources}
         onIntervalInvalidChange={sources.setIntervalInvalid} onChange={sources.change}

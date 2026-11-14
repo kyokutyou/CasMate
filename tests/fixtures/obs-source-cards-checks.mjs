@@ -31,9 +31,9 @@ export async function verifyObsSourceCards({ evaluate, resize, capture, render }
           assert.equal(a.y,b.y,`${width}px row alignment`);assert.ok(a.x<b.x,`${width}px two columns`);
           assert.equal(a.height,b.height,`${width}px equal row heights`);assert.equal(a.bottom,b.bottom,`${width}px bottom actions`);
         }
-        for (let i = 0; i < 4; i++) {
-          assert.equal(await evaluate("[...document.querySelectorAll('.obs-urls-row')].filter(node=>node.checkVisibility()).length"), 4);
-          assert.equal(await evaluate(`document.querySelectorAll('.obs-urls-row')[${i}].getAttribute('aria-label')`),['コメント','音声認識','キャラクター','文字演出'][i]);
+        for (let i = 0; i < 6; i++) {
+          assert.equal(await evaluate("[...document.querySelectorAll('.obs-urls-row')].filter(node=>node.checkVisibility()).length"), 6);
+          assert.equal(await evaluate(`document.querySelectorAll('.obs-urls-row')[${i}].getAttribute('aria-label')`),['コメント','音声認識','キャラクター','文字演出','リスナー投票','リスナーリアクション'][i]);
           assert.equal(await evaluate("document.querySelectorAll('.obs-urls-choice,.obs-urls-preview,.obs-urls-quiet,.obs-urls-modal,.obs-urls-running').length"), 0);
           checks++;
         }

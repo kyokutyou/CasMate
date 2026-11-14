@@ -43,10 +43,11 @@ class CameraGeometryDeviceTest {
                     val canvas = gl.surface.lockCanvas(null)
                     canvas.drawColor(Color.WHITE)
                     val paint = Paint().apply { color = Color.GREEN }
-                    canvas.drawRect(0f, 0f, 80f, 45f, paint)
-                    paint.color = Color.BLUE; canvas.drawRect(240f, 0f, 320f, 45f, paint)
-                    paint.color = Color.YELLOW; canvas.drawRect(240f, 135f, 320f, 180f, paint)
-                    paint.color = Color.MAGENTA; canvas.drawRect(0f, 135f, 80f, 180f, paint)
+                    // All four markers remain inside the visible central crop in either output aspect.
+                    canvas.drawRect(112f, 63f, 128f, 72f, paint)
+                    paint.color = Color.BLUE; canvas.drawRect(192f, 63f, 208f, 72f, paint)
+                    paint.color = Color.YELLOW; canvas.drawRect(192f, 108f, 208f, 117f, paint)
+                    paint.color = Color.MAGENTA; canvas.drawRect(112f, 108f, 128f, 117f, paint)
                     paint.color = Color.RED; canvas.drawCircle(160f, 90f, 20f, paint)
                     gl.surface.unlockCanvasAndPost(canvas)
                     assertTrue("Output frame arrived", latch.await(5, TimeUnit.SECONDS))
@@ -64,7 +65,7 @@ class CameraGeometryDeviceTest {
                     }
                     val identity = floatArrayOf(1f,0f,0f,0f, 0f,1f,0f,0f, 0f,0f,1f,0f, 0f,0f,0f,1f)
                     val fit = checkNotNull(geometry.fit(width, height, identity))
-                    val green = when (rotation) { 90 -> .875f to .125f; 180 -> .875f to .875f; 270 -> .125f to .875f; else -> .125f to .125f }
+                    val green = when (rotation) { 90 -> .625f to .375f; 180 -> .625f to .625f; 270 -> .375f to .625f; else -> .375f to .375f }
                     assertEquals(Color.GREEN, bitmap.getPixel(((.5f + (green.first - .5f) * fit[0]) * width).toInt(),
                         ((.5f + (green.second - .5f) * fit[1]) * height).toInt()))
                     val red = buildList { for (y in 0 until height) for (x in 0 until width) {
@@ -73,8 +74,11 @@ class CameraGeometryDeviceTest {
                     assertTrue(red.isNotEmpty())
                     assertTrue("Circle must not become an ellipse", kotlin.math.abs(
                         (red.maxOf { it.first } - red.minOf { it.first }) - (red.maxOf { it.second } - red.minOf { it.second })) <= 2)
-                    if (fit[0] < .9f) assertEquals(Color.BLACK, bitmap.getPixel(0, height / 2))
-                    if (fit[1] < .9f) assertEquals(Color.BLACK, bitmap.getPixel(width / 2, 0))
+                    assertTrue("The camera covers the selected output", fit.all { it >= 1f })
+                    assertEquals(Color.WHITE, bitmap.getPixel(0, height / 2))
+                    assertEquals(Color.WHITE, bitmap.getPixel(width / 2, 0))
+                    assertEquals(Color.WHITE, bitmap.getPixel(width - 1, height / 2))
+                    assertEquals(Color.WHITE, bitmap.getPixel(width / 2, height - 1))
                     java.io.File(context.getExternalFilesDir(null), "geometry-$width-$rotation.png").outputStream().use {
                         bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
                     }

@@ -45,7 +45,7 @@ class OutdoorTimestampOverlayUiTest {
 
         val toggle = compose.onNodeWithTag("診断用時刻スイッチ")
         toggle.assertIsOff()
-        compose.onNodeWithText("プレビュー・SRT映像とOBS録画・配信に表示されます。", substring = true)
+        compose.onNodeWithText("OBSの配信・録画にも時刻が表示されます。")
             .performScrollTo().assertExists()
 
         toggle.performClick()
@@ -60,7 +60,7 @@ class OutdoorTimestampOverlayUiTest {
         val activeToggle = compose.onNodeWithTag("診断用時刻スイッチ")
         activeToggle.assertIsOn()
         activeToggle.assertIsNotEnabled()
-        compose.onNodeWithText("送信中は変更できません").performScrollTo().assertExists()
+        compose.onNodeWithText("変更するには映像送信を停止してください。").performScrollTo().assertExists()
 
         compose.runOnIdle { OutdoorRuntime.update(OutdoorState()) }
         compose.onNodeWithTag("診断用時刻スイッチ").assertIsOff()
@@ -117,6 +117,7 @@ class OutdoorTimestampOverlayUiTest {
         compose.onNodeWithTag("画面切替・カメラ").performClick()
         compose.onNodeWithTag("カメラ設定の入口").performClick()
         compose.onNodeWithTag("映像・マイク分類・カメラ").performScrollTo().performClick()
+        compose.onNodeWithTag("映像・マイク分類・映像への時刻表示").performScrollTo().performClick()
     }
 }
 

@@ -243,6 +243,36 @@ export function useApplicationState(management = false) {
     };
   }, [bootstrap, management]);
 
+  const reactionRequest = useCallback(async (action?: string, body?: unknown, signal?: AbortSignal, expectedInstance?: string): Promise<import('../shared/listener-reactions').ReactionManagementSnapshot> => {
+    if (!token.current) throw Object.assign(new Error('管理認証を取得できません。'), { status: 403 });
+    const response = await fetch('/api/management/reactions' + (action ? '/' + action : ''), { signal,
+      method: action ? 'POST' : 'GET', cache: 'no-store',
+      headers: { [action ? 'X-CasMate-Token' : 'X-CasMate-Management']: token.current,
+        ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+        ...(expectedInstance === undefined ? {} : { 'X-CasMate-Reaction-Instance': expectedInstance }) },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    });
+    if (!response.ok && !action) throw Object.assign(new Error('管理状態を取得できません。'), { status: response.status });
+    const result = await response.json(); if (!response.ok) throw new Error(result.message ?? '操作に失敗しました。'); return result;
+  }, []);
+  const reactionImage = useCallback(async (id: string, signal: AbortSignal) => {
+    if (!token.current) throw new Error('管理認証を取得できません。');
+    const response = await fetch('/api/management/reactions/frame?id=' + encodeURIComponent(id), { signal, cache: 'no-store', headers: { 'X-CasMate-Management': token.current } });
+    if (!response.ok) throw Object.assign(new Error('最新画像を取得できません。'), { status: response.status });
+    return response.blob();
+  }, []);
+  const pollRequest = useCallback(async (action?: string, body?: unknown): Promise<import('../shared/listener-poll').PollManagementSnapshot> => {
+    if (!token.current) throw new Error('管理認証を取得できません。再読み込みしてください。');
+    const response = await fetch('/api/management/polls' + (action ? '/' + action : ''), {
+      method: action ? 'POST' : 'GET', cache: 'no-store',
+      headers: { [action ? 'X-CasMate-Token' : 'X-CasMate-Management']: token.current, ...(body === undefined ? {} : { 'Content-Type': 'application/json' }) },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.message ?? '投票の状態を取得できません。');
+    return result;
+  }, []);
+
   const mutate = useCallback(async (path: string, method = 'POST', body?: unknown) => {
     if (!token.current) throw new Error('操作トークンを取得できません。管理画面を再読み込みしてください。');
     const requestedRevision = lastRevision.current;
@@ -442,6 +472,7 @@ export function useApplicationState(management = false) {
       if (!response.ok || !result.input) throw new Error(result.message ?? 'OBS入力を準備できません。');
       return result.input;
     },
+    pollRequest, reactionRequest, reactionImage,
     connected,
     error,
     mutate,

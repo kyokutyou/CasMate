@@ -1,0 +1,62 @@
+.reaction-settings { display:grid; gap:12px; min-width:0; container-type:inline-size; }
+.reaction-settings :is(h3,p) { margin:0; }
+.reaction-settings label { display:grid; gap:6px; min-width:0; }
+.reaction-settings label:has(input[type=checkbox]) { display:flex; align-items:center; }
+.reaction-settings :is(select, input[type=number], input[type=text]) { width:100%; min-width:0; }
+.reaction-settings button { white-space:normal; max-width:100%; }
+.reaction-settings button[aria-disabled=true] { opacity:.5; cursor:default; }
+.reaction-settings [hidden] { display:none; }
+.reaction-section { display:grid; grid-template-columns:minmax(0,1fr); gap:12px; min-width:0; padding:12px; border:1px solid var(--studio-line, #496773); border-radius:10px; }
+.reaction-section-heading, .reaction-obs { display:flex; align-items:center; gap:8px 12px; flex-wrap:wrap; }
+.reaction-section-heading { justify-content:space-between; }
+.reaction-publication .reaction-section-heading { justify-content:flex-start; flex-wrap:nowrap; }
+.reaction-publication h3 { flex:none; }
+.reaction-public-status { height:2lh; overflow:auto; overflow-wrap:anywhere; align-content:center; }
+.reaction-public-status[data-online=true] { color:var(--studio-success, #b7e2cf); }
+.reaction-fields, .reaction-public-controls, .reaction-desktop-layout { display:grid; align-content:start; align-items:start; gap:8px; min-width:0; }
+.reaction-public-controls, .reaction-desktop-layout { gap:12px; }
+.reaction-public-controls { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.reaction-desktop-layout { grid-template-columns:minmax(0,1fr) minmax(0,1.7fr); }
+.reaction-desktop-layout[data-expanded=true] { grid-template-columns:minmax(0,1fr); }
+.reaction-expand-preview { justify-self:start; }
+.reaction-details { border-top:1px solid var(--studio-line, #496773); padding-top:8px; }
+.reaction-settings details > .reaction-fields { margin-top:8px; }
+.reaction-settings summary { cursor:pointer; color:var(--studio-accent, inherit); }
+.reaction-share { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:8px; padding:8px; border-radius:7px; background:var(--studio-background, #122029); }
+.reaction-url-slot { height:2lh; align-content:center; overflow:auto; overflow-wrap:anywhere; }
+.reaction-qr-slot { height:160px; margin-top:8px; }
+.reaction-qr-slot img { display:block; }
+.reaction-number-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+.reaction-settings .reaction-zoom-label { display:flex; align-items:center; gap:8px; white-space:nowrap; }
+.reaction-zoom-label select { width:auto; }
+.reaction-preview-viewport { min-width:0; border-radius:7px; background:#16151d; }
+.reaction-preview-viewport[data-expanded=true] { overflow:auto; max-block-size:min(55dvh, 480px); overscroll-behavior:contain; }
+.reaction-range-preview { position:relative; width:100%; touch-action:none; display:grid; place-items:center; user-select:none; overflow:hidden; }
+.reaction-range-preview:has(>img) { cursor:crosshair; }
+.reaction-preview-viewport[data-panning=true] .reaction-range-preview:has(>img) { cursor:grab; }
+.reaction-preview-viewport[data-panning=true] .reaction-range-preview:active { cursor:grabbing; }
+.reaction-range-preview>img { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; pointer-events:none; }
+.reaction-range-preview>span { position:absolute; inset:0; display:grid; place-items:safe center; overflow:auto; color:#f5f3ff; padding:8px; text-align:center; }
+.reaction-range-border { position:absolute; border:2px solid #ff4d4f; box-shadow:0 0 0 120vw #0b121f65; box-sizing:border-box; pointer-events:none; }
+.reaction-resume-panel { display:grid; grid-template-columns:minmax(0,1fr) max(10rem, calc(9 * var(--management-font-body, 16px) + 18px)); align-items:center; gap:8px; padding:8px; border:1px solid transparent; border-radius:7px; min-width:0; background:var(--studio-panel, #29434e); }
+.reaction-resume-panel[data-state=confirmation] { border-color:var(--studio-warning, #ffb454); background:var(--studio-warning-surface, #423521); }
+.reaction-resume-panel > button { height:var(--management-control-height, 40px); padding:4px 8px; line-height:1.15; }
+.reaction-state-label { display:flex; align-items:center; gap:8px; }
+.reaction-state-mark { flex:none; width:10px; height:10px; border-radius:2px; background:light-dark(#667280,#9aaab5); }
+.reaction-resume-panel[data-state=showing] .reaction-state-mark { border-radius:50%; background:var(--studio-success, #68d99e); }
+.reaction-resume-panel:is([data-state=preparing],[data-state=stopping],[data-state=paused]) .reaction-state-mark { border:2px solid var(--studio-warning, #ffd18b); border-radius:50%; background:transparent; }
+.reaction-resume-panel[data-state=confirmation] .reaction-state-mark { transform:rotate(45deg); background:var(--studio-warning, #ffd18b); }
+.reaction-resume-status p { font-size:var(--management-font-secondary, 14px); }
+.reaction-save { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:8px; }
+.reaction-save-status, .reaction-resume-status { height:3lh; align-content:center; overflow:auto; overflow-wrap:anywhere; }
+@container (max-width:640px) {
+  .reaction-public-controls, .reaction-desktop-layout { grid-template-columns:minmax(0,1fr); }
+  .reaction-number-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@container (max-width:320px) {
+  .reaction-section { padding:8px; }
+  .reaction-resume-panel { grid-template-columns:minmax(0,1fr) minmax(0,8rem); }
+  .reaction-resume-panel > button { height:max(var(--management-control-height, 40px), calc(2lh + 10px)); }
+  .reaction-save, .reaction-share { grid-template-columns:minmax(0,1fr); }
+  .reaction-save button, .reaction-share button { justify-self:start; }
+}

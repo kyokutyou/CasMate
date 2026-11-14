@@ -42,12 +42,12 @@ class RecognitionEntryPointTest {
             }
         } }
         ui.onNodeWithTag("カメラ設定の入口").performClick()
-        ui.onNodeWithTag("映像・マイク分類・その他").performScrollTo().performClick()
-        ui.onNodeWithText("配信者音声認識").performScrollTo().performClick()
+        ui.onNodeWithTag("映像・マイク分類・アプリと連携").performScrollTo().performClick()
+        ui.onNodeWithTag("映像・マイク分類・配信者の音声認識").performScrollTo().performClick()
         checkDialog(sending)
         ui.onNodeWithTag("カメラ設定の入口").performClick()
-        ui.onNodeWithTag("映像・マイク分類・その他").performScrollTo().performClick()
-        ui.onNodeWithText("配信者音声認識").performScrollTo().performClick()
+        ui.onNodeWithTag("映像・マイク分類・アプリと連携").performScrollTo().performClick()
+        ui.onNodeWithTag("映像・マイク分類・配信者の音声認識").performScrollTo().performClick()
         checkDialog(sending)
         ui.onNodeWithTag("画面切替・コメント").performClick()
         ui.onNodeWithTag("コメント設定の入口").performClick()

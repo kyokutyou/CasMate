@@ -1,3 +1,5 @@
+import { ReactionOverlayPage } from './pages/ReactionOverlayPage';
+import { PollOverlayPage } from './pages/PollOverlayPage';
 import { Dashboard } from './pages/Dashboard';
 import { CommentListPage } from './pages/CommentListPage';
 import { CommentOverlayPage } from './pages/CommentOverlayPage';
@@ -10,6 +12,8 @@ import { ObsDesignPage } from './pages/ObsDesignPage';
 
 export function App() {
   switch (location.pathname) {
+    case '/overlay/reactions': return <ReactionOverlayPage/>;
+    case '/overlay/poll': return <PollOverlayPage/>;
     case '/obs/design':
       return <ObsDesignPage />;
     case '/comments':

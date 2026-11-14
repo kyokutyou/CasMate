@@ -49,15 +49,17 @@ class ControlContrastDeviceTest {
             ui.onNodeWithTag("カメラ設定の入口").performClick()
             for (mode in AppearanceMode.entries) {
                 if (mode != AppearanceMode.entries.first()) ui.onNodeWithText("戻る").performClick()
-                ui.onNodeWithTag("映像・マイク分類・その他").performScrollTo().performClick()
+                ui.onNodeWithTag("映像・マイク分類・アプリと連携").performScrollTo().performClick()
                 ui.onNodeWithText(if (mode == AppearanceMode.LIGHT) "ライトモード" else "ダークモード")
                     .performScrollTo().performClick()
                 ui.waitUntil(5_000) { runBlocking { preferences.appearance.first() == mode } }
                 ui.onNodeWithText("戻る").performClick()
                 ui.onNodeWithTag("映像・マイク分類・カメラ").performScrollTo().performClick()
+                ui.onNodeWithTag("映像・マイク分類・映像への時刻表示").performScrollTo().performClick()
                 ui.onNodeWithTag("診断用時刻スイッチ").performScrollTo().assertIsEnabled()
                 ui.onNodeWithText("戻る").performClick()
-                ui.onNodeWithTag("映像・マイク分類・送信品質").performScrollTo().performClick()
+                ui.onNodeWithText("戻る").performClick()
+                ui.onNodeWithTag("映像・マイク分類・画質と向き").performScrollTo().performClick()
                 ui.onNodeWithText("自動").performScrollTo().performClick()
                 val control = weak().performScrollTo().assertIsEnabled()
                 if (qualityPreferences.quality().audioFirst) control.performClick()
@@ -123,7 +125,7 @@ class ControlContrastDeviceTest {
         try {
             ui.onNodeWithTag("カメラ設定の入口").performClick()
             for (mode in AppearanceMode.entries) {
-                ui.onNodeWithTag("映像・マイク分類・その他").performScrollTo().performClick()
+                ui.onNodeWithTag("映像・マイク分類・アプリと連携").performScrollTo().performClick()
                 ui.onNodeWithText(if (mode == AppearanceMode.LIGHT) "ライトモード" else "ダークモード")
                     .performScrollTo().performClick()
                 ui.waitUntil(5_000) { runBlocking { preferences.appearance.first() == mode } }
@@ -131,7 +133,7 @@ class ControlContrastDeviceTest {
                 for (locked in listOf(false, true)) {
                     ui.runOnIdle { OutdoorRuntime.update(originalState.copy(active = locked, status = if (locked) "sending" else "stopped")) }
                     for (label in listOf("横向き", "縦向き", "背面", "前面")) {
-                        if (label == "横向き") ui.onNodeWithTag("映像・マイク分類・送信品質").performScrollTo().performClick()
+                        if (label == "横向き") ui.onNodeWithTag("映像・マイク分類・画質と向き").performScrollTo().performClick()
                         if (label == "背面") {
                             ui.onNodeWithText("戻る").performClick()
                             ui.onNodeWithTag("映像・マイク分類・カメラ").performScrollTo().performClick()

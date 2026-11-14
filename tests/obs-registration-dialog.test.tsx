@@ -42,6 +42,10 @@ const loaded = async () => waitFor(() => expect(within(modal()).getByLabelText('
 const inputField = () => within(modal()).getByRole('combobox', { name: '使用するOBSソース' });
 const sourceCard = () => within(modal()).getByRole('group', { name: '使用するOBSソースの内容' });
 
+it.each([{overlay:'reactions',editor:'listenerReactions'},{overlay:'poll',editor:'listenerPoll'}] as const)('keeps the registration dialog open from the $editor editor',async({overlay,editor})=>{
+  const p=setup({}, {kind:'overlay',overlay}, {editor,open:vi.fn(),reportError:vi.fn()});open('検証入口');await loaded();expect(modal()).toBeVisible();expect(p.context).toHaveBeenCalledWith({kind:'overlay',overlay});
+});
+
 it('スマホの手動追加で入力を直接コピーし、二重取得を防いで通知する', async () => {
   let resolve!: (input: string) => void;
   const smartphoneObsInput = vi.fn(() => new Promise<string>(done => { resolve = done; }));

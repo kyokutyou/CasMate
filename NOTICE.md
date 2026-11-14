@@ -41,3 +41,7 @@ native/outdoor/README.mdに記載しています。
 
 Androidでは、本ライセンス本文をassets/licenses/CasMate-AGPL-3.0.txt、
 この通知をassets/licenses/CasMate-NOTICE.mdに収録します。
+
+## リスナーリアクション素材
+
+2026-11-12採用のキャラクターリアクション素材は、利用者提供のキャラクター画像を元に本機能向けに生成・編集したものです。配布時は `src/renderer/reactions/stickers/assets/` の固定素材を使用し、原本のデスクトップパスを参照しません。

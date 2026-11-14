@@ -152,7 +152,7 @@ export function sourceSetup(obs = new FakeSourceObs()) {
     smartphone: () => ({
       snapshot: () => structuredClone(phone),
       obsInput: id => 'udp://127.0.0.1:' + phone.devices.find(device => device.id === id)?.obsLocalPort +
-        '?localaddr=127.0.0.1&fifo_size=1024&overrun_nonfatal=1',
+        '?localaddr=127.0.0.1&fifo_size=32768&overrun_nonfatal=1',
     }),
   });
   const target: ObsSourceTarget = { kind: 'overlay', overlay: 'comments' };

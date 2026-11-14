@@ -25,6 +25,15 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
+it('sends the expected reaction instance alongside the authenticated edit request', async () => {
+  const { result } = renderHook(() => useApplicationState(true));
+  await waitFor(() => expect(result.current.snapshot).not.toBeNull());
+  await result.current.reactionRequest('edit', undefined, undefined, 'observed-instance');
+  expect(fetch).toHaveBeenLastCalledWith('/api/management/reactions/edit', expect.objectContaining({
+    method:'POST', headers:{ 'X-CasMate-Token':'management-token', 'X-CasMate-Reaction-Instance':'observed-instance' },
+  }));
+});
+
 it('キャラクターの表示オプション保存で古い素材・微動・ウィンドウ状態を送信しない', async () => {
   const { result } = renderHook(() => useApplicationState(true));
   await waitFor(() => expect(result.current.snapshot).not.toBeNull());

@@ -18,6 +18,7 @@ export const managementSections = [
   { group: '表示・演出', items: [['textEffects', 'コメント文字演出', '反応ワード・ルール・テスト', '✧'], ['character', 'キャラクター', '画像・微動・ウィンドウ', '♧'], ['commentList', 'コメント一覧', '外観・表示項目', '☷']] },
   { group: 'OBS', items: [['commentOverlay', 'OBSコメント表示', '表示方法・表示項目・デザイン', '▤'], ['speechRecognitionOverlay', 'OBS音声認識表示', '表示時間・別窓でデザイン編集', '♩'], ['obsControl', 'OBS操作', 'OBS接続・音声とAndroidの操作設定', '◎'], ['urls', 'OBSにソースを追加', 'OBSへの追加・URL', '↗']] },
   { group: 'スマホ連携', items: [['smartphone', 'スマホ連携', 'コメント・読み上げ・映像送信', '▯']] },
+  { group: 'リスナー参加', items: [['listenerReactions', 'リスナーリアクション', 'ここ見て！・ハート・拍手', '♡'], ['listenerPoll', 'リスナー投票', 'お題・投票ページ・結果公開', '▥']] },
   { group: 'アプリ', items: [['application', 'アプリ設定', '配色・文字サイズ・ポート・バージョン', '⚙']] },
 ] as const;
 export type ManagementEditor = typeof managementSections[number]['items'][number][0] | 'mobileSpeech' | 'outdoor';

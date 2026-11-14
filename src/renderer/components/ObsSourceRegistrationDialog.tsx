@@ -215,10 +215,12 @@ export function ObsSourceRegistrationDialog({ request, state, obs, smartphone, s
     void refreshContext(request, { collection: sourceContext.collection, inputUuid: selection.current.inputUuid });
   }, [contextRevision, request, connected, blockedReason, busy, loading, sourceContext, refreshContext]);
   useEffect(() => {
+    const onListenerEditor = request?.target.kind === 'overlay' &&
+      (request.target.overlay === 'reactions' && navigation?.editor === 'listenerReactions' || request.target.overlay === 'poll' && navigation?.editor === 'listenerPoll');
     const onEntryPage = request?.page && navigation?.page === request.page && !navigation.editor;
     const onEntry = request?.initialSetup
       ? navigation?.initialSetup && request.entry.isConnected
-      : onEntryPage || request && navigation?.editor === ownerOf(request.target);
+      : onEntryPage || onListenerEditor || request && navigation?.editor === ownerOf(request.target);
     if (request && navigation && !onEntry) {
       dialog.current?.close(); callbacks.current.onClose();
     }
@@ -416,7 +418,7 @@ export function ObsSourceRegistrationDialog({ request, state, obs, smartphone, s
             {(contextRefreshError || contextRefreshWarning || (loading && sourceContext)) && <p>{contextRefreshError || contextRefreshWarning || 'OBSの一覧を更新しています…'}</p>}
           </div>
         </div>
-        {request.target.kind === 'overlay' ? <ObsSourceTestControls selection={sourceContext && selectedScene && chosenInput ? { target: request.target, collection: sourceContext.collection, sceneUuid: selectedScene, inputUuid: chosenInput } : null}
+        {request.target.kind === 'overlay' && ['poll','reactions'].includes(request.target.overlay) ? <div className="obs-registration-actions">{registrationAction}</div> : request.target.kind === 'overlay' ? <ObsSourceTestControls selection={sourceContext && selectedScene && chosenInput ? { target: request.target, collection: sourceContext.collection, sceneUuid: selectedScene, inputUuid: chosenInput } : null}
           state={testState} context={testContext} contextRevision={contextRevision} action={testAction} prepare={prepareTest} blocked={!connected || Boolean(blockedReason || state?.busy || loading || contextRefreshError || retryBlocked)}
           startLabel={request.target.kind === 'overlay' && request.target.overlay === 'comments' ? 'コメント受信テスト' : undefined}
           notice={(message, error) => onTestNotice?.(message, error)} registrationAction={registrationAction}/>

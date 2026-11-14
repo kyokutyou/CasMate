@@ -9,19 +9,30 @@ export interface ObsProgramImage {
   height: number;
   mimeType: 'image/jpeg';
   current(): boolean;
+  canvasWidth?: number;
+  canvasHeight?: number;
+  context?: string;
+}
+
+export class ObsProgramContextChanged extends Error {
+  constructor() { super('OBS_CAPTURE_CHANGED'); }
 }
 
 /** Read-only scene capture, independent of the AI listener's selected input. */
 export class ObsProgramPreview {
   private busy = false;
   constructor(private readonly open: () => ObsVisualReader,
-    private readonly decode: (bytes: Buffer) => { width: number; height: number } = imageSize) {}
+    private readonly decode: (bytes: Buffer) => { width: number; height: number } = imageSize,
+    private readonly options: { maxDimension: number; quality: number; timeoutMs?: number } = { maxDimension: 1280, quality: 75 }) {}
 
-  async capture(signal: AbortSignal): Promise<ObsProgramImage> {
+  async capture(signal: AbortSignal, onBusy?: () => void): Promise<ObsProgramImage> {
     signal.throwIfAborted();
-    if (this.busy) throw new Error('BUSY');
+    if (this.busy) {
+      onBusy?.();
+      throw new Error('BUSY');
+    }
     this.busy = true;
-    const deadline = AbortSignal.any([signal, AbortSignal.timeout(5000)]);
+    const deadline = AbortSignal.any([signal, AbortSignal.timeout(this.options.timeoutMs ?? 5000)]);
     let abort!: () => void;
     const cancelled = new Promise<never>((_, reject) => {
       abort = () => reject(new Error('OBS_CAPTURE_CANCELLED'));
@@ -49,12 +60,12 @@ export class ObsProgramPreview {
         if (!Number.isInteger(width) || !Number.isInteger(height) || width < 8 || height < 8 || width > 32768 || height > 32768) throw new Error('OBS_CAPTURE_UNAVAILABLE');
         const formats = (await request('GetVersion')).supportedImageFormats;
         if (!Array.isArray(formats) || !formats.includes('jpg')) throw new Error('OBS_CAPTURE_UNAVAILABLE');
-        const scale = Math.min(1, 1280 / Math.max(width, height));
+        const scale = Math.min(1, this.options.maxDimension / Math.max(width, height));
         const scaledWidth = Math.floor(width * scale); const scaledHeight = Math.floor(height * scale);
         if (scaledWidth < 8 || scaledHeight < 8) throw new Error('OBS_CAPTURE_UNAVAILABLE');
         const result = await request('GetSourceScreenshot', {
           ...(typeof uuid === 'string' && uuid ? { sourceUuid: uuid } : { sourceName: name }),
-          imageFormat: 'jpg', imageWidth: scaledWidth, imageHeight: scaledHeight, imageCompressionQuality: 75,
+          imageFormat: 'jpg', imageWidth: scaledWidth, imageHeight: scaledHeight, imageCompressionQuality: this.options.quality,
         });
         const capturedAt = new Date().toISOString();
         const url = result.imageData;
@@ -64,9 +75,12 @@ export class ObsProgramPreview {
         const size = this.decode(bytes);
         if (size.width !== scaledWidth || size.height !== scaledHeight) throw new Error('OBS_CAPTURE_INVALID');
         const after = await request('GetCurrentProgramScene');
+        const afterVideo = await request('GetVideoSettings');
         if (after.currentProgramSceneName !== name || after.currentProgramSceneUuid !== uuid ||
-          (await request('GetSceneCollectionList')).currentSceneCollectionName !== collection) throw new Error('OBS_CAPTURE_CHANGED');
+          Number(afterVideo.baseWidth) !== width || Number(afterVideo.baseHeight) !== height ||
+          (await request('GetSceneCollectionList')).currentSceneCollectionName !== collection) throw new ObsProgramContextChanged();
         return { bytes, sceneName: name, capturedAt, width: size.width, height: size.height, mimeType: 'image/jpeg' as const,
+          canvasWidth: width, canvasHeight: height, context: JSON.stringify([collection, uuid ?? name, width, height]),
           current: () => !signal.aborted && read.valid() };
       })();
       // OBS has no request cancellation. Retain the physical capture slot until

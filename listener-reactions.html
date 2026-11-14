@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="casmate-preview">
+<title>配信に参加</title><link rel="stylesheet" href="/src/renderer/reactions/client/style.css"><script type="module" src="/src/renderer/reactions/client/app.mjs"></script>
+<body data-page="listener"><main class="panel">
+  <header class="listener-header"><p class="eyebrow">きゃすメイト</p><h1>配信に参加</h1><button id="preview-width-toggle" type="button" aria-pressed="false" aria-controls="screen-section">横幅いっぱい</button></header>
+  <section id="screen-section" aria-label="配信画面">
+    <div class="preview-toolbar">
+      <div class="preview-choice"><span class="still-preview-label">静止画</span><div id="live-preview-modes" role="group" aria-label="配信画面の表示" hidden>
+        <button type="button" data-preview-view="live" aria-pressed="true">配信映像</button>
+        <button type="button" data-preview-view="still" aria-pressed="false">静止画</button>
+      </div></div>
+      <div class="reaction-feedback" data-state="idle" role="status" aria-live="polite" aria-atomic="true"><span class="feedback-icon" aria-hidden="true">○</span><p id="status" tabindex="0" aria-label="送信結果">リアクションを送れます</p></div>
+      </div>
+    <div id="live-preview-controls" hidden>
+      <a id="live-preview-link" target="_blank" rel="noopener noreferrer"></a>
+      <button id="player-controls-toggle" type="button" aria-pressed="true" aria-controls="live-preview" hidden>映像の操作</button>
+    </div>
+    <div id="live-preview" hidden></div>
+    <div id="still-preview">
+      <div id="screen-stage" class="screen-stage" role="button" tabindex="0" aria-label="配信画面。場所の道具を選んでクリック。こっち！はクリックまたはドラッグ。丸・枠を選んでドラッグ。キーボードは矢印とEnterで指定、Escで取消。" aria-disabled="true"><span class="screen-wait">配信画面を待っています…</span></div>
+    </div>
+    <div class="screen-caption"><span>静止画 · 配信より遅れる場合があります</span><span id="screen-status" role="status">画像を取得しています…</span></div>
+  </section>
+  <section class="location-actions" aria-labelledby="location-heading">
+    <h2 id="location-heading">場所を伝える</h2>
+    <div class="point-toolbar"><button id="point-tool" type="button" aria-pressed="false" aria-describedby="point-hint" disabled><span aria-hidden="true">📍</span><span class="tool-label">ここ見て！</span></button><button id="question-tool" type="button" aria-pressed="false" aria-describedby="point-hint" disabled><span aria-hidden="true">？</span><span class="tool-label">これなに？</span></button><button id="danger-tool" type="button" aria-pressed="false" aria-describedby="point-hint" disabled><span aria-hidden="true">！</span><span class="tool-label">危ない！</span></button><button id="arrow-tool" type="button" aria-pressed="false" aria-describedby="arrow-hint" disabled><span aria-hidden="true">↗</span><span class="tool-label">こっち！</span></button><button id="ellipse-tool" type="button" aria-pressed="false" aria-describedby="range-hint" disabled><span aria-hidden="true">◯</span><span class="tool-label">丸で囲む</span></button><button id="rectangle-tool" type="button" aria-pressed="false" aria-describedby="range-hint" disabled><span aria-hidden="true">▭</span><span class="tool-label">枠で囲む</span></button></div>
+    <div class="tool-instructions"><p id="point-hint" role="status"></p><p id="arrow-hint" role="status">タップで矢印 · ドラッグで向きを指定</p><p id="range-hint" role="status">選んで、画面をタップ</p></div>
+  </section>
+  <section class="feeling-actions" aria-labelledby="feeling-heading">
+    <h2 id="feeling-heading">気持ちを送る</h2>
+    <div class="reaction-actions"><div class="buttons"><button data-kind="heart"><span aria-hidden="true">❤️</span>ハート</button><button data-kind="clap"><span aria-hidden="true">👏</span>拍手</button></div><div class="hold-actions"><button id="cheer-hold" type="button" aria-pressed="false" aria-describedby="hold-hint">がんばれ！<small>長押し · 最大10秒</small></button></div></div>
+    <p id="hold-hint" role="status"></p>
+    <p class="character-heading">キャラクターで送る</p>
+    <div id="character-reactions" class="character-reactions" role="group" aria-label="キャラクターリアクション"></div>
+  </section>
+  <details class="listener-help"><summary>使い方</summary><p>場所のボタンを選んで、映像をクリック／タップすると送信します。丸・枠はドラッグで囲みます。こっち！はタップで短い矢印、ドラッグで向きを指定できます。</p><p>同じボタンをもう一度押すか、Escで取消。キーボードは矢印で移動、Enter／Spaceで確定。こっち！・丸・枠は始点と終点を指定します。応援はSpace／Enterを長押し。</p><p>リアクションの音は鳴りません。続けて送るときは少し待ってください。「送りました」は受付の確認です。配信への表示を保証するものではありません。</p><p>配信映像では、遅延や広告、画角の違いで指定位置がずれる場合があります。再生・音量は「映像の操作」で切り替えます。</p></details>
+</main></body></html>

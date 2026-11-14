@@ -1,4 +1,16 @@
+import { ReactionController } from './reactions/reaction-controller';
+import { ReactionFrames } from './reactions/reaction-frames';
+import { ReactionStore } from './reactions/reaction-store';
+import { ReactionPublicServer } from './reactions/reaction-public-server';
+import { ReactionNamedShare } from './reactions/reaction-named-share';
+import { ReactionPublication } from './reactions/reaction-publication';
+import { NativeReactionDesktop } from './reactions/reaction-desktop';
 import { join } from 'node:path';
+import { PollController } from './poll/poll-controller';
+import { PollStore } from './poll/poll-store';
+import { PollPublicServer } from './poll/poll-public-server';
+import { PollPublication } from './poll/poll-publication';
+import { SrvUsTunnel } from './poll/srv-us-tunnel';
 import { mkdir } from 'node:fs/promises';
 import { app, BrowserWindow, dialog, screen, shell, safeStorage, nativeImage, ipcMain } from 'electron';
 import { ObsVisual } from './obs/obs-visual';
@@ -68,6 +80,11 @@ let obsControl: ObsControlController | null = null;
 let obsSources: ObsSourceRegistrationController | null = null;
 let obsTests: ObsSourceTestController | null = null;
 
+let reactions: ReactionController | null = null;
+let reactionPublication: ReactionPublication | null = null;
+let polls: PollController | null = null;
+let pollPublication: PollPublication | null = null;
+
 let baseUrl = '';
 let quitting = false;
 let shutdownStarted = false;
@@ -104,10 +121,13 @@ app.on('before-quit', (event) => {
   event.preventDefault();
   shutdownStarted = true;
   quitting = true;
+  obsControl?.setOverlayServerOrigin(null);
   fonts?.stop();
   pcStatus?.stop();
   void (async () => {
     // Begin network closure before OBS checks or window-state persistence can delay quit.
+    const reactionStopping = Promise.allSettled([reactionPublication?.stop().finally(() => reactions?.shutdown())]);
+    const pollStopping = Promise.allSettled([pollPublication?.stop().then(() => polls?.shutdown())]);
     const smartphoneStopping = Promise.allSettled([smartphone?.stop()]);
     await obsTests?.shutdown();
     obsSources?.stop();
@@ -118,7 +138,7 @@ app.on('before-quit', (event) => {
       () => characterSettingsWindowController?.prepareForShutdown(),
       () => obsDesignWindowController?.prepareForShutdown(),
     ]);
-    await Promise.allSettled([state?.shutdown(), server?.stop(), smartphoneStopping, obsControl?.stop()]);
+    await Promise.allSettled([state?.shutdown(), server?.stop(), smartphoneStopping, pollStopping, reactionStopping, obsControl?.stop()]);
     app.exit(0);
   })();
 });
@@ -164,6 +184,7 @@ async function startApplication() {
     store: new ObsControlStore(join(app.getPath('userData'), 'obs-control.protected'), safeStorage),
     onState: value => state?.setObsControlState(value),
     onSourceContextChanged: () => state?.invalidateObsSourceContext(),
+    onReactionContextChanged: (type, data) => reactions?.obsChanged(type, data),
   });
   const updateNotices = new UpdateNoticeStore(join(app.getPath('userData'), 'update-notices.json'), {
     settings: () => loaded.warning,
@@ -212,6 +233,18 @@ async function startApplication() {
   createIndependentWindowControllers();
   const assetStore = new CharacterAssetStore(characterAssetDirectory, rendererDirectory());
 
+  polls = new PollController(new PollStore(join(app.getPath('userData'), 'listener-poll', 'polls.json')));
+  await polls.initialize();
+  pollPublication = new PollPublication(polls, new PollPublicServer(polls, join(rendererDirectory(), 'listener-poll')), new SrvUsTunnel(join(app.getPath('userData'), 'listener-poll', 'connection'), safeStorage));
+  if (quitting) { await polls.shutdown(); return; }
+  const reactionRoot = join(app.getPath('userData'), 'listener-reactions');
+  const reactionResources = app.isPackaged ? join(process.resourcesPath, 'resources', 'reactions') : join(app.getAppPath(), 'resources', 'reactions');
+  reactions = new ReactionController(new ReactionStore(join(reactionRoot, 'settings.json')), new ReactionFrames(() => obsControl!.visualReader('background', 'reaction')), () => obsControl!.visualReader('background', 'reaction'), new NativeReactionDesktop(reactionResources, () => baseUrl));
+  await reactions.initialize();
+  const namedReactionShare = new ReactionNamedShare(join(reactionRoot, 'named-share.protected'), safeStorage);
+  reactionPublication = new ReactionPublication(new ReactionPublicServer(reactions, join(rendererDirectory(), 'listener-reactions'), body => namedReactionShare.verifyProof(body)), new SrvUsTunnel(join(reactionRoot, 'connection'), safeStorage), () => reactions!.isAvailable(), undefined,
+    (url, publication, signal) => namedReactionShare.ready(url, publication, signal));
+  if (quitting) { await reactions.shutdown(); return; }
   let port = loaded.settings.application.port;
   obsSources = new ObsSourceRegistrationController({
     obs: obsControl, baseUrl: () => 'http://127.0.0.1:' + port,
@@ -227,6 +260,8 @@ async function startApplication() {
   fonts = new WindowsFontCatalog(undefined, pcStatusWorkerExecutablePath(app.isPackaged, app.getAppPath(), process.resourcesPath));
   while (true) {
     server = new LocalServer({
+      polls: { controller: polls, publication: pollPublication },
+      reactions: { controller: reactions, publication: reactionPublication, namedShare: namedReactionShare },
       openSettingsDirectory: async () => {
         try {
           const directory = app.getPath('userData');
@@ -306,6 +341,7 @@ async function startApplication() {
   }
 
   baseUrl = `http://127.0.0.1:${port}`;
+  obsControl.setOverlayServerOrigin(baseUrl);
   createCharacterSettingsWindowController();
   obsDesignWindowController = new ObsDesignWindowController({ create: createObsDesignWindow,
     saveBounds: async bounds => { await state!.updateObsDesignWindowBounds(bounds); } });
@@ -344,6 +380,8 @@ async function startApplication() {
     () => smartphone!.snapshot(), ffmpegExecutablePath(), listener => state!.subscribe(event => { if (event.type === 'smartphone.stateChanged') listener(); })));
   if (quitting) return;
   createManagementWindow();
+  // Start only after loopback URLs are ready, without delaying the management UI.
+  void reactions.publishAtStartup(reactionPublication);
   // Publication and receiver preparation must not hold back the local UI.
   // SmartphoneController cancels late startup work when shutdown begins.
   void smartphone.start().catch(() => {

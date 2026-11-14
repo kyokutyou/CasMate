@@ -1,3 +1,4 @@
+import { defaultReactionSettings } from '../../src/shared/listener-reactions';
 import { useCallback, useLayoutEffect, useState } from 'react';
 import { flushSync } from 'react-dom';
 import type { AppSettings, AppSnapshot, ConnectionKey, SettingsSection, SourceStatusView, VoicevoxSpeaker } from '../../src/shared/types';
@@ -105,7 +106,7 @@ export function useApplicationState() {
       snapshot: () => structuredClone(snapshot),
     };
   }, [snapshot]);
-  return { snapshot, connected: true, error: null, updateSettings, sourceAction, mutate,
+  return { reactionRequest: async () => ({ instance: 'fixture', revision: 0, available: true, error: null, settings: defaultReactionSettings(), windows: [], selectedId: '', frame: null, generation: 0, publication: { status: 'off', url: null, message: '' }, desktop: { enabled: false, showing: false, message: '' } }), reactionImage: async () => new Blob(), pollRequest: async () => ({ instance: 'fixture', revision: 0, available: true, error: null, draft: { question: '', options: ['', ''], durationMinutes: null }, appearance: { fontSize: 28, color: '#ffffff', background: '#142032' }, current: null, history: [], publication: { status: 'off', url: null, message: '' } }), snapshot, connected: true, error: null, updateSettings, sourceAction, mutate,
     obsSourceContext, obsSourceContextRevision: 0, obsTestContext: async () => ({ available: true, message: '' }),
     obsTestAction: async (action: 'start' | 'stop', body: ObsSourceTestRequest | { testId: string }) => {
       flushSync(() => setSnapshot(current => ({ ...current, obsSourceTest: action === 'start'

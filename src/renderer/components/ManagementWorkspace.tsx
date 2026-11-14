@@ -152,7 +152,7 @@ export function ManagementLive({ homeProps, windows, commentWindow }: { homeProp
     </div>
     <ManagementCommentFeed comments={snapshot.comments} settings={snapshot.settings.commentList} active={active} commentWindow={commentWindow} />
     <section className="studio-live-transcript" aria-label="音声認識プレビュー"><span title="配信に使う音声認識とは別に、設定画面から開始・停止できます。">音声認識プレビュー</span><p title={latest?.text}>{latest?.text ?? (recognition.previewActive ? '認識結果を待っています。' : '停止中')}</p><SettingLink id="live-recognition-settings" editor="speechRecognition">音声認識の設定</SettingLink></section>
-    <div className="studio-live-utilities"><button id="live-windows" className="feature-link" onClick={event => openDetail('windows', event.currentTarget)}>別ウィンドウを開く・設定 ›</button></div>
+    <div className="studio-live-utilities"><SettingLink id="live-listener-reactions" editor="listenerReactions">リスナーリアクション</SettingLink><SettingLink id="live-listener-poll" editor="listenerPoll">リスナー投票</SettingLink><button id="live-windows" className="feature-link" onClick={event => openDetail('windows', event.currentTarget)}>別ウィンドウを開く・設定 ›</button></div>
     <dialog ref={dialog} className="studio-live-dialog" aria-labelledby="live-detail-title" onCancel={event => { event.preventDefault(); close(); }} onClose={event => { if (!event.currentTarget.open) setDetail(null); }} onKeyDown={event => {
       if (event.key !== 'Tab') return;
       const controls = [...event.currentTarget.querySelectorAll<HTMLElement>('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),[tabindex="0"]')].filter(node => !node.closest('[hidden]'));

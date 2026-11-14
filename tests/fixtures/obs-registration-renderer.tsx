@@ -29,7 +29,7 @@ declare global {
   }
 }
 const targetTitle = (target: ObsSourceTarget) => target.kind === 'overlay'
-  ? { comments: 'コメント', speech: '音声認識', character: 'キャラクター', effects: '文字演出' }[target.overlay]
+  ? { comments: 'コメント', speech: '音声認識', character: 'キャラクター', effects: '文字演出', poll: 'リスナー投票', reactions: 'リスナーリアクション' }[target.overlay]
   : 'スマホA';
 
 // The harness uses real renderer components and state changes without connecting to OBS or exposing registration credentials.

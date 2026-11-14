@@ -8,11 +8,34 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.TextureView
 import android.view.ViewConfiguration
+import android.view.OrientationEventListener
+import android.hardware.display.DisplayManager
 import kotlin.math.abs
 import kotlin.math.hypot
 
 /** Normal taps focus the camera; handwriting owns its complete pointer sequence. */
 class OutdoorPreviewView(context: Context) : TextureView(context) {
+    internal var previewRotation = 0
+        set(value) { if (field != value) { cancelInput(); field = value; updateViewportTransform() } }
+    private var physicalOrientation: OutdoorOrientationTracker? = null
+    private val displayManager = context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
+    private fun refreshPreviewRotation() {
+        physicalOrientation?.let { previewRotation = outdoorPreviewRotation(it.current, display?.rotation ?: 0) }
+    }
+    private val displayListener = object : DisplayManager.DisplayListener {
+        override fun onDisplayAdded(displayId: Int) {}
+        override fun onDisplayRemoved(displayId: Int) {}
+        override fun onDisplayChanged(displayId: Int) {
+            if (display?.displayId == displayId) refreshPreviewRotation()
+        }
+    }
+    private val orientationListener = object : OrientationEventListener(context) {
+        override fun onOrientationChanged(orientation: Int) {
+            val tracker = physicalOrientation ?: return
+            tracker.sample(orientation)
+            refreshPreviewRotation()
+        }
+    }
     var onHorizontalFlick: ((Int) -> Unit)? = null
     var drawingMode = false
         set(value) { if (field != value) cancelInput(); field = value; updateViewportTransform() }
@@ -78,7 +101,9 @@ class OutdoorPreviewView(context: Context) : TextureView(context) {
         if (drawingMode) return false
         super.performClick()
         if (!isClickable) return false
-        val point = tapped ?: (width / 2f to height / 2f)
+        val tap = tapped ?: (width / 2f to height / 2f)
+        val point = previewInputPoint(tap.first, tap.second)
+        if (point.first !in 0f..width.toFloat() || point.second !in 0f..height.toFloat()) { tapped = null; return false }
         tapped = null; OutdoorRuntime.service?.focus(point.first, point.second, width, height); return true
     }
     private fun drawTouch(event: MotionEvent): Boolean {
@@ -156,8 +181,8 @@ class OutdoorPreviewView(context: Context) : TextureView(context) {
     private fun updateGrip(event: MotionEvent, apply: Boolean) {
         val first = event.findPointerIndex(firstFinger); val second = event.findPointerIndex(secondFinger)
         if (first < 0 || second < 0) { cancelInput(); return }
-        val x = (event.getX(first) + event.getX(second)) / 2f
-        val y = (event.getY(first) + event.getY(second)) / 2f
+        val (x, y) = previewInputPoint((event.getX(first) + event.getX(second)) / 2f,
+            (event.getY(first) + event.getY(second)) / 2f)
         val span = hypot(event.getX(first) - event.getX(second), event.getY(first) - event.getY(second)).coerceAtLeast(1f)
         val current = drawingViewport
         if (apply && current != null && width > 0 && height > 0) {
@@ -170,8 +195,9 @@ class OutdoorPreviewView(context: Context) : TextureView(context) {
         focusX = x; focusY = y; distance = span
     }
     private fun appendDrawing(x: Float, y: Float) { drawingPoint(x, y, clip = true)?.let { onDrawingMove?.invoke(it.x, it.y) } }
-    private fun drawingPoint(x: Float, y: Float, clip: Boolean = false): OutdoorDrawingPoint? {
+    private fun drawingPoint(viewX: Float, viewY: Float, clip: Boolean = false): OutdoorDrawingPoint? {
         if (width <= 0 || height <= 0) return null
+        val (x, y) = previewInputPoint(viewX, viewY)
         return drawingViewport?.geometry(width.toFloat(), height.toFloat(), drawingOutputWidth, drawingOutputHeight)?.point(x, y, clip)
             ?: if (drawingViewport == null && (clip || x in 0f..width.toFloat() && y in 0f..height.toFloat()))
                 OutdoorDrawingPoint((x / width).coerceIn(0f, 1f), (y / height).coerceIn(0f, 1f)) else null
@@ -182,8 +208,12 @@ class OutdoorPreviewView(context: Context) : TextureView(context) {
             val frame = drawingViewport!!.geometry(width.toFloat(), height.toFloat(), drawingOutputWidth, drawingOutputHeight)
             matrix.setScale(frame.zoom, frame.zoom, width / 2f, height / 2f); matrix.postTranslate(frame.offsetX, frame.offsetY)
         }
+        matrix.postConcat(outdoorPreviewRotationMatrix(width, height, previewRotation,
+            if (drawingMode) width else drawingOutputWidth, if (drawingMode) height else drawingOutputHeight))
         setTransform(matrix)
     }
+    private fun previewInputPoint(x: Float, y: Float) = outdoorPreviewInputPoint(x, y, width, height, previewRotation,
+        if (drawingMode) width else drawingOutputWidth, if (drawingMode) height else drawingOutputHeight)
     private fun endInk() {
         inputHandler.removeCallbacks(beginPending); pending.clear()
         if (phase == Phase.INK) onDrawingEnd?.invoke()
@@ -196,8 +226,19 @@ class OutdoorPreviewView(context: Context) : TextureView(context) {
     }
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh); cancelInput(); updateViewportTransform()
+        refreshPreviewRotation()
     }
-    override fun onDetachedFromWindow() { cancelInput(); super.onDetachedFromWindow() }
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        if (physicalOrientation == null) physicalOrientation = OutdoorOrientationTracker((360 - (display?.rotation ?: 0) * 90) % 360)
+        refreshPreviewRotation()
+        displayManager.registerDisplayListener(displayListener, inputHandler)
+        if (orientationListener.canDetectOrientation()) orientationListener.enable()
+    }
+    override fun onDetachedFromWindow() {
+        orientationListener.disable(); displayManager.unregisterDisplayListener(displayListener)
+        cancelInput(); super.onDetachedFromWindow()
+    }
     override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
         if (!hasWindowFocus) cancelInput()
         super.onWindowFocusChanged(hasWindowFocus)

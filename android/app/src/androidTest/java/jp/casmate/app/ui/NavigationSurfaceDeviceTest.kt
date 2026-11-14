@@ -63,7 +63,7 @@ class NavigationSurfaceDeviceTest {
             ui.onNodeWithTag("カメラ設定の入口").assertIsFocused()
             assertTrue(OutdoorRuntime.state.value.active)
             ui.onNodeWithTag("カメラ設定の入口").performClick()
-            ui.onNodeWithTag("映像・マイク分類・画面表示").performScrollTo().performClick()
+            ui.onNodeWithTag("映像・マイク分類・スマホの表示").performScrollTo().performClick()
             ui.onNodeWithTag("診断表示切替").performScrollTo().performClick()
             ui.onNodeWithText("閉じる").performClick()
             ui.onNodeWithTag("診断表示要約・本文").performTouchInput { swipeUp() }

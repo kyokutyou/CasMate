@@ -1,6 +1,6 @@
 {
   "name": "casmate",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "private": true,
   "description": "Windows向けストリーミング配信支援アプリ",
   "author": "kyokutyou",
@@ -10,9 +10,7 @@
     "dev": "vite",
     "typecheck": "node tools/compatibility-policy.mjs --check && tsc -p tsconfig.main.json --noEmit && tsc -p tsconfig.renderer.json --noEmit",
     "lint": "node tools/compatibility-policy.mjs --check && node tools/lint.mjs",
-    "lint:prototypes": "node tools/lint.mjs --scope=prototypes",
     "test": "node tools/compatibility-policy.mjs --check && node tools/test.mjs",
-    "test:prototypes": "vitest run --config vitest.prototypes.config.mts",
     "test:watch": "vitest",
     "build:worker": "dotnet publish src/speech-recognition-worker/CasMate.SpeechRecognition.Worker/CasMate.SpeechRecognition.Worker.csproj -c Release -r win-x64 --self-contained true -o resources/speech-recognition-worker",
     "build:pc-worker": "dotnet publish src/pc-status-worker/CasMate.PcStatus.Worker/CasMate.PcStatus.Worker.csproj -c Release -r win-x64 --self-contained true -o resources/pc-status-worker && node tools/write-pc-worker-fingerprint.mjs",
@@ -21,7 +19,7 @@
     "test:native-media": "node tools/test-outdoor-worker.mjs",
     "build:outdoor-worker": "node tools/build-outdoor-worker.mjs",
     "build:obs-style-editor": "vite build --config vite.obs-style-editor.config.mts",
-    "build": "node tools/compatibility-policy.mjs --check && vite build && vite build --config vite.direct.config.mts && pnpm build:obs-style-editor && tsc -p tsconfig.main.json && pnpm build:worker && pnpm build:pc-worker && pnpm build:outdoor-worker",
+    "build": "node tools/compatibility-policy.mjs --check && vite build && vite build --config vite.direct.config.mts && vite build --config vite.poll.config.mts && vite build --config vite.reactions.config.mts && pnpm build:obs-style-editor && tsc -p tsconfig.main.json && pnpm build:worker && pnpm build:pc-worker && pnpm build:outdoor-worker",
     "start": "electron .",
     "package:win": "pnpm build && electron-builder --win nsis",
     "compatibility:generate": "node tools/compatibility-policy.mjs --generate",
@@ -39,6 +37,10 @@
       "package.json"
     ],
     "extraResources": [
+      {
+        "from": "resources/reactions",
+        "to": "resources/reactions"
+      },
       {
         "from": "LICENSE",
         "to": "LICENSE"

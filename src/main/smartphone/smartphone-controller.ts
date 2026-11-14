@@ -249,7 +249,8 @@ export class SmartphoneController {
     const record = this.editable();
     const port = this.device(record, id).obsLocalPort;
     if (!port) throw new Error('映像の共通入力を準備中です。PCの状態を確認してください。');
-    return `udp://127.0.0.1:${port}?localaddr=127.0.0.1&fifo_size=1024&overrun_nonfatal=1`;
+    // FFmpeg counts 188-byte TS packets. Keep room for the 4MiB encoded burst plus mux overhead.
+    return `udp://127.0.0.1:${port}?localaddr=127.0.0.1&fifo_size=32768&overrun_nonfatal=1`;
   }
 
   feedback(id: string, network: SmartphoneNetwork, value: unknown) {

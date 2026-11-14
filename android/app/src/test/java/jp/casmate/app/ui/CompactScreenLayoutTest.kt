@@ -123,9 +123,9 @@ class CompactScreenLayoutTest {
         compose.onNodeWithTag("コメント・読み上げ操作").assertWidthIsEqualTo(48.dp).assertHeightIsEqualTo(48.dp)
         compose.onNodeWithTag("コメント設定の入口").assertWidthIsEqualTo(48.dp).assertHeightIsEqualTo(48.dp)
         val gear = compose.onNodeWithTag("コメント設定の入口").fetchSemanticsNode().boundsInRoot
-        assertEquals(cameraGear, reading)
+        assertEquals(cameraGear, gear)
         val commentsConnection = compose.onNodeWithContentDescription("スマホ連携").fetchSemanticsNode().boundsInRoot
-        assertTrue(comments.right <= commentsConnection.left && commentsConnection.right <= gear.left && gear.right <= reading.left)
+        assertTrue(comments.right <= reading.left && reading.right <= commentsConnection.left && commentsConnection.right <= gear.left)
         for (status in AudioStatus.entries) {
             compose.runOnIdle { audio.value = status }
             assertEquals(reading, compose.onNodeWithTag("コメント・読み上げ操作").fetchSemanticsNode().boundsInRoot)

@@ -16,7 +16,8 @@ export interface Principal {
 }
 export interface ControlOptions {
   controller: Pick<SmartphoneController, 'authenticateControl' | 'registrationTokenCurrent' | 'registrationUpdateCurrent' | 'updatedRegistration' | 'touchReport' | 'releaseReport' | 'feedback' | 'acceptReport'>;
-  obs: Pick<ObsControlController, 'view' | 'prepareAndroid' | 'confirmAndroid' | 'cancelAndroid' | 'captureProgramAndroid' | 'canCaptureProgramAndroid'>;
+  obs: Pick<ObsControlController, 'view' | 'prepareAndroid' | 'confirmAndroid' | 'cancelAndroid' |
+    'captureProgramAndroid' | 'canCaptureProgramAndroid' | 'noteAndroidCaptureContention'>;
   state: Pick<AppState, 'subscribe' | 'remoteSpeechRecognitionState' | 'setSpeechRecognitionEnabled' | 'selectSpeechRecognitionInput' | 'retrySpeechRecognition'>;
   network: SmartphoneNetwork;
   address: string;
@@ -188,7 +189,10 @@ export class SmartphoneControlSession {
         if (this.principal.protocolVersion !== 3) throw new ObsControlHttpError(503, 'OBS_CAPTURE_UNSUPPORTED');
         if (!this.obsSubscribed || !this.principal.obs) throw new ObsControlHttpError(403, 'REGISTRATION_UNAVAILABLE');
         if (!m.payload || typeof m.payload !== 'object' || Array.isArray(m.payload) || Object.keys(m.payload).length) throw new ObsControlHttpError(400, 'INVALID_REQUEST');
-        if (this.capture) throw new ObsControlHttpError(409, 'BUSY');
+        if (this.capture) {
+          this.options.obs.noteAndroidCaptureContention(this.principal.obs);
+          throw new ObsControlHttpError(409, 'BUSY');
+        }
         await this.captureProgram(id, generation);
         return;
       }

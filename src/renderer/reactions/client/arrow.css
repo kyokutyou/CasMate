@@ -1,0 +1,4 @@
+.arrow-marker{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.arrow-view{position:absolute;left:0;top:0;transform-origin:0 0}
+.arrow-view canvas{position:absolute;left:0;top:0}
+.arrow-label{position:absolute;display:flex;align-items:center;justify-content:center;box-sizing:border-box;height:27px;padding:4px 8px;border-radius:7px;background:rgba(255,255,255,.8);color:#237b90;font:500 14px/1.4 "Segoe UI","Yu Gothic UI",sans-serif;white-space:nowrap}

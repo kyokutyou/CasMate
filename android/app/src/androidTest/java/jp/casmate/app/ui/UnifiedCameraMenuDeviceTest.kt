@@ -35,20 +35,20 @@ class UnifiedCameraMenuDeviceTest {
             assertTrue(send.right <= connection.left && connection.right <= menu.left)
             for (mode in AppearanceMode.entries) {
                 ui.onNodeWithTag("カメラ設定の入口").performClick()
-                category("その他")
+                category("アプリと連携")
                 ui.onNodeWithText(if (mode == AppearanceMode.LIGHT) "ライトモード" else "ダークモード")
                     .performScrollTo().performClick()
                 ui.waitUntil(5_000) { runBlocking { preferences.appearance.first() == mode } }
                 ui.onNodeWithText("戻る").performClick()
                 capture("list-${mode.storedValue}")
-                for (name in listOf("カメラ", "マイク", "送信品質", "画面表示")) {
+                for (name in listOf("カメラ", "マイク", "画質と向き", "スマホの表示")) {
                     category(name)
                     ui.onNodeWithText("閉じる").assertIsDisplayed()
                     when (name) {
                         "カメラ" -> ui.onNodeWithText("前面").assertIsEnabled()
                         "マイク" -> ui.onNodeWithTag("カメラ・ミュート").performScrollTo().assertIsNotEnabled()
-                        "送信品質" -> ui.onNodeWithText("横向き").assertIsEnabled()
-                        "画面表示" -> ui.onNodeWithText("プレビューを閉じる").assertIsEnabled()
+                        "画質と向き" -> ui.onNodeWithText("横向き").assertIsEnabled()
+                        "スマホの表示" -> ui.onNodeWithTag("プレビュー表示切替").assertIsEnabled()
                     }
                     ui.onNodeWithText("戻る").performClick()
                 }
@@ -63,7 +63,7 @@ class UnifiedCameraMenuDeviceTest {
                 ui.onNodeWithTag("機能操作の入口").assertIsFocused()
                 capture("header-${mode.storedValue}")
                 ui.onNodeWithTag("カメラ設定の入口").performClick()
-                category("通信・診断")
+                category("通信と診断")
                 ui.onNodeWithTag("機能操作メニュー").assertDoesNotExist()
                 listOf("概要", "自動調整", "通信", "履歴").forEach { ui.onNodeWithText(it).assertIsDisplayed() }
                 ui.onNodeWithText("診断を閉じる").performClick()

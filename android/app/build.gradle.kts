@@ -15,8 +15,8 @@ android {
         applicationId = "jp.casmate.app"
         minSdk = 29
         targetSdk = 37
-        versionCode = 3
-        versionName = "0.5.1"
+        versionCode = 4
+        versionName = "0.5.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86") }

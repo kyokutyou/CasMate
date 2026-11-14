@@ -36,6 +36,10 @@ export interface ObsWebsocketTransport {
 
 const OBS_RPC_VERSION = 1;
 const REQUEST_TIMEOUT_MS = 5_000;
+const SCREENSHOT_RESPONSE_TIMEOUT_MS = 10_000;
+// Protocol All (standard categories through Canvases), plus geometry changes.
+// Do not enable volume meters or other unrelated high-volume streams.
+const OBS_EVENT_SUBSCRIPTIONS = ((1 << 12) - 1) | (1 << 19);
 
 export class DefaultObsWebsocketTransport implements ObsWebsocketTransport {
   connect(url: string, password: string): Promise<ObsWebsocketConnection> {
@@ -99,6 +103,7 @@ class ObsWebsocketConnectionImpl implements ObsWebsocketConnection {
           d: {
             rpcVersion: OBS_RPC_VERSION,
             authentication: obsAuthentication(password, hello.authentication),
+            eventSubscriptions: OBS_EVENT_SUBSCRIPTIONS,
           },
         };
         socket.send(JSON.stringify(identify));
@@ -131,11 +136,14 @@ class ObsWebsocketConnectionImpl implements ObsWebsocketConnection {
       return Promise.reject(new Error('OBS_WEBSOCKET_DISCONNECTED'));
     }
     const requestId = randomUUID();
+    // The capture caller has its own deadline. Keep the shared physical slot
+    // occupied while a late screenshot reply can still confirm completion.
+    const timeout = requestType === 'GetSourceScreenshot' ? SCREENSHOT_RESPONSE_TIMEOUT_MS : REQUEST_TIMEOUT_MS;
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pending.delete(requestId);
         reject(new Error('OBS_WEBSOCKET_TIMEOUT'));
-      }, REQUEST_TIMEOUT_MS);
+      }, timeout);
       this.pending.set(requestId, { resolve, reject, timer });
       this.socket.send(JSON.stringify({ op: 6, d: { requestType, requestId, ...(requestData ? { requestData } : {}) } }));
     });

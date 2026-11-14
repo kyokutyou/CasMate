@@ -15,6 +15,8 @@ import { initialSetupSteps, setupConfigured, type SetupStep } from '../../shared
 import { useManagementHistory } from '../use-management-history';
 
 const introductions: Partial<Record<ManagementEditor, string>> = {
+  listenerReactions: 'リスナーのリアクションを配信画面とPCに表示します。',
+  listenerPoll: 'リスナーが参加する投票を作り、結果を公開します。',
   application: 'PCアプリの配色・文字サイズ・接続設定を変更します。',
   urls: 'コメントや演出など、使う表示をOBSへ追加します。',
   smartphone: 'コメント・音声・映像を使うスマホの接続を準備します。',

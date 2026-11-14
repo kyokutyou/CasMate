@@ -8,7 +8,7 @@
 
 ## ダウンロード
 
-Windows用インストーラーとAndroid用APKは、[v0.5.0のリリースページ](https://github.com/kyokutyou/CasMate/releases/tag/v0.5.0)からダウンロードできます。
+Windows用インストーラーとAndroid用APKは、[v0.5.2のリリースページ](https://github.com/kyokutyou/CasMate/releases/tag/v0.5.2)で配布します。
 
 PC版は **Windows 11（x64）**、Android版は **Android 10以降**が対象です。ソースから起動する場合は、下の「ソースからビルド」を参照してください。
 
@@ -20,6 +20,8 @@ PC版は **Windows 11（x64）**、Android版は **Android 10以降**が対象�
 - **キャラクターを動かす：** 画像2枚で、読み上げに合わせた口パクとゆっくりした動きを付けられます。
 - **スマホと連携して外配信：** 外配信で必要なコメントの閲覧・読み上げ、カメラ・マイク送信、OBS配信開始・終了を操作できます。
 - **AIリスナーを参加させる：** Geminiが配信中の会話をもとにコメントします。
+- **リスナー投票：** 共有リンクから匿名で投票してもらい、結果をOBSに表示できます。
+- **リスナーリアクション：** ハート・拍手・応援や、映像上の位置・範囲を伝えるリアクションをOBSやPC画面に表示できます。
 
 ## 使い方
 
@@ -67,7 +69,7 @@ Android版は独立したGradleプロジェクトです。[Androidの開発手�
 
 独立したOBS着せ替えツールは、`pnpm build:obs-style-editor` または通常ビルドで `dist-tools/obs-style-editor.html` に生成します。EdgeまたはChromeで開いて使えます。
 
-ソースの確認には `pnpm lint`・`pnpm typecheck`・`pnpm test` を利用できます。利用方法は上の設定ガイドを参照してください。
+ソースの確認には `pnpm lint`・`pnpm typecheck` と対象ファイルを指定した `pnpm test <対象ファイル...>` を利用できます。利用方法は上の設定ガイドを参照してください。
 
 ## ライセンス
 

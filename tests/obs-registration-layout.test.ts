@@ -31,12 +31,12 @@ it('OBS登録の入口・ダイアログ・状態前後・復旧を320pxと縦�
     const browser = ['C:/Program Files/Google/Chrome/Application/chrome.exe', 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'].find(path => existsSync(path));
     const selection = await runElectronFixture('tests/fixtures/obs-registration-layout.mjs', html, directory,
       [captures, '--source-cards-only'], 60_000);
-    expect(selection.stdout, selection.stderr).toContain('PASS: 960 OBS source cards checks');
+    expect(selection.stdout, selection.stderr).toContain('PASS: 1440 OBS source cards checks');
     if (browser) {
       const nativeSelection = await promisify(execFile)(process.execPath,
         [resolve('tests/fixtures/management-studio-native-browser.mjs'), browser, html, captures, '--source-cards-only'],
         { cwd: directory, windowsHide: true, timeout: 60_000 });
-      expect(nativeSelection.stdout, nativeSelection.stderr).toContain('PASS: 960 OBS source cards checks; zero HTTP(S) requests');
+      expect(nativeSelection.stdout, nativeSelection.stderr).toContain('PASS: 1440 OBS source cards checks; zero HTTP(S) requests');
     }
     if (browser) {
       const native = await promisify(execFile)(process.execPath,
@@ -45,10 +45,10 @@ it('OBS登録の入口・ダイアログ・状態前後・復旧を320pxと縦�
       expect(native.stdout, native.stderr).toContain('PASS: 3 OBS registration status checks');
     }
     const disconnected = await runElectronFixture('tests/fixtures/obs-registration-layout.mjs', html, directory, [captures, '--disconnected-metrics-only'], 40_000);
-    expect(disconnected.stdout, disconnected.stderr).toContain('PASS: 60 disconnected OBS guidance scenarios');
+    expect(disconnected.stdout, disconnected.stderr).toContain('PASS: 90 disconnected OBS guidance scenarios');
     const { stdout, stderr } = await runElectronFixture('tests/fixtures/obs-registration-layout.mjs', html, directory, [captures], 40_000);
-    expect(stdout, stderr).toContain('PASS: 36 OBS registration layout/state scenarios');
-    expect(stdout).toContain('PASS: four entries, manual phone fallback, recovery and keyboard');
+    expect(stdout, stderr).toContain('PASS: 42 OBS registration layout/state scenarios');
+    expect(stdout).toContain('PASS: five entries, manual phone fallback, recovery and keyboard');
     const recovery = await runElectronFixture('tests/fixtures/obs-registration-layout.mjs', html, directory,
       [captures, '--recovery-metrics-only'], 40_000);
     expect(recovery.stdout, recovery.stderr).toContain('PASS: 48 OBS recovery text-size/scroll/stability scenarios');

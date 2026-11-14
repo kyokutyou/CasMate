@@ -6,6 +6,8 @@ export function ObsSourceIcon({ name }: { name: Extract<ObsSourceTarget, { kind:
     {name === 'speech' && <><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v5M8 22h8"/></>}
     {name === 'character' && <><path d="m4 9 1-6 5 3h4l5-3 1 6v7a6 6 0 0 1-6 5h-4a6 6 0 0 1-6-5Z"/><path d="M8 12v2M16 12v2m-6 3 2 1 2-1"/></>}
     {name === 'effects' && <path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5ZM20 2v4M18 4h4"/>}
+    {name === 'reactions' && <path d="M12 21 3 12C-3 3 9-1 12 6c3-7 15-3 9 6Z"/>}
+    {name === 'poll' && <><path d="M4 3v18h17M8 16v-5M13 16V6M18 16v-8"/></>}
     {name === 'copy' && <><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M15 8V3H3v13h5"/></>}
     {name === 'smartphone' && <><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M10 5h4M11 19h2"/></>}
   </svg>;

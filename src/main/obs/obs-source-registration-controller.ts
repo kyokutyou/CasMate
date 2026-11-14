@@ -235,7 +235,14 @@ export class ObsSourceRegistrationController {
     for (const input of inputs.filter(input => input.kind === definition.kind)) {
       const individual = await reader.request('GetInputSettings', { inputUuid: input.uuid });
       const settings = effectiveSettings(definition, defaults, record(individual.inputSettings));
-      if ((definition.kind === 'browser_source' ? settings.url : settings.input) !== definition.input) continue;
+      if ((definition.kind === 'browser_source' ? settings.url : settings.input) !== definition.input) {
+        if (definition.kind === 'ffmpeg_source' &&
+          settings.input === definition.input.replace('&fifo_size=32768&', '&fifo_size=1024&')) {
+          incompatible.push({ uuid: input.uuid, name: input.name,
+            reason: '受信バッファが古い設定です。「OBS入力をコピー」の内容で、OBSのメディアソースの入力を更新してください。' });
+        }
+        continue;
+      }
       const reason = incompatibility(definition, settings);
       if (reason) incompatible.push({ uuid: input.uuid, name: input.name, reason });
       else candidates.push({ uuid: input.uuid, name: input.name });

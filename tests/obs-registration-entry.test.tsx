@@ -13,15 +13,15 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); vi.restoreAllMocks(); });
 
-it('4つの表示はそれぞれの対象で共通登録へ進み、管理画面とコメント一覧を対象にしない', () => {
+it('6つの表示はそれぞれの対象で共通登録へ進み、管理画面とコメント一覧を対象にしない', () => {
   const onRegisterSource = vi.fn();
   render(<ObsUrlsPanel baseUrl="http://127.0.0.1:4000" onRegisterSource={onRegisterSource}
     onSuccess={vi.fn()} onError={vi.fn()} onOperationStart={vi.fn()} />);
-  for (const [overlay, title] of [['comments', 'コメント'], ['speech', '音声認識'], ['character', 'キャラクター'], ['effects', '文字演出']]) {
+  for (const [overlay, title] of [['comments', 'コメント'], ['speech', '音声認識'], ['character', 'キャラクター'], ['effects', '文字演出'], ['poll', 'リスナー投票'], ['reactions', 'リスナーリアクション']]) {
     const entry = screen.getByRole('button', { name: `${title}をOBSに追加` }); fireEvent.click(entry);
     expect(onRegisterSource).toHaveBeenLastCalledWith({ target: { kind: 'overlay', overlay }, title, entry });
   }
-  expect(onRegisterSource).toHaveBeenCalledTimes(4);
+  expect(onRegisterSource).toHaveBeenCalledTimes(6);
   expect(screen.queryByRole('button', { name: '管理画面をOBSに追加' })).toBeNull();
   expect(screen.queryByRole('button', { name: 'コメント一覧をOBSに追加' })).toBeNull();
 });

@@ -175,7 +175,7 @@ class OutdoorDiagnosticPanelTest {
         }
         compose.onNodeWithTag("画面切替・カメラ").performClick()
         compose.onNodeWithTag("カメラ設定の入口").performClick()
-        compose.onNodeWithText("通信・診断").performScrollTo().performClick()
+        compose.onNodeWithText("通信と診断").performScrollTo().performClick()
         compose.onNodeWithText("履歴").performClick()
         compose.onNodeWithText("数値診断を書き出す").performScrollTo().performClick()
         assertTrue(OutdoorDiagnosticExport.state.value.busy)
@@ -190,7 +190,7 @@ class OutdoorDiagnosticPanelTest {
         assertNotNull(OutdoorDiagnosticHistory.capture())
         compose.onNodeWithTag("画面切替・カメラ").performClick()
         compose.onNodeWithTag("カメラ設定の入口").performClick()
-        compose.onNodeWithText("通信・診断").performScrollTo().performClick()
+        compose.onNodeWithText("通信と診断").performScrollTo().performClick()
         compose.onNodeWithText("履歴").assertIsSelected()
         compose.onNodeWithText("書き出しをキャンセルしました").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("数値診断を書き出す").assertIsEnabled()
@@ -286,7 +286,7 @@ class OutdoorDiagnosticPanelTest {
         } }
         fun openDisplay() {
             compose.onNodeWithTag("カメラ設定の入口").performClick()
-            compose.onNodeWithTag("映像・マイク分類・画面表示").performScrollTo().performClick()
+            compose.onNodeWithTag("映像・マイク分類・スマホの表示").performScrollTo().performClick()
         }
         compose.onNodeWithTag("画面切替・カメラ").performClick()
         compose.onNodeWithTag("カメラ・送信操作").assertDoesNotExist()
@@ -296,7 +296,7 @@ class OutdoorDiagnosticPanelTest {
         val stop = compose.onNodeWithTag("カメラ・送信操作").assertIsDisplayed().fetchSemanticsNode().boundsInRoot
         compose.onNodeWithText("閉じる").performClick()
         openDisplay()
-        compose.onNodeWithText("プレビューを閉じる").performScrollTo().performClick()
+        compose.onNodeWithTag("プレビュー表示切替").performScrollTo().performClick()
         compose.onNodeWithText("閉じる").performClick()
         assertEquals(canvas, compose.onNodeWithTag("カメラ本文").fetchSemanticsNode().boundsInRoot)
         compose.onNodeWithTag("機能操作の入口").performClick()
@@ -304,7 +304,7 @@ class OutdoorDiagnosticPanelTest {
         assertEquals(stop, compose.onNodeWithTag("カメラ・送信操作").fetchSemanticsNode().boundsInRoot)
         compose.onNodeWithText("閉じる").performClick()
         openDisplay()
-        compose.onNodeWithText("プレビューを表示").performScrollTo().performClick()
+        compose.onNodeWithTag("プレビュー表示切替").performScrollTo().performClick()
         compose.onNodeWithText("閉じる").performClick()
         compose.onNodeWithText("自動制御を再試行").assertDoesNotExist()
         compose.onNodeWithText("映像を再試行").assertDoesNotExist()

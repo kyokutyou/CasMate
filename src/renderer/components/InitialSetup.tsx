@@ -138,7 +138,7 @@ export function InitialSetupWorkspaceActions({ view, pending, open, onObsSource,
 }
 
 function setupDisplayTargets(view: InitialSetupView) {
-  return (Object.keys(obsOverlayDefinitions) as (keyof typeof obsOverlayDefinitions)[]).filter(id => view.selected.includes(({ comments: 'commentOverlay', speech: 'speechRecognition', effects: 'textEffects', character: 'character' } as const)[id]));
+  return (['comments', 'speech', 'effects', 'character'] as const).filter(id => view.selected.includes(({ comments: 'commentOverlay', speech: 'speechRecognition', effects: 'textEffects', character: 'character' } as const)[id]));
 }
 
 export function InitialSetupObsRegistration({ view, onObsSource, disclosures }: Pick<Props, 'view' | 'onObsSource'> & { disclosures: Disclosures }) {

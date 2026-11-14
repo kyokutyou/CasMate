@@ -90,6 +90,21 @@ class OutdoorDrawingGestureTest {
         g.tick(200); g.send(MotionEvent.ACTION_UP, p); assertEquals(0, g.starts)
     }
 
+    @Test fun previewQuarterTurnEndsInkAndCancelsPendingTouchesWithoutChangingViewport() {
+        for (pending in listOf(false, true)) {
+            val f = Fixture(); val p = Point(0, 160f, 300f)
+            f.send(MotionEvent.ACTION_DOWN, p)
+            if (!pending) f.tick(80)
+            val viewport = f.view.drawingViewport
+            f.view.previewRotation = 90
+            f.tick(200)
+            f.send(MotionEvent.ACTION_MOVE, p.copy(x = 190f)); f.send(MotionEvent.ACTION_UP, p)
+            assertEquals(if (pending) 0 else 1, f.starts)
+            assertEquals(if (pending) 0 else 1, f.ends)
+            assertEquals(viewport, f.view.drawingViewport)
+        }
+    }
+
     @Test fun cancelFocusLossAndModeCloseCannotPublishDelayedInk() {
         for (kind in 0..3) {
             val f = Fixture(); val p = Point(0, 160f, 300f)
